@@ -1,6 +1,7 @@
-package com.SouthernWall_404.Painter;
+package com.SouthernWall_404.Painter.Common.Init;
 
 import com.SouthernWall_404.Painter.API.Capability.PaintInfo;
+import com.SouthernWall_404.Painter.Painter;
 import net.neoforged.neoforge.attachment.AttachmentType;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import net.neoforged.neoforge.registries.NeoForgeRegistries;

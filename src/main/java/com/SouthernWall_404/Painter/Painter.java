@@ -1,5 +1,6 @@
 package com.SouthernWall_404.Painter;
 
+import com.SouthernWall_404.Painter.Common.Init.ModAttachments;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.common.Mod;
 

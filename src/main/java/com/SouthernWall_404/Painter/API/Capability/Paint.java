@@ -6,6 +6,7 @@ import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.neoforged.neoforge.common.util.INBTSerializable;
 import org.jetbrains.annotations.UnknownNullability;
@@ -55,5 +56,16 @@ public class Paint implements INBTSerializable<CompoundTag> {
 
     public Direction getDirection() {
         return direction;
+    }
+
+    public Block getBlock()
+    {
+        Block block=BuiltInRegistries.BLOCK.get(blockKey);
+        if(block!=null)
+        {
+            return block;
+        }else {
+            return Blocks.AIR;
+        }
     }
 }
