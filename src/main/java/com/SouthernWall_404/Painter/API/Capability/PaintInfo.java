@@ -22,8 +22,12 @@ public class PaintInfo implements INBTSerializable<CompoundTag> {
 
     //========需要持久化的数据========
     private Map<BlockPos, Paint> paints = new HashMap<>();
-
+    //========不需要持久化的数据========
+    private boolean isChanged=false;
     //========构造方法========
+
+
+
     public PaintInfo() {
     }
 
@@ -68,6 +72,13 @@ public class PaintInfo implements INBTSerializable<CompoundTag> {
     }
 
     //========方法类========
+
+
+
+    public Map<BlockPos, Paint> getPaints() {
+        return paints;
+    }
+
     public void addPaint(BlockPos pos, Paint paint) {
         paints.put(pos, paint);
     }

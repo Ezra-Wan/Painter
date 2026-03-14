@@ -5,6 +5,8 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
@@ -16,6 +18,8 @@ public class Paint implements INBTSerializable<CompoundTag> {
     //========需要记录的数据========
     private ResourceLocation blockKey;
     private Direction direction;
+
+
 
     //========构造方法========
     public Paint(Direction direction, ResourceLocation blockKey) {

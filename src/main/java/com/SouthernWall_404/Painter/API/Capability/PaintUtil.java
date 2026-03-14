@@ -1,8 +1,10 @@
 package com.SouthernWall_404.Painter.API.Capability;
 
 import com.SouthernWall_404.Painter.Common.Init.ModAttachments;
+import com.SouthernWall_404.Painter.Common.Network.ClientRequestPack;
 import com.SouthernWall_404.Painter.Common.Network.ModChannels;
 import com.SouthernWall_404.Painter.Common.Network.S2C.PaintS2CPacket;
+import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.ChunkPos;
@@ -67,6 +69,11 @@ public class PaintUtil {
 
 
         ModChannels.sendToClient(new PaintS2CPacket(paintInfo.serializeNBT(null),pos),player);
+    }
+
+    public static void requireFromServer(ChunkPos pos)
+    {
+        ModChannels.sendToServer(new ClientRequestPack(1,pos));
     }
 
     public static void save(Level level,BlockPos pos)
