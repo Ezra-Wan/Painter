@@ -1,9 +1,7 @@
 package com.SouthernWall_404.Painter;
 
 import com.SouthernWall_404.Painter.Common.Event.BlockEvent;
-import com.SouthernWall_404.Painter.Common.Init.ModAttachments;
-import com.SouthernWall_404.Painter.Common.Init.ModBlock;
-import com.SouthernWall_404.Painter.Common.Init.ModBlockEntities;
+import com.SouthernWall_404.Painter.Common.Init.*;
 import com.SouthernWall_404.Painter.Common.Network.ModChannels;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.common.Mod;
@@ -19,6 +17,9 @@ public class Painter {
         ModAttachments.ATTACHMENT_TYPES.register(modEventBus);
         ModBlock.BLOCKS.register(modEventBus);
         ModBlockEntities.BLOCK_ENTITY_TYPE.register(modEventBus);
+
+        ModItems.ITEMS.register(modEventBus);
+        ModCreativeModeTab.CREATIVE_TABS.register(modEventBus);
 
         NeoForge.EVENT_BUS.register(BlockEvent.class);
     }

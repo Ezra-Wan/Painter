@@ -2,9 +2,9 @@ package com.SouthernWall_404.Painter.Common.World.Item;
 
 import net.minecraft.world.item.Item;
 
-public class BrushItem extends Item {
+public class PaintItem extends Item {
 
-    public BrushItem(Properties properties) {
+    public PaintItem(Properties properties) {
         super(properties);
     }
 }
