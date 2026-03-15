@@ -1,9 +1,17 @@
 package com.SouthernWall_404.Painter.API.Paint;
 
 import com.SouthernWall_404.Painter.Common.Init.ModBlock;
+import com.SouthernWall_404.Painter.Common.Network.ModChannels;
+import com.SouthernWall_404.Painter.Common.Network.S2C.RenderS2CPacket;
+import com.SouthernWall_404.Painter.Common.World.Block.RenderBedRock;
+import com.SouthernWall_404.Painter.Common.World.BlockEntity.RenderBedRockEntity;
 import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.LevelChunk;
 
 public class RenderBlockAPI {
@@ -14,31 +22,36 @@ public class RenderBlockAPI {
      * 将最底下的基岩替换为一个铁块。
      */
     public static void onPaint(Level level, BlockPos blockPos) {
-        LevelChunk chunk = level.getChunkAt(blockPos);
-        int startX = chunk.getPos().getMinBlockX();
-        int startZ = chunk.getPos().getMinBlockZ();
 
-        BlockPos target = null;
+    }
 
-        // 从下往上（y = -64 到 -55）搜索
-        for (int y = -64; y <= -55; y++) {
-            BlockPos pos = new BlockPos(startX, y, startZ);
-            var blockState = level.getBlockState(pos);
-            var block = blockState.getBlock();
 
-            if (block == ModBlock.RENDER_BEDROCK.get()) {
-                return;
-            }
+    public static void placeARender(Level level, BlockPos blockPos,Player player)
+    {
 
-            // 如果遇到基岩，记录位置并停止搜索
-            if (block == Blocks.BEDROCK) {
-                target = pos;
-                break;
-            }
+        BlockState origin=level.getBlockState(blockPos);
+
+        if(origin.getBlock()instanceof RenderBedRock)
+        {
+            return;
         }
+        BlockState render=ModBlock.RENDER_BEDROCK.get().defaultBlockState();
 
-        if (target != null) {
-            level.setBlock(target, ModBlock.RENDER_BEDROCK.get().defaultBlockState(), 3);
+        level.setBlock(blockPos,render,2);
+
+        BlockEntity entity=level.getBlockEntity(blockPos);
+        if(entity instanceof RenderBedRockEntity renderEntity)
+        {
+            renderEntity.setCopyState(origin);
+            renderEntity.setChanged();
+            level.sendBlockUpdated(blockPos, render, render, 3);
+
+//            syncToClient(renderEntity,player);
         }
+    }
+
+    public static void syncToClient(BlockEntity blockEntity, Player player)
+    {
+        ModChannels.sendToClient(new RenderS2CPacket(blockEntity.getUpdateTag(null),blockEntity.getBlockPos()),(ServerPlayer)player);
     }
 }

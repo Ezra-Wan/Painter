@@ -2,6 +2,7 @@ package com.SouthernWall_404.Painter.Common.Network;
 
 import com.SouthernWall_404.Painter.Common.Network.S2C.PaintClientHandler;
 import com.SouthernWall_404.Painter.Common.Network.S2C.PaintS2CPacket;
+import com.SouthernWall_404.Painter.Common.Network.S2C.RenderS2CPacket;
 import com.SouthernWall_404.Painter.Painter;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.server.level.ServerPlayer;
@@ -34,6 +35,12 @@ public class ModChannels {
                 PaintS2CPacket.TYPE,
                 PaintS2CPacket.STREAM_CODEC,
                 PaintClientHandler::handlePaintSync
+        );
+
+        registrar.playToClient(
+                RenderS2CPacket.TYPE,
+                RenderS2CPacket.STREAM_CODEC,
+                PaintClientHandler::handleRenderSync
         );
     }
 
