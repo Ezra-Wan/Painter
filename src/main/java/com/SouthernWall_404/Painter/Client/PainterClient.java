@@ -17,7 +17,7 @@ public class PainterClient {
         // 第一个参数是你的 BlockEntityType，第二个参数是渲染器的提供者
         event.registerBlockEntityRenderer(
                 ModBlockEntities.RENDER_BEDROCK_ENTITY.get(), // 替换为你的 BlockEntityType 实例
-                MyBlockEntityRenderer::new // 方法引用，指向渲染器的构造函数
+                PaintRender::new // 方法引用，指向渲染器的构造函数
         );
     }
 }

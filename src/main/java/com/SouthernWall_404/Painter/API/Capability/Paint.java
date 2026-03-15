@@ -22,11 +22,16 @@ public class Paint implements INBTSerializable<CompoundTag> {
 
 
     //========构造方法========
+
+
     public Paint(Direction direction, ResourceLocation blockKey) {
         this.blockKey = blockKey;
         this.direction = direction;
     }
-
+    public Paint(Direction direction,Block block)
+    {
+        this(direction,BuiltInRegistries.BLOCK.getKey(block));
+    }
     public Paint() {
         this(Direction.SOUTH, BuiltInRegistries.BLOCK.getKey(Blocks.STONE));
     }

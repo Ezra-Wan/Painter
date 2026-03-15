@@ -1,5 +1,6 @@
 package com.SouthernWall_404.Painter.API.Paint;
 
+import com.SouthernWall_404.Painter.Common.Init.ModBlock;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
@@ -12,7 +13,7 @@ public class RenderBlockAPI {
      * 而后将区块内的（0,0）位置在 [-55, -64] 的高度上进行搜索，
      * 将最底下的基岩替换为一个铁块。
      */
-    public static void onFirstPaint(Level level, BlockPos blockPos) {
+    public static void onPaint(Level level, BlockPos blockPos) {
         LevelChunk chunk = level.getChunkAt(blockPos);
         int startX = chunk.getPos().getMinBlockX();
         int startZ = chunk.getPos().getMinBlockZ();
@@ -25,8 +26,7 @@ public class RenderBlockAPI {
             var blockState = level.getBlockState(pos);
             var block = blockState.getBlock();
 
-            // 如果遇到铁块，说明该位置已被处理过，直接结束
-            if (block == Blocks.IRON_BLOCK) {
+            if (block == ModBlock.RENDER_BEDROCK.get()) {
                 return;
             }
 
@@ -37,9 +37,8 @@ public class RenderBlockAPI {
             }
         }
 
-        // 如果找到了基岩（且未提前遇到铁块），则替换为铁块
         if (target != null) {
-            level.setBlock(target, Blocks.IRON_BLOCK.defaultBlockState(), 3);
+            level.setBlock(target, ModBlock.RENDER_BEDROCK.get().defaultBlockState(), 3);
         }
     }
 }
