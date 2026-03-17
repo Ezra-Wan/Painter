@@ -7,6 +7,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.color.block.BlockColors;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -20,6 +21,8 @@ import net.minecraft.world.level.block.SnowyDirtBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.neoforge.common.IShearable;
+
+import java.util.List;
 
 public class SimpleBlockPaint extends AbstractPaint {
 
@@ -57,12 +60,40 @@ public class SimpleBlockPaint extends AbstractPaint {
 
         for(Direction direction:Direction.values())
         {
-            TextureAtlasSprite texture=RenderUtil.getFaceFromBlock(origin,direction);
-            renderFace(blockEntity,texture,direction,
-                    poseStack,bufferSource,packedLight,packedOverlay);
+
+
+            List<BakedQuad> quads=RenderUtil.getQuads(origin,direction);
+            for(BakedQuad quad:quads)
+            {
+                renderQuadManually(blockEntity,quad,poseStack,bufferSource,packedLight,packedOverlay);
+            }
         }
     }
 
+
+    /**
+     * 从 BakedQuad 中提取信息，并使用手动渲染方式渲染该面
+     */
+    private static void renderQuadManually(BlockEntity blockEntity, BakedQuad quad,
+                                           PoseStack poseStack, MultiBufferSource bufferSource,
+                                           int packedLight, int packedOverlay) {
+        if (!(blockEntity instanceof PaintBlockEntity paintBE)) return;
+        Level level = blockEntity.getLevel();
+        if (level == null) return;
+
+        BlockPos pos = blockEntity.getBlockPos();
+        BlockState origin = paintBE.getOrigin();
+
+        // 从 quad 中提取纹理和方向
+        TextureAtlasSprite sprite = quad.getSprite();
+        Direction face = quad.getDirection(); // quad 的实际方向
+
+        // 获取染色信息
+        int tintIndex = quad.isTinted() ? quad.getTintIndex() : -1;
+
+        // 调用手动渲染方法（需要扩展 renderFace 以支持 tintIndex）
+        renderFace(blockEntity, sprite, face, tintIndex, poseStack, bufferSource, packedLight, packedOverlay);
+    }
     /**
      * 渲染单个面
      * @param blockEntity   方块实体
@@ -71,7 +102,7 @@ public class SimpleBlockPaint extends AbstractPaint {
      * @param poseStack     变换栈
      * @param bufferSource  渲染缓冲区
      */
-    private static void renderFace(BlockEntity blockEntity, TextureAtlasSprite texture, Direction direction,
+    private static void renderFace(BlockEntity blockEntity, TextureAtlasSprite texture, Direction direction,int tintIndex,
                                    PoseStack poseStack, MultiBufferSource bufferSource, int partickedLight, int packedOverlay) {
         if(blockEntity instanceof PaintBlockEntity paintBlockEntity) {
             Level level = blockEntity.getLevel();
@@ -84,7 +115,17 @@ public class SimpleBlockPaint extends AbstractPaint {
             // 获取阴影系数
             float shade = level.getShade(direction, true);
 
-
+            // 计算颜色乘数
+            float r = shade, g = shade, b = shade;
+            if (tintIndex >= 0) {
+                BlockColors blockColors = Minecraft.getInstance().getBlockColors();
+                int color = blockColors.getColor(origin, level,originPos, tintIndex);
+                if (color != -1) {
+                    r = ((color >> 16) & 0xFF) / 255.0f * shade;
+                    g = ((color >> 8) & 0xFF) / 255.0f * shade;
+                    b = (color & 0xFF) / 255.0f * shade;
+                }
+            }
 
 
 
@@ -175,16 +216,16 @@ public class SimpleBlockPaint extends AbstractPaint {
                 if(origin.getBlock()instanceof SnowyDirtBlock)
                 {
                     // 获取生物群系颜色乘数
-                    float r = shade, g = shade, b = shade; // 默认使用 shade 灰度
-                    BlockColors blockColors = Minecraft.getInstance().getBlockColors();
-                    if (blockColors != null) {
-                        int color = blockColors.getColor(origin, level, originPos, 0);
-                        if (color != -1) {
-                            r = ((color >> 16) & 0xFF) / 255.0f * shade;
-                            g = ((color >> 8) & 0xFF) / 255.0f * shade;
-                            b = (color & 0xFF) / 255.0f * shade;
-                        }
-                    }
+//                    float r = shade, g = shade, b = shade; // 默认使用 shade 灰度
+//                    BlockColors blockColors = Minecraft.getInstance().getBlockColors();
+//                    if (blockColors != null) {
+//                        int color = blockColors.getColor(origin, level, originPos, 0);
+//                        if (color != -1) {
+//                            r = ((color >> 16) & 0xFF) / 255.0f * shade;
+//                            g = ((color >> 8) & 0xFF) / 255.0f * shade;
+//                            b = (color & 0xFF) / 255.0f * shade;
+//                        }
+//                    }
 
                     consumer.addVertex(poseStack.last().pose(), local[0], local[1], local[2])
                             .setColor(r, g,b, 1.0f)
@@ -195,16 +236,16 @@ public class SimpleBlockPaint extends AbstractPaint {
                 else if(origin.getBlock()instanceof IShearable)
                 {
                     // 获取生物群系颜色乘数
-                    float r = shade, g = shade, b = shade; // 默认使用 shade 灰度
-                    BlockColors blockColors = Minecraft.getInstance().getBlockColors();
-                    if (blockColors != null) {
-                        int color = blockColors.getColor(origin, level, originPos, 0);
-                        if (color != -1) {
-                            r = ((color >> 16) & 0xFF) / 255.0f * shade;
-                            g = ((color >> 8) & 0xFF) / 255.0f * shade;
-                            b = (color & 0xFF) / 255.0f * shade;
-                        }
-                    }
+//                    float r = shade, g = shade, b = shade; // 默认使用 shade 灰度
+//                    BlockColors blockColors = Minecraft.getInstance().getBlockColors();
+//                    if (blockColors != null) {
+//                        int color = blockColors.getColor(origin, level, originPos, 0);
+//                        if (color != -1) {
+//                            r = ((color >> 16) & 0xFF) / 255.0f * shade;
+//                            g = ((color >> 8) & 0xFF) / 255.0f * shade;
+//                            b = (color & 0xFF) / 255.0f * shade;
+//                        }
+//                    }
 
                     consumer.addVertex(poseStack.last().pose(), local[0], local[1], local[2])
                             .setColor(r, g,b, 1.0f)

@@ -15,6 +15,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.neoforge.client.model.data.ModelData;
 
+import javax.annotation.Nullable;
 import java.util.List;
 
 public class RenderUtil {
@@ -78,6 +79,29 @@ public class RenderUtil {
         }
 
         return RenderType.solid();
+    }
+
+
+    public static List<BakedQuad> getQuads(BlockState state, @Nullable Direction direction,
+                                           RandomSource random, ModelData modelData, RenderType renderType) {
+        Minecraft mc = Minecraft.getInstance();
+        BlockRenderDispatcher dispatcher = mc.getBlockRenderer();
+        BakedModel model = dispatcher.getBlockModel(state);
+        return model.getQuads(state, direction, random, modelData, renderType);
+    }
+
+    /**
+     * 简化版本：使用默认随机源和空的模型数据
+     */
+    public static List<BakedQuad> getQuads(BlockState state, @Nullable Direction direction, RenderType renderType) {
+        return getQuads(state, direction, RandomSource.create(), ModelData.EMPTY, renderType);
+    }
+
+    /**
+     * 获取指定方向的所有 quads（包括使用默认渲染类型）
+     */
+    public static List<BakedQuad> getQuads(BlockState state, @Nullable Direction direction) {
+        return getQuads(state, direction, RenderUtil.getRenderType(state));
     }
 }
 
