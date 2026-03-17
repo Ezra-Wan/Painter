@@ -1,21 +1,29 @@
 package com.SouthernWall_404.Painter.API.Paint;
 
+import com.SouthernWall_404.Painter.Common.World.Block.PaintBlock;
+import com.SouthernWall_404.Painter.Common.World.BlockEntity.PaintBlockEntity;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.BlockRenderDispatcher;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.BakedModel;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.inventory.InventoryMenu;
+import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.neoforge.client.model.data.ModelData;
 
 import javax.annotation.Nullable;
+import java.awt.*;
 import java.util.List;
 
 public class RenderUtil {
@@ -51,12 +59,27 @@ public class RenderUtil {
         return model.getParticleIcon();
     }
 
+
+
+    public static RenderType getRenderType(BlockGetter level,BlockPos pos)
+    {
+        BlockState blockState=level.getBlockState(pos);
+
+        if(blockState.getBlock()instanceof PaintBlock)
+        {
+            blockState=getPaintBlockOrigin(level,pos);
+        }
+
+        return getRenderType(blockState);
+    }
+
     /**
      * 获取方块状态对应的渲染类型
      * @param state 方块状态
      * @return 渲染类型，如果获取失败则返回 null
      */
     public static RenderType getRenderType(BlockState state) {
+
         Minecraft mc = Minecraft.getInstance();
         BlockRenderDispatcher dispatcher = mc.getBlockRenderer();
 
@@ -102,6 +125,54 @@ public class RenderUtil {
      */
     public static List<BakedQuad> getQuads(BlockState state, @Nullable Direction direction) {
         return getQuads(state, direction, RenderUtil.getRenderType(state));
+    }
+
+    public static BlockState getPaintBlockOrigin(BlockGetter level,BlockPos neighborPos)
+    {
+        BlockState blockState= Blocks.AIR.defaultBlockState();
+        BlockEntity blockEntity=level.getBlockEntity(neighborPos);
+        if(blockEntity instanceof PaintBlockEntity paintBlockEntity)
+        {
+            blockState =paintBlockEntity.getOrigin();
+        }
+
+        return blockState;
+
+    }
+
+    public static boolean shouldRenderFace(BlockGetter level, BlockPos pos,BlockState state, Direction face ) {
+
+        BlockPos neighborPos=pos.relative(face);
+        BlockState neighborState = level.getBlockState(neighborPos);
+        if(neighborState.getBlock()instanceof PaintBlock)
+        {
+            neighborState=getPaintBlockOrigin(level,neighborPos);
+        }
+
+        // 邻居是空气 → 必须渲染
+        if (neighborState.isAir()) {
+            return true;
+        }
+
+        // 获取当前方块的渲染类型（用于判断是否为透明类）
+        RenderType renderType = getRenderType(level,pos);
+        boolean isTransparent = renderType == RenderType.cutout() ||
+                renderType == RenderType.cutoutMipped() ||
+                renderType == RenderType.translucent();
+
+        // 如果邻居与当前方块类型相同，且当前方块为透明类 → 隐藏内部面
+        if (isTransparent && neighborState.getBlock() == state.getBlock()) {
+            return false;
+        }
+
+        // 如果邻居是不透明完整方块（使用原版 isSolid 近似判断）
+        // 注意：isSolid() 对于玻璃等返回 false，所以需要结合上一步
+        if (neighborState.isSolid()) {
+            return false;
+        }
+
+        // 默认渲染（包括邻居为半透明、流体等情况）
+        return true;
     }
 }
 

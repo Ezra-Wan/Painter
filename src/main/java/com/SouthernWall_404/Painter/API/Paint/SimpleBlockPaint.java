@@ -58,14 +58,19 @@ public class SimpleBlockPaint extends AbstractPaint {
             return;
         }
 
+
         for(Direction direction:Direction.values())
         {
-
-
-            List<BakedQuad> quads=RenderUtil.getQuads(origin,direction);
-            for(BakedQuad quad:quads)
+            boolean shouldRender=RenderUtil.shouldRenderFace(blockEntity.getLevel(),blockEntity.getBlockPos(),origin,direction);
+            if(shouldRender)
             {
-                renderQuadManually(blockEntity,quad,poseStack,bufferSource,packedLight,packedOverlay);
+
+                List<BakedQuad> quads=RenderUtil.getQuads(origin,direction);
+                for(BakedQuad quad:quads)
+                {
+
+                    renderQuadManually(blockEntity,quad,poseStack,bufferSource,packedLight,packedOverlay);
+                }
             }
         }
     }
