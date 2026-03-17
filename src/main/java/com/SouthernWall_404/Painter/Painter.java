@@ -14,7 +14,7 @@ public class Painter {
 
     public Painter(IEventBus modEventBus)
     {
-        ModAttachments.ATTACHMENT_TYPES.register(modEventBus);
+//        ModAttachments.ATTACHMENT_TYPES.register(modEventBus);
         ModBlock.BLOCKS.register(modEventBus);
         ModBlockEntities.BLOCK_ENTITY_TYPE.register(modEventBus);
 

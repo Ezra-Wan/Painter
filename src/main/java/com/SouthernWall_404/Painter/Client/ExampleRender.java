@@ -1,6 +1,6 @@
 package com.SouthernWall_404.Painter.Client;
 
-import com.SouthernWall_404.Painter.Common.World.BlockEntity.RenderBedRockEntity;
+import com.SouthernWall_404.Painter.Common.World.BlockEntity.PaintBlockEntity;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.Minecraft;
@@ -16,7 +16,7 @@ import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LightLayer;
 
-public class ExampleRender implements BlockEntityRenderer<RenderBedRockEntity> {
+public class ExampleRender implements BlockEntityRenderer<PaintBlockEntity> {
 
     private TextureAtlasSprite ironBlockTopSprite;
 
@@ -28,7 +28,7 @@ public class ExampleRender implements BlockEntityRenderer<RenderBedRockEntity> {
     }
 
     @Override
-    public void render(RenderBedRockEntity blockEntity, float partialTick, PoseStack poseStack,
+    public void render(PaintBlockEntity blockEntity, float partialTick, PoseStack poseStack,
                        MultiBufferSource bufferSource, int packedLight, int packedOverlay) {
         Level level = blockEntity.getLevel();
         if (level == null) return;
