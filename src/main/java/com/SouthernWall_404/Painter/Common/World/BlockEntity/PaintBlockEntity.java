@@ -30,6 +30,7 @@ public class PaintBlockEntity extends BlockEntity {
         this(ModBlockEntities.RENDER_BEDROCK_ENTITY.get(), blockPos, blockState);
     }
 
+
     /**
      * 用于初始化
      * @param render
@@ -62,6 +63,10 @@ public class PaintBlockEntity extends BlockEntity {
 
     public void setRender(AbstractRender render) {
         this.render = render;
+
+        if (level != null && !level.isClientSide) {
+            level.getLightEngine().checkBlock(worldPosition);
+        }
         setChanged();
     }
 

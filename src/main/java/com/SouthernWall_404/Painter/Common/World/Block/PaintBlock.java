@@ -66,6 +66,7 @@ public class PaintBlock extends Block implements EntityBlock {
         return Blocks.AIR.defaultBlockState();
     }
 
+
     // ===== 渲染外观（Forge 模型数据） =====
     @Override
     @OnlyIn(Dist.CLIENT)
