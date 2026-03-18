@@ -139,7 +139,18 @@ private static final ThreadLocal<Object2ByteLinkedOpenHashMap<Block.BlockStatePa
         return getQuads(state, direction, RenderUtil.getRenderType(state));
     }
 
+    public static AbstractRender getRender(Level level,BlockPos blockPos)
+    {
+        BlockEntity blockEntity=level.getBlockEntity(blockPos);
+        AbstractRender render=new SimpleBlockPaint();
 
+        if(blockEntity instanceof PaintBlockEntity paintBlockEntity)
+        {
+            render=paintBlockEntity.getRender();
+        }
+
+        return render;
+    }
 
     public static BlockState getPaintBlockOrigin(BlockGetter level,BlockPos neighborPos)
     {

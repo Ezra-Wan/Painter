@@ -15,6 +15,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
+import org.checkerframework.checker.units.qual.A;
 
 public class PaintBlockEntity extends BlockEntity {
 
@@ -43,7 +44,7 @@ public class PaintBlockEntity extends BlockEntity {
     //=========业务方法=========
 
 
-    public IRender getRender() {
+    public AbstractRender getRender() {
         return render;
     }
 

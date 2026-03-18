@@ -1,5 +1,6 @@
 package com.SouthernWall_404.Painter.API.Paint;
 
+import com.SouthernWall_404.Painter.Common.Init.ModBlock;
 import com.SouthernWall_404.Painter.Common.World.BlockEntity.PaintBlockEntity;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
@@ -43,6 +44,11 @@ public class SimpleBlockPaint extends AbstractPaint {
     private static final int EAST  = 8;
     private static final int UP    = 16;
     private static final int DOWN  = 32;
+
+    public SimpleBlockPaint()
+    {
+        this(Blocks.AIR.defaultBlockState());
+    }
 
     public SimpleBlockPaint(BlockState origin) {
         super(origin, PaintContent.SIMPLE_BLOCK);

@@ -18,7 +18,7 @@ public class BlockEvent {
     @SubscribeEvent
     public static void onBlockClicked(PlayerInteractEvent.RightClickBlock event)
     {
-        if (event.getLevel().isClientSide) return; // 只服务端执行
+//        if (event.getLevel().isClientSide) return; // 只服务端执行
         Level level=event.getLevel();
         BlockPos blockPos=event.getPos();
 

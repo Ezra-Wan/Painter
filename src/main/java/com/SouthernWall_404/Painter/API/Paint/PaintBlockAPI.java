@@ -25,9 +25,20 @@ public class PaintBlockAPI {
         BlockState origin=level.getBlockState(blockPos);
         if(origin.getBlock() instanceof PaintBlock)
         {
-            AbstractRender render=RenderUtil.get
+            AbstractRender render=RenderUtil.getRender(level,blockPos);
 
+            ItemStack itemStack=player.getItemInHand(InteractionHand.OFF_HAND);
+            if(itemStack.getItem() instanceof BlockItem item)
+            {
+                Block block=item.getBlock();
+                render.putRenderBlock(direction,block);
 
+                BlockEntity blockEntity=level.getBlockEntity(blockPos);
+                if(blockEntity instanceof PaintBlockEntity paintBlockEntity)
+                {
+                    paintBlockEntity.setRender(render);
+                }
+            }
             return;
         }
 
