@@ -26,10 +26,15 @@ public class ModItems {
         return item;
     }
 
-    public static final DeferredItem<PaintItem> BRUSH=ITEMS.register("brush",
+    public static final DeferredItem<Item> BRUSH=registerWithTab("brush",
             ()->new PaintItem(new Item.Properties()
                     .rarity(Rarity.UNCOMMON)
                     .stacksTo(1)
             )
     );
+    static {
+
+    }
+
+
 }

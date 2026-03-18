@@ -19,4 +19,5 @@ public class ModCreativeModeTab {
                     .icon(() -> new ItemStack(Items.COMMAND_BLOCK))
                     .displayItems((parameters, output) -> ModItems.CREATIVE_TAB_ITEMS.forEach((item) -> output.accept(item.get())))
                     .build());
+
 }

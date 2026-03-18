@@ -76,15 +76,6 @@ public class PaintBlock extends Block implements EntityBlock {
         return getOrigin(level, pos);
     }
 
-//    @Override
-//    protected RenderShape getRenderShape(BlockState state) {
-//        return RenderShape.INVISIBLE; // 关键：不渲染模型
-//    }
-
-
-
-
-
     // ===== 委托属性 =====
     @Override
     public SoundType getSoundType(BlockState state, LevelReader level, BlockPos pos, @Nullable Entity entity) {
