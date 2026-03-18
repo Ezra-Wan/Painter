@@ -33,7 +33,7 @@ public class BlockEvent {
                 Block block=blockItem.getBlock();
 //                PaintUtil.addPaint(level,blockPos,new Paint(Direction.SOUTH,block));
 //                RenderBlockAPI.onPaint(level,blockPos);
-                PaintBlockAPI.placeARender(level,blockPos,player);
+                PaintBlockAPI.placeARender(level,blockPos,player,event.getFace());
 
                 event.setCanceled(true);
             }

@@ -32,9 +32,7 @@ import net.neoforged.neoforge.client.model.data.ModelData;
 import net.neoforged.neoforge.common.IShearable;
 import org.joml.Vector2d;
 
-import java.util.ArrayList;
-import java.util.BitSet;
-import java.util.List;
+import java.util.*;
 
 public class SimpleBlockPaint extends AbstractPaint {
 
@@ -68,7 +66,7 @@ public class SimpleBlockPaint extends AbstractPaint {
         if (level == null) return;
         BlockPos pos = blockEntity.getBlockPos();
 
-        // 获取原版方块模型（用于获取 Quad）
+        // 获取原版方块模型
         BakedModel model = Minecraft.getInstance().getModelManager().getBlockModelShaper().getBlockModel(origin);
         BlockColors blockColors = Minecraft.getInstance().getBlockColors();
         RandomSource random = RandomSource.create();
@@ -76,7 +74,7 @@ public class SimpleBlockPaint extends AbstractPaint {
         RenderType renderType = RenderUtil.getRenderType(origin);
         VertexConsumer consumer = bufferSource.getBuffer(renderType);
 
-        // 创建自定义渲染器实例（可复用，但注意线程安全，这里每次新建）
+        // 创建自定义渲染器
         ModModelRender modRenderer = new ModModelRender(blockColors);
 
         Vec3 offset = origin.getOffset(level, pos);
@@ -88,26 +86,33 @@ public class SimpleBlockPaint extends AbstractPaint {
         BitSet shapeFlags = new BitSet(3);
         ModModelRender.AmbientOcclusionFace aoFace = new ModModelRender.AmbientOcclusionFace();
 
-        // 渲染每个方向的面
+        // ----- 构建自定义 Quad，并记录有自定义的方向 -----
+        List<BakedQuad> customQuads = buildCustomQuads(level, pos, origin);
+        Map<Direction, List<BakedQuad>> customQuadsByDir = new EnumMap<>(Direction.class);
+        Set<Direction> dirsWithCustom = EnumSet.noneOf(Direction.class);
+        for (BakedQuad quad : customQuads) {
+            Direction dir = quad.getDirection();
+            if (dir != null) {
+                customQuadsByDir.computeIfAbsent(dir, k -> new ArrayList<>()).add(quad);
+                dirsWithCustom.add(dir);
+            }
+        }
+
+        // 渲染每个方向的原版面（跳过有自定义的方向）
         for (Direction direction : Direction.values()) {
+            if (dirsWithCustom.contains(direction)) {
+                continue; // 该方向由自定义 quad 覆盖，跳过原版
+            }
             random.setSeed(seed);
             List<BakedQuad> quads = model.getQuads(origin, direction, random, ModelData.EMPTY, renderType);
             if (quads.isEmpty()) continue;
 
-            // 检查是否需要渲染该面（相邻方块遮挡）
             BlockPos neighborPos = pos.relative(direction);
             if (!RenderUtil.shouldRenderFace(origin, level, pos, direction, neighborPos)) continue;
 
-            // 对每个 Quad 计算 AO 并渲染
             for (BakedQuad quad : quads) {
-                // 计算形状（填充 shape 和 shapeFlags）
                 modRenderer.calculateShape(level, origin, pos, quad.getVertices(), quad.getDirection(), shape, shapeFlags);
-
-
-                // 计算 AO 亮度（填充 aoFace）
                 aoFace.calculate(level, origin, pos, quad.getDirection(), shape, shapeFlags, quad.isShade());
-
-                // 写入顶点数据（已包含 AO 亮度和光照值）
                 modRenderer.putQuadData(level, origin, pos, consumer, poseStack.last(), quad,
                         aoFace.brightness[0], aoFace.brightness[1], aoFace.brightness[2], aoFace.brightness[3],
                         aoFace.lightmap[0], aoFace.lightmap[1], aoFace.lightmap[2], aoFace.lightmap[3],
@@ -115,7 +120,7 @@ public class SimpleBlockPaint extends AbstractPaint {
             }
         }
 
-        // 渲染无方向的面（如粒子面）
+        // 渲染无方向的原版面（如粒子面）
         random.setSeed(seed);
         List<BakedQuad> generalQuads = model.getQuads(origin, null, random, ModelData.EMPTY, renderType);
         if (!generalQuads.isEmpty()) {
@@ -129,28 +134,115 @@ public class SimpleBlockPaint extends AbstractPaint {
             }
         }
 
-        // ----- 渲染自定义 Quad（可选）-----
-        List<BakedQuad> customQuads = buildCustomQuads(level, pos, origin); // 你需要实现这个方法
+// ----- 渲染自定义 Quad -----
         if (!customQuads.isEmpty()) {
             for (BakedQuad quad : customQuads) {
-                modRenderer.calculateShape(level, origin, pos, quad.getVertices(), quad.getDirection(), shape, shapeFlags);
-                aoFace.calculate(level, origin, pos, quad.getDirection(), shape, shapeFlags, quad.isShade());
+                Direction direction = quad.getDirection();
+                // 可选：检查该面是否应被渲染（相邻方块遮挡）
+                BlockPos neighborPos = pos.relative(direction);
+                if (!RenderUtil.shouldRenderFace(origin, level, pos, direction, neighborPos)) continue;
+
+                modRenderer.calculateShape(level, origin, pos, quad.getVertices(), direction, shape, shapeFlags);
+                aoFace.calculate(level, origin, pos, direction, shape, shapeFlags, quad.isShade());
                 modRenderer.putQuadData(level, origin, pos, consumer, poseStack.last(), quad,
                         aoFace.brightness[0], aoFace.brightness[1], aoFace.brightness[2], aoFace.brightness[3],
                         aoFace.lightmap[0], aoFace.lightmap[1], aoFace.lightmap[2], aoFace.lightmap[3],
                         packedOverlay);
             }
         }
-
         poseStack.popPose();
     }
 
     // 示例：构造自定义 Quad 的方法（你需要根据需求实现）
     private List<BakedQuad> buildCustomQuads(Level level, BlockPos pos, BlockState state) {
-        List<BakedQuad> list = new ArrayList<>();
-        // 使用 ModelBuilder 或直接创建 BakedQuad 对象
-        // 注意设置正确的纹理、方向和 tintIndex（如果需要）
-        return list;
+
+        List<BakedQuad> quads = new ArrayList<>();
+        // 遍历所有方向，为每个方向生成一个 quad（如果对应 flag 有纹理）
+        for (Direction direction : Direction.values()) {
+            int flag = getFlag(direction); // 假设你已将 Direction 注册为 flag key
+            TextureAtlasSprite sprite = objects.get(flag);
+            if (sprite == null) continue; // 没有自定义纹理则跳过
+
+            // 构建该方向的 quad
+            BakedQuad quad = createQuad(sprite, direction);
+            quads.add(quad);
+        }
+
+        // 也可以根据其他逻辑生成自定义 quad，例如使用特定的 flag 值
+        // int customFlag = getFlag("someKey");
+        // TextureAtlasSprite customSprite = objects.get(customFlag);
+        // if (customSprite != null) { ... }
+
+        return quads;
+    }
+
+    private BakedQuad createQuad(TextureAtlasSprite sprite, Direction direction) {
+        // 顶点顺序：左下、右下、右上、左上（逆时针，从外部看）
+        float[][] vertices = new float[4][3];
+        float[] u = new float[4];
+        float[] v = new float[4];
+
+        switch (direction) {
+            case DOWN:
+                vertices[0] = new float[]{0, 0, 0}; // 左下 (X最小, Z最小)
+                vertices[1] = new float[]{1, 0, 0}; // 右下 (X最大, Z最小)
+                vertices[2] = new float[]{1, 0, 1}; // 右上 (X最大, Z最大)
+                vertices[3] = new float[]{0, 0, 1}; // 左上 (X最小, Z最大)
+                break;
+            case UP:
+                vertices[0] = new float[]{0, 1, 1}; // 左下 (X最小, Z最大)
+                vertices[1] = new float[]{1, 1, 1}; // 右下 (X最大, Z最大)
+                vertices[2] = new float[]{1, 1, 0}; // 右上 (X最大, Z最小)
+                vertices[3] = new float[]{0, 1, 0}; // 左上 (X最小, Z最小)
+                break;
+            case NORTH:
+                vertices[0] = new float[]{1, 0, 0}; // 左下
+                vertices[1] = new float[]{0, 0, 0}; // 右下
+                vertices[2] = new float[]{0, 1, 0}; // 右上
+                vertices[3] = new float[]{1, 1, 0}; // 左上
+                break;
+            case SOUTH:
+                vertices[0] = new float[]{0, 0, 1}; // 左下
+                vertices[1] = new float[]{1, 0, 1}; // 右下
+                vertices[2] = new float[]{1, 1, 1}; // 右上
+                vertices[3] = new float[]{0, 1, 1}; // 左上
+                break;
+            case WEST:
+                vertices[0] = new float[]{0, 0, 0}; // 左下 (Z最小)
+                vertices[1] = new float[]{0, 0, 1}; // 右下 (Z最大)
+                vertices[2] = new float[]{0, 1, 1}; // 右上
+                vertices[3] = new float[]{0, 1, 0}; // 左上
+                break;
+            case EAST:
+                vertices[0] = new float[]{1, 0, 1}; // 左下 (Z最大)
+                vertices[1] = new float[]{1, 0, 0}; // 右下 (Z最小)
+                vertices[2] = new float[]{1, 1, 0}; // 右上
+                vertices[3] = new float[]{1, 1, 1}; // 左上
+                break;
+            default:
+                return null;
+        }
+
+        // UV 映射保持不变（0左下、1右下、2右上、3左上）
+        u[0] = sprite.getU0(); v[0] = sprite.getV1();
+        u[1] = sprite.getU1(); v[1] = sprite.getV1();
+        u[2] = sprite.getU1(); v[2] = sprite.getV0();
+        u[3] = sprite.getU0(); v[3] = sprite.getV0();
+
+        int[] vertexData = new int[32]; // 4 顶点 * 8 int
+        for (int i = 0; i < 4; i++) {
+            int offset = i * 8;
+            vertexData[offset + 0] = Float.floatToRawIntBits(vertices[i][0]);
+            vertexData[offset + 1] = Float.floatToRawIntBits(vertices[i][1]);
+            vertexData[offset + 2] = Float.floatToRawIntBits(vertices[i][2]);
+            vertexData[offset + 3] = -1; // 颜色白色
+            vertexData[offset + 4] = Float.floatToRawIntBits(u[i]);
+            vertexData[offset + 5] = Float.floatToRawIntBits(v[i]);
+            vertexData[offset + 6] = 0;   // 光照（稍后由 ModModelRender 填充）
+            vertexData[offset + 7] = 0;   // 法线（稍后由渲染器处理）
+        }
+
+        return new BakedQuad(vertexData, -1, direction, sprite, true);
     }
 
 

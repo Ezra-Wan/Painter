@@ -139,6 +139,8 @@ private static final ThreadLocal<Object2ByteLinkedOpenHashMap<Block.BlockStatePa
         return getQuads(state, direction, RenderUtil.getRenderType(state));
     }
 
+
+
     public static BlockState getPaintBlockOrigin(BlockGetter level,BlockPos neighborPos)
     {
         BlockState blockState= Blocks.AIR.defaultBlockState();

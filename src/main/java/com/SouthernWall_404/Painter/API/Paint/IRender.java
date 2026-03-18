@@ -2,7 +2,6 @@ package com.SouthernWall_404.Painter.API.Paint;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Block;
@@ -25,8 +24,8 @@ public interface IRender<T extends Object> extends INBTSerializable<CompoundTag>
     String getType();
 
 
-    void setRenderObject(int flag, ResourceLocation key);
-    void setRenderBlock(Object object, Block block);//方块渲染的拓展方法
+    void putRenderObject(int flag, ResourceLocation key);
+    void putRenderBlock(Object object, Block block);//方块渲染的拓展方法
 
     BlockState getOrigin();
     int getFlag(Object object);//用于获取某一flag

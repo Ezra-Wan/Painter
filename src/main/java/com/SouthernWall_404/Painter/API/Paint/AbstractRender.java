@@ -2,19 +2,16 @@ package com.SouthernWall_404.Painter.API.Paint;
 
 import com.mojang.serialization.DataResult;
 import net.minecraft.core.HolderLookup;
-import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.UnknownNullability;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 
 public abstract class AbstractRender<T> implements IRender<T> {
 
@@ -76,16 +73,16 @@ public abstract class AbstractRender<T> implements IRender<T> {
     }
 
     @Override
-    public void setRenderBlock(Object object, Block block) {
+    public void putRenderBlock(Object object, Block block) {
         int flag=getFlag(object);
 
         ResourceLocation key=RenderUtil.getKey(block);
 
-        setRenderObject(flag,key);
+        putRenderObject(flag,key);
     }
 
     @Override
-    public void setRenderObject(int flag, ResourceLocation key) {
+    public void putRenderObject(int flag, ResourceLocation key) {
         paintPaths.put(flag,key);
 
         update();
