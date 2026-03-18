@@ -2,6 +2,7 @@ package com.SouthernWall_404.Painter.API.Paint;
 
 import com.SouthernWall_404.Painter.Common.World.Block.PaintBlock;
 import com.SouthernWall_404.Painter.Common.World.BlockEntity.PaintBlockEntity;
+import it.unimi.dsi.fastutil.objects.Object2ByteLinkedOpenHashMap;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.BlockRenderDispatcher;
@@ -20,6 +21,9 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.shapes.BooleanOp;
+import net.minecraft.world.phys.shapes.Shapes;
+import net.minecraft.world.phys.shapes.VoxelShape;
 import net.neoforged.neoforge.client.model.data.ModelData;
 
 import javax.annotation.Nullable;
@@ -29,6 +33,14 @@ import java.util.List;
 public class RenderUtil {
 
 //    public static IRender addSimple(BlockState origin,)
+private static final ThreadLocal<Object2ByteLinkedOpenHashMap<Block.BlockStatePairKey>> OCCLUSION_CACHE = ThreadLocal.withInitial(() -> {
+    Object2ByteLinkedOpenHashMap<Block.BlockStatePairKey> object2bytelinkedopenhashmap = new Object2ByteLinkedOpenHashMap<Block.BlockStatePairKey>(2048, 0.25F) {
+        protected void rehash(int newN) {
+        }
+    };
+    object2bytelinkedopenhashmap.defaultReturnValue((byte)127);
+    return object2bytelinkedopenhashmap;
+});
 
     public static ResourceLocation getKey(Block block)
     {
@@ -173,6 +185,41 @@ public class RenderUtil {
 
         // 默认渲染（包括邻居为半透明、流体等情况）
         return true;
+    }
+
+    public static boolean shouldRenderFace(BlockState state, BlockGetter level, BlockPos offset, Direction face, BlockPos neighborPos) {
+        BlockState blockstate = level.getBlockState(neighborPos);
+
+        if(blockstate.getBlock()instanceof PaintBlock)blockstate=getPaintBlockOrigin(level,neighborPos);
+
+        if (state.skipRendering(blockstate, face)) {
+            return false;
+        } else if (blockstate.hidesNeighborFace(level, neighborPos, state, face.getOpposite()) && state.supportsExternalFaceHiding()) {
+            return false;
+        } else if (blockstate.canOcclude()) {
+            Block.BlockStatePairKey block$blockstatepairkey = new Block.BlockStatePairKey(state, blockstate, face);
+            Object2ByteLinkedOpenHashMap<Block.BlockStatePairKey> object2bytelinkedopenhashmap = (Object2ByteLinkedOpenHashMap)OCCLUSION_CACHE.get();
+            byte b0 = object2bytelinkedopenhashmap.getAndMoveToFirst(block$blockstatepairkey);
+            if (b0 != 127) {
+                return b0 != 0;
+            } else {
+                VoxelShape voxelshape = state.getFaceOcclusionShape(level, offset, face);
+                if (voxelshape.isEmpty()) {
+                    return true;
+                } else {
+                    VoxelShape voxelshape1 = blockstate.getFaceOcclusionShape(level, neighborPos, face.getOpposite());
+                    boolean flag = Shapes.joinIsNotEmpty(voxelshape, voxelshape1, BooleanOp.ONLY_FIRST);
+                    if (object2bytelinkedopenhashmap.size() == 2048) {
+                        object2bytelinkedopenhashmap.removeLastByte();
+                    }
+
+                    object2bytelinkedopenhashmap.putAndMoveToFirst(block$blockstatepairkey, (byte)(flag ? 1 : 0));
+                    return flag;
+                }
+            }
+        } else {
+            return true;
+        }
     }
 }
 
