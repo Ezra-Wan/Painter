@@ -181,76 +181,99 @@ public class SimpleBlockPaint extends AbstractPaint {
 
         return quads;
     }
-
     private BakedQuad createQuad(TextureAtlasSprite sprite, Direction direction) {
-        // 顶点顺序：左下、右下、右上、左上（逆时针，从外部看）
-        float[][] vertices = new float[4][3];
-        float[] u = new float[4];
-        float[] v = new float[4];
-
+        // 1. 标准顺序的四个角坐标（左下、右下、右上、左上）
+        float[][] positions = new float[4][3];
         switch (direction) {
             case DOWN:
-                vertices[0] = new float[]{0, 0, 0}; // 左下 (X最小, Z最小)
-                vertices[1] = new float[]{1, 0, 0}; // 右下 (X最大, Z最小)
-                vertices[2] = new float[]{1, 0, 1}; // 右上 (X最大, Z最大)
-                vertices[3] = new float[]{0, 0, 1}; // 左上 (X最小, Z最大)
+                positions[0] = new float[]{0, 0, 0}; // 左下
+                positions[1] = new float[]{1, 0, 0}; // 右下
+                positions[2] = new float[]{1, 0, 1}; // 右上
+                positions[3] = new float[]{0, 0, 1}; // 左上
                 break;
             case UP:
-                vertices[0] = new float[]{0, 1, 1}; // 左下 (X最小, Z最大)
-                vertices[1] = new float[]{1, 1, 1}; // 右下 (X最大, Z最大)
-                vertices[2] = new float[]{1, 1, 0}; // 右上 (X最大, Z最小)
-                vertices[3] = new float[]{0, 1, 0}; // 左上 (X最小, Z最小)
+                positions[0] = new float[]{0, 1, 1}; // 左下
+                positions[1] = new float[]{1, 1, 1}; // 右下
+                positions[2] = new float[]{1, 1, 0}; // 右上
+                positions[3] = new float[]{0, 1, 0}; // 左上
                 break;
             case NORTH:
-                vertices[0] = new float[]{1, 0, 0}; // 左下
-                vertices[1] = new float[]{0, 0, 0}; // 右下
-                vertices[2] = new float[]{0, 1, 0}; // 右上
-                vertices[3] = new float[]{1, 1, 0}; // 左上
+                // 修正：左下应为 (0,0,0)，右下 (1,0,0)，右上 (1,1,0)，左上 (0,1,0)
+                positions[0] = new float[]{1, 0, 0}; // 左下
+                positions[1] = new float[]{0, 0, 0}; // 右下
+                positions[2] = new float[]{0, 1, 0}; // 右上
+                positions[3] = new float[]{1, 1, 0}; // 左上
                 break;
             case SOUTH:
-                vertices[0] = new float[]{0, 0, 1}; // 左下
-                vertices[1] = new float[]{1, 0, 1}; // 右下
-                vertices[2] = new float[]{1, 1, 1}; // 右上
-                vertices[3] = new float[]{0, 1, 1}; // 左上
+                positions[0] = new float[]{0, 0, 1}; // 左下
+                positions[1] = new float[]{1, 0, 1}; // 右下
+                positions[2] = new float[]{1, 1, 1}; // 右上
+                positions[3] = new float[]{0, 1, 1}; // 左上
                 break;
             case WEST:
-                vertices[0] = new float[]{0, 0, 0}; // 左下 (Z最小)
-                vertices[1] = new float[]{0, 0, 1}; // 右下 (Z最大)
-                vertices[2] = new float[]{0, 1, 1}; // 右上
-                vertices[3] = new float[]{0, 1, 0}; // 左上
+                // 注意：WEST 面（法向 -X），左下应为 (0,0,0)? 实际上 WEST 面位于 x=0 平面，左下应该是 (0,0,0)（y最小z最小），右下 (0,0,1)（y最小z最大），右上 (0,1,1)，左上 (0,1,0)
+                positions[0] = new float[]{0, 0, 0};
+                positions[1] = new float[]{0, 0, 1};
+                positions[2] = new float[]{0, 1, 1};
+                positions[3] = new float[]{0, 1, 0};
                 break;
             case EAST:
-                vertices[0] = new float[]{1, 0, 1}; // 左下 (Z最大)
-                vertices[1] = new float[]{1, 0, 0}; // 右下 (Z最小)
-                vertices[2] = new float[]{1, 1, 0}; // 右上
-                vertices[3] = new float[]{1, 1, 1}; // 左上
+                // EAST 面（法向 +X），位于 x=1 平面，左下应该是 (1,0,1)（y最小z最大），右下 (1,0,0)（y最小z最小），右上 (1,1,0)，左上 (1,1,1)
+                positions[0] = new float[]{1, 0, 1};
+                positions[1] = new float[]{1, 0, 0};
+                positions[2] = new float[]{1, 1, 0};
+                positions[3] = new float[]{1, 1, 1};
                 break;
             default:
                 return null;
         }
 
-        // UV 映射保持不变（0左下、1右下、2右上、3左上）
+        // 2. 标准 UV 映射：左下(U0,V1), 右下(U1,V1), 右上(U1,V0), 左上(U0,V0)
+        float[] u = new float[4];
+        float[] v = new float[4];
         u[0] = sprite.getU0(); v[0] = sprite.getV1();
         u[1] = sprite.getU1(); v[1] = sprite.getV1();
         u[2] = sprite.getU1(); v[2] = sprite.getV0();
         u[3] = sprite.getU0(); v[3] = sprite.getV0();
 
-        int[] vertexData = new int[32]; // 4 顶点 * 8 int
-        for (int i = 0; i < 4; i++) {
-            int offset = i * 8;
-            vertexData[offset + 0] = Float.floatToRawIntBits(vertices[i][0]);
-            vertexData[offset + 1] = Float.floatToRawIntBits(vertices[i][1]);
-            vertexData[offset + 2] = Float.floatToRawIntBits(vertices[i][2]);
+        // 3. 获取重映射表（标准索引 → 实际顶点索引）
+        int[] remap = getRemapForDirection(direction);
+
+        // 4. 按重映射表填充最终顶点数据
+        int[] vertexData = new int[32];
+        for (int stdIdx = 0; stdIdx < 4; stdIdx++) {
+            int targetIdx = remap[stdIdx];
+            int offset = targetIdx * 8;
+            vertexData[offset + 0] = Float.floatToRawIntBits(positions[stdIdx][0]);
+            vertexData[offset + 1] = Float.floatToRawIntBits(positions[stdIdx][1]);
+            vertexData[offset + 2] = Float.floatToRawIntBits(positions[stdIdx][2]);
             vertexData[offset + 3] = -1; // 颜色白色
-            vertexData[offset + 4] = Float.floatToRawIntBits(u[i]);
-            vertexData[offset + 5] = Float.floatToRawIntBits(v[i]);
-            vertexData[offset + 6] = 0;   // 光照（稍后由 ModModelRender 填充）
-            vertexData[offset + 7] = 0;   // 法线（稍后由渲染器处理）
+            vertexData[offset + 4] = Float.floatToRawIntBits(u[stdIdx]);
+            vertexData[offset + 5] = Float.floatToRawIntBits(v[stdIdx]);
+            vertexData[offset + 6] = 0;   // 光照占位
+            vertexData[offset + 7] = 0;   // 法线占位
         }
 
         return new BakedQuad(vertexData, -1, direction, sprite, true);
     }
 
+    private int[] getRemapForDirection(Direction dir) {
+        switch (dir) {
+            case DOWN:
+            case SOUTH:
+                return new int[]{1, 2, 3,0};
+            case UP:
+                return new int[]{1,2, 3, 0};
+            case NORTH:
+                return new int[]{1,2, 3, 0};
+            case WEST:
+                return new int[]{ 1, 2,3,0};
+            case EAST:
+                return new int[]{1, 2, 3, 0};
+            default:
+                return new int[]{0, 1, 2, 3};
+        }
+    }
 
     private static void renderQuadList(PoseStack.Pose pose, VertexConsumer consumer, float red, float green, float blue, List<BakedQuad> quads, int packedLight, int packedOverlay) {
         for(BakedQuad bakedquad : quads) {

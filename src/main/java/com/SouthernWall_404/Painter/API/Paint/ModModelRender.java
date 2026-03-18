@@ -512,10 +512,11 @@ public class ModModelRender {
     @OnlyIn(Dist.CLIENT)
     static enum AmbientVertexRemap {
         DOWN(0, 1, 2, 3),
-        UP(2, 3, 0, 1),
-        NORTH(3, 0, 1, 2),
-        SOUTH(0, 1, 2, 3),
-        WEST(3, 0, 1, 2),
+        UP(1,2, 3, 0),
+
+        NORTH(1,2,3, 0),
+        SOUTH( 1, 2, 3,0),
+        WEST(1, 2,3,0),
         EAST(1, 2, 3, 0);
 
         final int vert0;
