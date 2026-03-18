@@ -92,6 +92,10 @@ public class PaintBlockEntity extends BlockEntity {
                 render = PaintContent.getRender(type).apply(null);
             }
             render.deserializeNBT(provider, tag.getCompound("render"));
+
+            if (level != null && !level.isClientSide) {
+                level.getLightEngine().checkBlock(worldPosition);
+            }
         }
     }
     @Override
@@ -114,6 +118,10 @@ public class PaintBlockEntity extends BlockEntity {
                 render = PaintContent.getRender(type).apply(null);
             }
             render.deserializeNBT(provider, tag.getCompound("render"));
+
+            if (level != null) {
+                level.getLightEngine().checkBlock(worldPosition);
+            }
         }
     }
 

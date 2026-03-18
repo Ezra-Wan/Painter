@@ -1,6 +1,6 @@
 package com.SouthernWall_404.Painter.Common.Event;
 
-import com.SouthernWall_404.Painter.API.Paint.RenderBlockAPI;
+import com.SouthernWall_404.Painter.API.Paint.PaintBlockAPI;
 import com.SouthernWall_404.Painter.Common.World.Item.PaintItem;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.InteractionHand;
@@ -33,7 +33,7 @@ public class BlockEvent {
                 Block block=blockItem.getBlock();
 //                PaintUtil.addPaint(level,blockPos,new Paint(Direction.SOUTH,block));
 //                RenderBlockAPI.onPaint(level,blockPos);
-                RenderBlockAPI.placeARender(level,blockPos,player);
+                PaintBlockAPI.placeARender(level,blockPos,player);
 
                 event.setCanceled(true);
             }
