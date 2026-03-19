@@ -9,12 +9,12 @@ import net.minecraft.client.renderer.block.BlockRenderDispatcher;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.BakedModel;
+import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.RandomSource;
-import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
@@ -27,7 +27,6 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 import net.neoforged.neoforge.client.model.data.ModelData;
 
 import javax.annotation.Nullable;
-import java.awt.*;
 import java.util.List;
 
 public class RenderUtil {
@@ -42,14 +41,23 @@ private static final ThreadLocal<Object2ByteLinkedOpenHashMap<Block.BlockStatePa
     return object2bytelinkedopenhashmap;
 });
 
-    public static ResourceLocation getKey(Block block)
+    public static ResourceLocation getBlockKey(Block block)
     {
         ResourceLocation key = BuiltInRegistries.BLOCK.getKey(block);
         // 将方块注册名转换为纹理路径，例如 "minecraft:iron_block" -> "minecraft:block/iron_block"
-        ResourceLocation textureLocation = ResourceLocation.fromNamespaceAndPath(
-                key.getNamespace(), "block/" + key.getPath());
 
-        return textureLocation;
+
+        return key;
+    }
+
+    public static ModelResourceLocation getModelKey(Block block)
+    {
+        ResourceLocation blockKey=getBlockKey(block);
+        ResourceLocation modelLocation = ResourceLocation.fromNamespaceAndPath(
+                blockKey.getNamespace(), "block/" + blockKey.getPath());
+
+        ModelResourceLocation modelResourceLocation=ModelResourceLocation.inventory(blockKey);
+        return modelResourceLocation;
     }
 
     public static TextureAtlasSprite getFaceFromBlock(BlockState state, Direction face)
@@ -233,6 +241,15 @@ private static final ThreadLocal<Object2ByteLinkedOpenHashMap<Block.BlockStatePa
         } else {
             return true;
         }
+    }
+
+
+    public static Block getBlockFromID(ResourceLocation key)
+    {
+        Block block=BuiltInRegistries.BLOCK.get(key);
+        if(block==null)return Blocks.AIR;
+
+        return block;
     }
 }
 

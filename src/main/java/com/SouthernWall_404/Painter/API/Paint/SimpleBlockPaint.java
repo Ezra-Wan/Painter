@@ -10,6 +10,7 @@ import net.minecraft.client.color.block.BlockColors;
 import net.minecraft.client.gui.screens.PauseScreen;
 import net.minecraft.client.gui.screens.options.OptionsScreen;
 import net.minecraft.client.gui.screens.options.VideoSettingsScreen;
+import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.BlockRenderDispatcher;
@@ -72,7 +73,7 @@ public class SimpleBlockPaint extends AbstractPaint {
         if (level == null) return;
         BlockPos pos = blockEntity.getBlockPos();
 
-        // 获取原版方块模型
+        // 对Origin的处理
         BakedModel model = Minecraft.getInstance().getModelManager().getBlockModelShaper().getBlockModel(origin);
         BlockColors blockColors = Minecraft.getInstance().getBlockColors();
         RandomSource random = RandomSource.create();
@@ -92,25 +93,32 @@ public class SimpleBlockPaint extends AbstractPaint {
         BitSet shapeFlags = new BitSet(3);
         ModModelRender.AmbientOcclusionFace aoFace = new ModModelRender.AmbientOcclusionFace();
 
-        // ----- 构建自定义 Quad，并记录有自定义的方向 -----
-        List<BakedQuad> customQuads = buildCustomQuads(level, pos, origin);
-        Map<Direction, List<BakedQuad>> customQuadsByDir = new EnumMap<>(Direction.class);
-        Set<Direction> dirsWithCustom = EnumSet.noneOf(Direction.class);
-        for (BakedQuad quad : customQuads) {
-            Direction dir = quad.getDirection();
-            if (dir != null) {
-                customQuadsByDir.computeIfAbsent(dir, k -> new ArrayList<>()).add(quad);
-                dirsWithCustom.add(dir);
-            }
-        }
+         //----- 构建自定义 Quad，并记录有自定义的方向 -----
+//        List<BakedQuad> customQuads = buildCustomQuads(level, pos, origin);
+//        Map<Direction, List<BakedQuad>> customQuadsByDir = new EnumMap<>(Direction.class);
+//        Set<Direction> dirsWithCustom = EnumSet.noneOf(Direction.class);
+//        for (BakedQuad quad : customQuads) {
+//            Direction dir = quad.getDirection();
+//            if (dir != null) {
+//                customQuadsByDir.computeIfAbsent(dir, k -> new ArrayList<>()).add(quad);
+//                dirsWithCustom.add(dir);
+//            }
+//        }
 
         // 渲染每个方向的原版面（跳过有自定义的方向）
         for (Direction direction : Direction.values()) {
-            if (dirsWithCustom.contains(direction)) {
-                continue; // 该方向由自定义 quad 覆盖，跳过原版
+            List<BakedQuad> quads;
+
+            int flag=getFlag(direction);
+            if (objects.containsKey(flag)) {
+                quads=objects.get(flag);
+
             }
-            random.setSeed(seed);
-            List<BakedQuad> quads = model.getQuads(origin, direction, random, ModelData.EMPTY, renderType);
+            else
+            {
+                random.setSeed(seed);
+                quads= model.getQuads(origin, direction, random, ModelData.EMPTY, renderType);
+            }
             if (quads.isEmpty()) continue;
 
             BlockPos neighborPos = pos.relative(direction);
@@ -118,7 +126,11 @@ public class SimpleBlockPaint extends AbstractPaint {
 
             for (BakedQuad quad : quads) {
                 modRenderer.calculateShape(level, origin, pos, quad.getVertices(), quad.getDirection(), shape, shapeFlags);
+
+
                 aoFace.calculate(level, origin, pos, quad.getDirection(), shape, shapeFlags, quad.isShade());
+
+
                 modRenderer.putQuadData(level, origin, pos, consumer, poseStack.last(), quad,
                         aoFace.brightness[0], aoFace.brightness[1], aoFace.brightness[2], aoFace.brightness[3],
                         aoFace.lightmap[0], aoFace.lightmap[1], aoFace.lightmap[2], aoFace.lightmap[3],
@@ -140,22 +152,22 @@ public class SimpleBlockPaint extends AbstractPaint {
             }
         }
 
-// ----- 渲染自定义 Quad -----
-        if (!customQuads.isEmpty()) {
-            for (BakedQuad quad : customQuads) {
-                Direction direction = quad.getDirection();
-                // 可选：检查该面是否应被渲染（相邻方块遮挡）
-                BlockPos neighborPos = pos.relative(direction);
-                if (!RenderUtil.shouldRenderFace(origin, level, pos, direction, neighborPos)) continue;
-
-                modRenderer.calculateShape(level, origin, pos, quad.getVertices(), direction, shape, shapeFlags);
-                aoFace.calculate(level, origin, pos, direction, shape, shapeFlags, quad.isShade());
-                modRenderer.putQuadData(level, origin, pos, consumer, poseStack.last(), quad,
-                        aoFace.brightness[0], aoFace.brightness[1], aoFace.brightness[2], aoFace.brightness[3],
-                        aoFace.lightmap[0], aoFace.lightmap[1], aoFace.lightmap[2], aoFace.lightmap[3],
-                        packedOverlay);
-            }
-        }
+//// ----- 渲染自定义 Quad -----
+//        if (!objects.isEmpty()) {
+//            for (BakedQuad quad : customQuads) {
+//                Direction direction = quad.getDirection();
+//                // 可选：检查该面是否应被渲染（相邻方块遮挡）
+//                BlockPos neighborPos = pos.relative(direction);
+//                if (!RenderUtil.shouldRenderFace(origin, level, pos, direction, neighborPos)) continue;
+//
+//                modRenderer.calculateShape(level, origin, pos, quad.getVertices(), direction, shape, shapeFlags);
+//                aoFace.calculate(level, origin, pos, direction, shape, shapeFlags, quad.isShade());
+//                modRenderer.putQuadData(level, origin, pos, consumer, poseStack.last(), quad,
+//                        aoFace.brightness[0], aoFace.brightness[1], aoFace.brightness[2], aoFace.brightness[3],
+//                        aoFace.lightmap[0], aoFace.lightmap[1], aoFace.lightmap[2], aoFace.lightmap[3],
+//                        packedOverlay);
+//            }
+//        }
         poseStack.popPose();
     }
 
@@ -166,12 +178,18 @@ public class SimpleBlockPaint extends AbstractPaint {
         // 遍历所有方向，为每个方向生成一个 quad（如果对应 flag 有纹理）
         for (Direction direction : Direction.values()) {
             int flag = getFlag(direction); // 假设你已将 Direction 注册为 flag key
-            TextureAtlasSprite sprite = objects.get(flag);
-            if (sprite == null) continue; // 没有自定义纹理则跳过
 
-            // 构建该方向的 quad
-            BakedQuad quad = createQuad(sprite, direction);
-            quads.add(quad);
+            List<BakedQuad> quad=objects.get(flag);
+            if(quad==null)continue;
+
+
+            quads.addAll(quad);
+//            TextureAtlasSprite sprite = objects.get(flag);
+//            if (sprite == null) continue; // 没有自定义纹理则跳过
+//
+//            // 构建该方向的 quad
+//            BakedQuad quad = createQuad(sprite, direction);
+//            quads.add(quad);
         }
 
         // 也可以根据其他逻辑生成自定义 quad，例如使用特定的 flag 值
@@ -261,17 +279,17 @@ public class SimpleBlockPaint extends AbstractPaint {
         switch (dir) {
             case DOWN:
             case SOUTH:
-                return new int[]{1, 2, 3,0};
-            case UP:
-                return new int[]{1,2, 3, 0};
-            case NORTH:
-                return new int[]{1,2, 3, 0};
-            case WEST:
-                return new int[]{ 1, 2,3,0};
-            case EAST:
-                return new int[]{1, 2, 3, 0};
-            default:
                 return new int[]{0, 1, 2, 3};
+            case UP:
+                return new int[]{2, 3, 0, 1};
+            case NORTH:
+                return new int[]{3, 0, 1, 2};
+            case WEST:
+                return new int[]{ 0, 1, 2, 3};
+            case EAST:
+                return new int[]{3, 0, 1, 2};
+            default:
+                return new int[]{1, 2, 3, 0};
         }
     }
 

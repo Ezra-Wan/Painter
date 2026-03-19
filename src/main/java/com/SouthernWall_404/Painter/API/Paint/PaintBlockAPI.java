@@ -43,7 +43,7 @@ public class PaintBlockAPI {
         }
 
         //建立render
-        AbstractRender<?> render=new SimpleBlockPaint(origin);
+        AbstractRender render=new SimpleBlockPaint(origin);
         ItemStack itemStack=player.getItemInHand(InteractionHand.OFF_HAND);
         if(itemStack.getItem() instanceof BlockItem item)
         {

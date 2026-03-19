@@ -36,7 +36,7 @@ public class PaintBlockEntity extends BlockEntity {
      * 用于初始化
      * @param render
      */
-    public void init(AbstractRender<?> render)
+    public void init(AbstractRender render)
     {
         setRender(render);
     }

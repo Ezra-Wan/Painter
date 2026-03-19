@@ -20,6 +20,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.color.block.BlockColors;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.block.ModelBlockRenderer;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.core.BlockPos;
@@ -512,12 +513,13 @@ public class ModModelRender {
     @OnlyIn(Dist.CLIENT)
     static enum AmbientVertexRemap {
         DOWN(0, 1, 2, 3),
-        UP(1,2, 3, 0),
-
-        NORTH(1,2,3, 0),
-        SOUTH( 1, 2, 3,0),
-        WEST(1, 2,3,0),
+        UP(2, 3, 0, 1),
+        NORTH(3, 0, 1, 2),
+        SOUTH(0, 1, 2, 3),
+        WEST(3, 0, 1, 2),
         EAST(1, 2, 3, 0);
+
+
 
         final int vert0;
         final int vert1;

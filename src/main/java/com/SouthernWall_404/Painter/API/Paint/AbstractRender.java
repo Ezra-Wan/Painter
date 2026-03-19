@@ -13,10 +13,10 @@ import org.jetbrains.annotations.UnknownNullability;
 import java.util.HashMap;
 import java.util.Map;
 
-public abstract class AbstractRender<T> implements IRender<T> {
+public abstract class AbstractRender<T,F extends Object> implements IRender<T> {
 
     //========不需要持久化的数据========
-    protected Map<Object,Integer> flags=new HashMap<>();//识别码定义系统
+    protected Map<F,Integer> flags=new HashMap<>();//识别码定义系统
     protected Map<Integer,T> objects=new HashMap<>();//渲染内容缓存
     protected String type;
     //========需要持久化的数据========
@@ -51,14 +51,14 @@ public abstract class AbstractRender<T> implements IRender<T> {
 
     //========内部方法========
 
-    protected void registerFlag(Object object,int flag)
+    protected void registerFlag(F f,int flag)
     {
         if(flags.containsValue(flag))
         {
             return;
         }//防止重复注册
         else {
-            flags.put(object,flag);
+            flags.put(f,flag);
         }
     }
 
@@ -76,7 +76,7 @@ public abstract class AbstractRender<T> implements IRender<T> {
     public void putRenderBlock(Object object, Block block) {
         int flag=getFlag(object);
 
-        ResourceLocation key=RenderUtil.getKey(block);
+        ResourceLocation key=RenderUtil.getBlockKey(block);
 
         putRenderObject(flag,key);
     }
