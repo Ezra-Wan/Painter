@@ -1,5 +1,6 @@
 package com.SouthernWall_404.Painter.API.Paint;
 
+import com.SouthernWall_404.Painter.Painter;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.model.BakedQuad;
@@ -14,6 +15,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.neoforge.client.model.data.ModelData;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -36,14 +38,23 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>,Direc
             Direction direction= getDirection(flag);
 
             Block block=RenderUtil.getBlockFromID(paintPaths.get(flag));
-            {
-                List<BakedQuad> quads=getQuadsForDirection(block,direction);
+            List<BakedQuad> quads = getQuadsForDirection(block, direction);
 
-                objects.put(flag,quads);
-            }
+            objects.put(flag, quads);
+
+
         }
     }
 
+
+    public Block getPaintedBlock(Direction direction)
+    {
+        int flag=getFlag(direction);
+
+        Block block=RenderUtil.getBlockFromID(paintPaths.get(flag));
+
+        return block;
+    }
 
     private Direction getDirection(int flag)
     {
@@ -59,6 +70,7 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>,Direc
         }
         return Direction.NORTH;
     }
+
     public List<BakedQuad> getQuadsForDirection(Block block, Direction direction) {
         // 1. 获取 Block 的默认状态 (如果你需要特定状态，可以传入相应的 BlockState)
         BlockState state = block.defaultBlockState();

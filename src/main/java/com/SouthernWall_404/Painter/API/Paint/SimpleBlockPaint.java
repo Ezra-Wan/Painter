@@ -79,7 +79,8 @@ public class SimpleBlockPaint extends AbstractPaint {
         RandomSource random = RandomSource.create();
         long seed = origin.getSeed(pos);
         RenderType renderType = RenderUtil.getRenderType(origin);
-        VertexConsumer consumer = bufferSource.getBuffer(renderType);
+
+
 
         // 创建自定义渲染器
         ModModelRender modRenderer = new ModModelRender(blockColors);
@@ -93,64 +94,75 @@ public class SimpleBlockPaint extends AbstractPaint {
         BitSet shapeFlags = new BitSet(3);
         ModModelRender.AmbientOcclusionFace aoFace = new ModModelRender.AmbientOcclusionFace();
 
-         //----- 构建自定义 Quad，并记录有自定义的方向 -----
-//        List<BakedQuad> customQuads = buildCustomQuads(level, pos, origin);
-//        Map<Direction, List<BakedQuad>> customQuadsByDir = new EnumMap<>(Direction.class);
-//        Set<Direction> dirsWithCustom = EnumSet.noneOf(Direction.class);
-//        for (BakedQuad quad : customQuads) {
-//            Direction dir = quad.getDirection();
-//            if (dir != null) {
-//                customQuadsByDir.computeIfAbsent(dir, k -> new ArrayList<>()).add(quad);
-//                dirsWithCustom.add(dir);
-//            }
-//        }
 
         // 渲染每个方向的原版面（跳过有自定义的方向）
         for (Direction direction : Direction.values()) {
             List<BakedQuad> quads;
 
             int flag=getFlag(direction);
+            BlockPos neighborPos = pos.relative(direction);
+            if (!RenderUtil.shouldRenderFace(origin, level, pos, direction, neighborPos)) continue;
+
             if (objects.containsKey(flag)) {
                 quads=objects.get(flag);
+
+                BlockState state=getPaintedBlock(direction).defaultBlockState();
+                VertexConsumer testconsumer = bufferSource.getBuffer(RenderUtil.getRenderType(state));
+                for (BakedQuad quad : quads) {
+                    modRenderer.calculateShape(level, state, pos, quad.getVertices(), quad.getDirection(), shape, shapeFlags);
+
+
+                    aoFace.calculate(level, state, pos, quad.getDirection(), shape, shapeFlags, quad.isShade());
+
+
+                    modRenderer.putQuadData(level, state, pos,testconsumer, poseStack.last(), quad,
+                            aoFace.brightness[0], aoFace.brightness[1], aoFace.brightness[2], aoFace.brightness[3],
+                            aoFace.lightmap[0], aoFace.lightmap[1], aoFace.lightmap[2], aoFace.lightmap[3],
+                            packedOverlay);
+                }
 
             }
             else
             {
+                VertexConsumer consumer = bufferSource.getBuffer(renderType);
                 random.setSeed(seed);
                 quads= model.getQuads(origin, direction, random, ModelData.EMPTY, renderType);
+
+                for (BakedQuad quad : quads) {
+                    modRenderer.calculateShape(level, origin, pos, quad.getVertices(), quad.getDirection(), shape, shapeFlags);
+
+
+                    aoFace.calculate(level, origin, pos, quad.getDirection(), shape, shapeFlags, quad.isShade());
+
+
+                    modRenderer.putQuadData(level, origin, pos, consumer, poseStack.last(), quad,
+                            aoFace.brightness[0], aoFace.brightness[1], aoFace.brightness[2], aoFace.brightness[3],
+                            aoFace.lightmap[0], aoFace.lightmap[1], aoFace.lightmap[2], aoFace.lightmap[3],
+                            packedOverlay);
+                }
+
+                // 渲染无方向的原版面（如粒子面）
+                random.setSeed(seed);
+                List<BakedQuad> generalQuads = model.getQuads(origin, null, random, ModelData.EMPTY, renderType);
+                if (!generalQuads.isEmpty()) {
+                    for (BakedQuad quad : generalQuads) {
+                        modRenderer.calculateShape(level, origin, pos, quad.getVertices(), quad.getDirection(), shape, shapeFlags);
+                        aoFace.calculate(level, origin, pos, quad.getDirection(), shape, shapeFlags, quad.isShade());
+                        modRenderer.putQuadData(level, origin, pos, consumer, poseStack.last(), quad,
+                                aoFace.brightness[0], aoFace.brightness[1], aoFace.brightness[2], aoFace.brightness[3],
+                                aoFace.lightmap[0], aoFace.lightmap[1], aoFace.lightmap[2], aoFace.lightmap[3],
+                                packedOverlay);
+                    }
+                }
             }
             if (quads.isEmpty()) continue;
 
-            BlockPos neighborPos = pos.relative(direction);
-            if (!RenderUtil.shouldRenderFace(origin, level, pos, direction, neighborPos)) continue;
-
-            for (BakedQuad quad : quads) {
-                modRenderer.calculateShape(level, origin, pos, quad.getVertices(), quad.getDirection(), shape, shapeFlags);
 
 
-                aoFace.calculate(level, origin, pos, quad.getDirection(), shape, shapeFlags, quad.isShade());
 
-
-                modRenderer.putQuadData(level, origin, pos, consumer, poseStack.last(), quad,
-                        aoFace.brightness[0], aoFace.brightness[1], aoFace.brightness[2], aoFace.brightness[3],
-                        aoFace.lightmap[0], aoFace.lightmap[1], aoFace.lightmap[2], aoFace.lightmap[3],
-                        packedOverlay);
-            }
         }
 
-        // 渲染无方向的原版面（如粒子面）
-        random.setSeed(seed);
-        List<BakedQuad> generalQuads = model.getQuads(origin, null, random, ModelData.EMPTY, renderType);
-        if (!generalQuads.isEmpty()) {
-            for (BakedQuad quad : generalQuads) {
-                modRenderer.calculateShape(level, origin, pos, quad.getVertices(), quad.getDirection(), shape, shapeFlags);
-                aoFace.calculate(level, origin, pos, quad.getDirection(), shape, shapeFlags, quad.isShade());
-                modRenderer.putQuadData(level, origin, pos, consumer, poseStack.last(), quad,
-                        aoFace.brightness[0], aoFace.brightness[1], aoFace.brightness[2], aoFace.brightness[3],
-                        aoFace.lightmap[0], aoFace.lightmap[1], aoFace.lightmap[2], aoFace.lightmap[3],
-                        packedOverlay);
-            }
-        }
+
 
 //// ----- 渲染自定义 Quad -----
 //        if (!objects.isEmpty()) {
