@@ -14,6 +14,7 @@ import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.SlabBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 
@@ -43,7 +44,13 @@ public class PaintBlockAPI {
         }
 
         //建立render
+
         AbstractRender render=new SimpleBlockPaint(origin);
+
+        if(origin.getBlock() instanceof SlabBlock)
+        {
+            render=new SlabBlockPaint(origin);
+        }
         ItemStack itemStack=player.getItemInHand(InteractionHand.OFF_HAND);
         if(itemStack.getItem() instanceof BlockItem item)
         {

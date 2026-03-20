@@ -38,10 +38,10 @@ public class BlockEvent {
             if(itemToPaint instanceof BlockItem blockItem)
             {
                 Block block=blockItem.getBlock();
-                if(!block.defaultBlockState().isCollisionShapeFullBlock(level, blockPos))
-                {
-                    return;
-                }
+//                if(!block.defaultBlockState().isCollisionShapeFullBlock(level, blockPos))
+//                {
+//                    return;
+//                }
 //                PaintUtil.addPaint(level,blockPos,new Paint(Direction.SOUTH,block));
 //                RenderBlockAPI.onPaint(level,blockPos);
                 PaintBlockAPI.placeARender(level,blockPos,player,event.getFace());
@@ -56,13 +56,14 @@ public class BlockEvent {
     public static boolean isPaintable(Level level,BlockPos blockPos)
     {
 
-        BlockState blockState=level.getBlockState(blockPos);
-        if(blockState.isCollisionShapeFullBlock(level, blockPos))
-        {
-            return true;
-        }
-
-        return false;
+//        BlockState blockState=level.getBlockState(blockPos);
+//        if(blockState.isCollisionShapeFullBlock(level, blockPos))
+//        {
+//            return true;
+//        }
+//
+//        return false;
+        return true;
     }
 
 }
