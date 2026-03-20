@@ -10,6 +10,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 
@@ -22,15 +23,25 @@ public class BlockEvent {
         Level level=event.getLevel();
         BlockPos blockPos=event.getPos();
 
+
+        if(!isPaintable(level,blockPos))return;
+
+
+
         Player player=event.getEntity();
         ItemStack itemStack=player.getItemInHand(InteractionHand.MAIN_HAND);
         Item item=itemStack.getItem().asItem();
         if(item instanceof PaintItem)
         {
+
             Item itemToPaint=player.getItemInHand(InteractionHand.OFF_HAND).getItem();
             if(itemToPaint instanceof BlockItem blockItem)
             {
                 Block block=blockItem.getBlock();
+                if(!block.defaultBlockState().isCollisionShapeFullBlock(level, blockPos))
+                {
+                    return;
+                }
 //                PaintUtil.addPaint(level,blockPos,new Paint(Direction.SOUTH,block));
 //                RenderBlockAPI.onPaint(level,blockPos);
                 PaintBlockAPI.placeARender(level,blockPos,player,event.getFace());
@@ -42,5 +53,16 @@ public class BlockEvent {
         }
     }
 
+    public static boolean isPaintable(Level level,BlockPos blockPos)
+    {
+
+        BlockState blockState=level.getBlockState(blockPos);
+        if(blockState.isCollisionShapeFullBlock(level, blockPos))
+        {
+            return true;
+        }
+
+        return false;
+    }
 
 }

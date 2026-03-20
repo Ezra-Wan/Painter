@@ -16,4 +16,10 @@ public class PaintContent {
     {
         return RENDERS.getOrDefault(type,(blockState -> new SimpleBlockPaint(blockState)));
     }
+
+    static {
+        RENDERS.put(SIMPLE_BLOCK,(blockState -> new SimpleBlockPaint(blockState)));
+    }
+
+
 }
