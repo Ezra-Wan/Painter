@@ -36,7 +36,7 @@ public abstract class AbstractRender<T,F extends Object> implements IRender<T> {
 
     @Override
     public String getType() {
-        return "";
+        return type;
     }
 
     @Override

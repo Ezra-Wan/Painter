@@ -77,32 +77,30 @@ public class PaintBlockEntity extends BlockEntity {
     protected void saveAdditional(CompoundTag tag, HolderLookup.Provider provider) {
         super.saveAdditional(tag, provider);
         if (render != null) {
+            // 保存类型，供反序列化时选择正确的子类
+            tag.putString("render_type", render.getType());
             tag.put("render", render.serializeNBT(provider));
         }
     }
 
-    // 从区块加载
     @Override
     public void loadAdditional(CompoundTag tag, HolderLookup.Provider provider) {
         super.loadAdditional(tag, provider);
-        if (tag.contains("render")) {
-            // 如果 render 尚未创建，需要先根据类型创建实例（可从 tag 中读取 type）
-            if (render == null) {
-                String type = tag.getCompound("render").getString("type");
-                // 注意：创建时传入的 origin 不重要，反序列化时会覆盖
-                render = PaintContent.getRender(type).apply(null);
+        if (tag.contains("render_type")) {
+            String type = tag.getString("render_type");
+            // 通过 PaintContent 创建对应类型的实例（构造函数可传入 null，因为数据会从 tag 覆盖）
+            AbstractRender newRender = PaintContent.getRender(type).apply(getOrigin());
+            if (tag.contains("render")) {
+                newRender.deserializeNBT(provider, tag.getCompound("render"));
             }
-            render.deserializeNBT(provider, tag.getCompound("render"));
-
-            if (level != null && !level.isClientSide) {
-                level.getLightEngine().checkBlock(worldPosition);
-            }
+            this.render = newRender;
         }
     }
     @Override
     public CompoundTag getUpdateTag(HolderLookup.Provider provider) {
         CompoundTag tag = super.getUpdateTag(provider);
         if (render != null) {
+            tag.putString("render_type", render.getType());
             tag.put("render", render.serializeNBT(provider));
         }
         return tag;
@@ -111,18 +109,13 @@ public class PaintBlockEntity extends BlockEntity {
     @Override
     public void handleUpdateTag(CompoundTag tag, HolderLookup.Provider provider) {
         super.handleUpdateTag(tag, provider);
-        if (tag.contains("render")) {
-            // 确保 render 实例存在，然后反序列化
-            if (render == null) {
-                // 从 tag 中读取 type 并创建对应实例
-                String type = tag.getCompound("render").getString("type");
-                render = PaintContent.getRender(type).apply(null);
+        if (tag.contains("render_type")) {
+            String type = tag.getString("render_type");
+            AbstractRender newRender = PaintContent.getRender(type).apply(null);
+            if (tag.contains("render")) {
+                newRender.deserializeNBT(provider, tag.getCompound("render"));
             }
-            render.deserializeNBT(provider, tag.getCompound("render"));
-
-            if (level != null) {
-                level.getLightEngine().checkBlock(worldPosition);
-            }
+            this.render = newRender;
         }
     }
 

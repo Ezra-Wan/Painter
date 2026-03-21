@@ -25,6 +25,7 @@ import net.minecraft.world.level.block.state.properties.SlabType;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.client.model.data.ModelData;
 
+import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.List;
 
@@ -87,7 +88,7 @@ public class SlabBlockPaint extends AbstractPaint {
                     BlockState slabState = getSlabStateForFace(block, dir);
 
 
-                    List<BakedQuad> quads = getQuadsForSlabState(slabState, dir, level, pos);//TODO:应当是这里的问题
+                    List<BakedQuad> quads = getQuadsForSlabState(slabState, dir, level, pos);
                     if(dir==Direction.UP)
                     {
                         if(origin.getValue(SlabBlock.TYPE)==SlabType.BOTTOM)
@@ -110,20 +111,22 @@ public class SlabBlockPaint extends AbstractPaint {
                 }
                 else {
 
+                    List<BakedQuad> quads=new ArrayList<>();
                     TextureAtlasSprite texture=RenderUtil.getFaceFromBlock(block.defaultBlockState(),dir);
-                    BakedQuad quad=createSlabQuadManual(texture,dir,true);
+
+                    BakedQuad quad=createSlabQuadManual(texture,dir);
+
+                    quads=List.of(quad);
 
                     BlockState slabState = getSlabStateForFace(block, dir);
-                    List<BakedQuad> quads=List.of(quad);
+
 
                     if (!quads.isEmpty()) {
                         VertexConsumer consumer = bufferSource.getBuffer(RenderType.cutout());
-                        renderQuadsWithAO(level, slabState, pos, quads, consumer, modRenderer, shape, shapeFlags, aoFace, poseStack, packedOverlay);
+                        renderQuadsWithAO(level, origin, pos, quads, consumer, modRenderer, shape, shapeFlags, aoFace, poseStack, packedOverlay);
                     }
                 }
             } else {
-
-
 //                 无自定义：渲染原方块的面
                 random.setSeed(seed);
                 List<BakedQuad> quads = model.getQuads(origin, dir, random, ModelData.EMPTY, renderType);
@@ -156,12 +159,14 @@ public class SlabBlockPaint extends AbstractPaint {
 
 
 
-    private BakedQuad createSlabQuadManual(TextureAtlasSprite sprite, Direction direction, boolean isTopSlab) {
+    private BakedQuad createSlabQuadManual(TextureAtlasSprite sprite, Direction direction) {
+        boolean isTopSlab = origin.getValue(SlabBlock.TYPE) == SlabType.TOP;
         float yMin = isTopSlab ? 0.5f : 0.0f;
         float yMax = isTopSlab ? 1.0f : 0.5f;
 
-        // 为每个面定义四个顶点的位置（顺序：左下、右下、右上、左上）
         float[][] positions;
+
+        //TODO:需要处理光照渲染错误
         switch (direction) {
             case DOWN -> positions = new float[][]{
                     {0, yMin, 0}, {1, yMin, 0}, {1, yMin, 1}, {0, yMin, 1}
@@ -170,60 +175,60 @@ public class SlabBlockPaint extends AbstractPaint {
                     {0, yMax, 1}, {1, yMax, 1}, {1, yMax, 0}, {0, yMax, 0}
             };
             case NORTH -> positions = new float[][]{
-                    {0, yMin, 0}, {1, yMin, 0}, {1, yMax, 0}, {0, yMax, 0}
+                    {1, yMax, 0}, {1, yMin, 0}, {0, yMin, 0}, {0, yMax, 0}
             };
             case SOUTH -> positions = new float[][]{
-                    {1, yMin, 1}, {0, yMin, 1}, {0, yMax, 1}, {1, yMax, 1}
+                    {0, yMin, 1}, {1, yMin, 1}, {1, yMax, 1}, {0, yMax, 1}
             };
             case WEST -> positions = new float[][]{
-                    {0, yMin, 1}, {0, yMin, 0}, {0, yMax, 0}, {0, yMax, 1}
+                    {0, yMin, 0}, {0, yMin, 1}, {0, yMax, 1}, {0, yMax, 0}
             };
             case EAST -> positions = new float[][]{
-                    {1, yMin, 0}, {1, yMin, 1}, {1, yMax, 1}, {1, yMax, 0}
+                    {1, yMin, 1}, {1, yMin, 0}, {1, yMax, 0}, {1, yMax, 1}
             };
             default -> throw new IllegalArgumentException("Invalid direction: " + direction);
         }
-        // UV 顺序与顶点顺序一致
+
+        // UV 与顶点顺序一致（左下、右下、右上、左上）
         float u0 = sprite.getU0(), u1 = sprite.getU1();
         float v0 = sprite.getV0(), v1 = sprite.getV1();
+        if (direction.getAxis().isHorizontal()) {
+            if (isTopSlab) {
+                v0 = sprite.getV0() + (sprite.getV1() - sprite.getV0()) * 0.5f; // 上半纹理
+            } else {
+                v1 = sprite.getV0() + (sprite.getV1() - sprite.getV0()) * 0.5f; // 下半纹理
+            }
+        }
         float[][] uvs = {
                 {u0, v1}, {u1, v1}, {u1, v0}, {u0, v0}
         };
 
+        // 打包法线
+        int packedNormal = packNormal(direction.getNormal().getX(),
+                direction.getNormal().getY(),
+                direction.getNormal().getZ());
         int[] vertexData = new int[32];
         for (int i = 0; i < 4; i++) {
             int offset = i * 8;
-            vertexData[offset] = Float.floatToRawIntBits(positions[i][0]);
+            vertexData[offset]     = Float.floatToRawIntBits(positions[i][0]);
             vertexData[offset + 1] = Float.floatToRawIntBits(positions[i][1]);
             vertexData[offset + 2] = Float.floatToRawIntBits(positions[i][2]);
-            vertexData[offset + 3] = -1;                         // 白色（ARGB 格式）
+            vertexData[offset + 3] = -1;   // 白色
             vertexData[offset + 4] = Float.floatToRawIntBits(uvs[i][0]);
             vertexData[offset + 5] = Float.floatToRawIntBits(uvs[i][1]);
-            vertexData[offset + 6] = 0;                          // 光照占位
-            vertexData[offset + 7] = 0;                          // 法线占位
+            vertexData[offset + 6] = 0;    // 光照（渲染时填充）
+            vertexData[offset + 7] = packedNormal;
         }
 
         return new BakedQuad(vertexData, -1, direction, sprite, true);
     }
-
-    private int[] getRemapForDirection(Direction dir) {
-        switch (dir) {
-            case DOWN:
-            case SOUTH:
-                return new int[]{0, 1, 2, 3};
-            case UP:
-                return new int[]{2, 3, 0, 1};
-            case NORTH:
-                return new int[]{3, 0, 1, 2};
-            case WEST:
-                return new int[]{ 0, 1, 2, 3};
-            case EAST:
-                return new int[]{3, 0, 1, 2};
-            default:
-                return new int[]{1, 2, 3, 0};
-        }
+    // 辅助方法：将法线向量打包为 int（与 DefaultVertexFormat 一致）
+    private static int packNormal(float x, float y, float z) {
+        int nx = (int) (x * 127);
+        int ny = (int) (y * 127);
+        int nz = (int) (z * 127);
+        return (nx & 0xFF) | ((ny & 0xFF) << 8) | ((nz & 0xFF) << 16);
     }
-
     private BlockState getSlabStateForFace(Block block, Direction face) {
         SlabType type=origin.getValue(SlabBlock.TYPE);
         BlockState defaultState = block.defaultBlockState();
