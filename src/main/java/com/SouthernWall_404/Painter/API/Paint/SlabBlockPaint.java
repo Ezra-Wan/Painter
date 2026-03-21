@@ -121,9 +121,10 @@ public class SlabBlockPaint extends AbstractPaint {
                     BlockState slabState = getSlabStateForFace(block, dir);
 
 
+                    //TODO:处理半砖面的平滑光照
                     if (!quads.isEmpty()) {
                         VertexConsumer consumer = bufferSource.getBuffer(RenderType.cutout());
-                        renderQuadsWithAO(level, origin, pos, quads, consumer, modRenderer, shape, shapeFlags, aoFace, poseStack, packedOverlay);
+                        renderQuadsWithAO(level, slabState, pos, quads, consumer, modRenderer, shape, shapeFlags, aoFace, poseStack, packedOverlay);
                     }
                 }
             } else {
@@ -166,7 +167,7 @@ public class SlabBlockPaint extends AbstractPaint {
 
         float[][] positions;
 
-        //TODO:需要处理光照渲染错误
+        //TODO:处理北面半砖渲染压缩的问题
         switch (direction) {
             case DOWN -> positions = new float[][]{
                     {0, yMin, 0}, {1, yMin, 0}, {1, yMin, 1}, {0, yMin, 1}
