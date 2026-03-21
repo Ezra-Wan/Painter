@@ -1,6 +1,7 @@
 package com.SouthernWall_404.Painter.API.Paint;
 
 import com.SouthernWall_404.Painter.Common.World.BlockEntity.PaintBlockEntity;
+import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.Minecraft;
@@ -8,6 +9,7 @@ import net.minecraft.client.color.block.BlockColors;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.model.BakedQuad;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -107,14 +109,17 @@ public class SlabBlockPaint extends AbstractPaint {
                     }
                 }
                 else {
-////                    return;
-//                    // 非半砖按普通方块处理（使用默认状态）
-//                    BlockState state = block.defaultBlockState();
-//                    List<BakedQuad> quads = getQuadsForDirection(block, dir);
-//                    if (!quads.isEmpty()) {
-//                        VertexConsumer consumer = bufferSource.getBuffer(RenderUtil.getRenderType(state));
-//                        renderQuadsWithAO(level, state, pos, quads, consumer, modRenderer, shape, shapeFlags, aoFace, poseStack, packedOverlay);
-//                    }
+
+                    TextureAtlasSprite texture=RenderUtil.getFaceFromBlock(block.defaultBlockState(),dir);
+                    BakedQuad quad=createSlabQuadManual(texture,dir,true);
+
+                    BlockState slabState = getSlabStateForFace(block, dir);
+                    List<BakedQuad> quads=List.of(quad);
+
+                    if (!quads.isEmpty()) {
+                        VertexConsumer consumer = bufferSource.getBuffer(RenderType.cutout());
+                        renderQuadsWithAO(level, slabState, pos, quads, consumer, modRenderer, shape, shapeFlags, aoFace, poseStack, packedOverlay);
+                    }
                 }
             } else {
 
@@ -149,6 +154,75 @@ public class SlabBlockPaint extends AbstractPaint {
         poseStack.popPose();
     }
 
+
+
+    private BakedQuad createSlabQuadManual(TextureAtlasSprite sprite, Direction direction, boolean isTopSlab) {
+        float yMin = isTopSlab ? 0.5f : 0.0f;
+        float yMax = isTopSlab ? 1.0f : 0.5f;
+
+        // 为每个面定义四个顶点的位置（顺序：左下、右下、右上、左上）
+        float[][] positions;
+        switch (direction) {
+            case DOWN -> positions = new float[][]{
+                    {0, yMin, 0}, {1, yMin, 0}, {1, yMin, 1}, {0, yMin, 1}
+            };
+            case UP -> positions = new float[][]{
+                    {0, yMax, 1}, {1, yMax, 1}, {1, yMax, 0}, {0, yMax, 0}
+            };
+            case NORTH -> positions = new float[][]{
+                    {0, yMin, 0}, {1, yMin, 0}, {1, yMax, 0}, {0, yMax, 0}
+            };
+            case SOUTH -> positions = new float[][]{
+                    {1, yMin, 1}, {0, yMin, 1}, {0, yMax, 1}, {1, yMax, 1}
+            };
+            case WEST -> positions = new float[][]{
+                    {0, yMin, 1}, {0, yMin, 0}, {0, yMax, 0}, {0, yMax, 1}
+            };
+            case EAST -> positions = new float[][]{
+                    {1, yMin, 0}, {1, yMin, 1}, {1, yMax, 1}, {1, yMax, 0}
+            };
+            default -> throw new IllegalArgumentException("Invalid direction: " + direction);
+        }
+        // UV 顺序与顶点顺序一致
+        float u0 = sprite.getU0(), u1 = sprite.getU1();
+        float v0 = sprite.getV0(), v1 = sprite.getV1();
+        float[][] uvs = {
+                {u0, v1}, {u1, v1}, {u1, v0}, {u0, v0}
+        };
+
+        int[] vertexData = new int[32];
+        for (int i = 0; i < 4; i++) {
+            int offset = i * 8;
+            vertexData[offset] = Float.floatToRawIntBits(positions[i][0]);
+            vertexData[offset + 1] = Float.floatToRawIntBits(positions[i][1]);
+            vertexData[offset + 2] = Float.floatToRawIntBits(positions[i][2]);
+            vertexData[offset + 3] = -1;                         // 白色（ARGB 格式）
+            vertexData[offset + 4] = Float.floatToRawIntBits(uvs[i][0]);
+            vertexData[offset + 5] = Float.floatToRawIntBits(uvs[i][1]);
+            vertexData[offset + 6] = 0;                          // 光照占位
+            vertexData[offset + 7] = 0;                          // 法线占位
+        }
+
+        return new BakedQuad(vertexData, -1, direction, sprite, true);
+    }
+
+    private int[] getRemapForDirection(Direction dir) {
+        switch (dir) {
+            case DOWN:
+            case SOUTH:
+                return new int[]{0, 1, 2, 3};
+            case UP:
+                return new int[]{2, 3, 0, 1};
+            case NORTH:
+                return new int[]{3, 0, 1, 2};
+            case WEST:
+                return new int[]{ 0, 1, 2, 3};
+            case EAST:
+                return new int[]{3, 0, 1, 2};
+            default:
+                return new int[]{1, 2, 3, 0};
+        }
+    }
 
     private BlockState getSlabStateForFace(Block block, Direction face) {
         SlabType type=origin.getValue(SlabBlock.TYPE);
