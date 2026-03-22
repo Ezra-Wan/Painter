@@ -43,11 +43,11 @@ public class SlabBlockPaint extends AbstractPaint {
         registerFlag(Direction.DOWN, DOWN);
     }
 
-    @Override
-    protected void update() {
-        // 半砖不预生成 quads，因为依赖渲染时的方向
-        objects.clear();
-    }
+//    @Override
+//    protected void update() {
+//        // 半砖不预生成 quads，因为依赖渲染时的方向
+//        objects.clear();
+//    }
 
     @Override
     public void render(BlockEntity blockEntity, float partialTick, PoseStack poseStack,
@@ -73,53 +73,19 @@ public class SlabBlockPaint extends AbstractPaint {
         BitSet shapeFlags = new BitSet(3);
         ModModelRender.AmbientOcclusionFace aoFace = new ModModelRender.AmbientOcclusionFace();
 
-
-        BakedModel halfQuad;
         for (Direction dir : Direction.values()) {
             int flag = getFlag(dir);
             if (!RenderUtil.shouldRenderFace(origin, level, pos, dir, pos.relative(dir))) continue;
 
-            if (paintPaths.containsKey(flag)) {
-                Block block = RenderUtil.getBlockFromID(paintPaths.get(flag));
-                if (block instanceof SlabBlock) {
-                    BlockState slabState = getSlabStateForFace(block, dir);
-
-
-                    List<BakedQuad> quads = getQuadsForSlabState(slabState, dir, level, pos);
-                    if(dir==Direction.UP)
-                    {
-                        if(origin.getValue(SlabBlock.TYPE)==SlabType.BOTTOM)
-                        {
-                            quads=getQuadsForSlabState(slabState,null,level,pos);
-                        }
-                    }
-                    if (dir==Direction.DOWN)
-                    {
-                        if(origin.getValue(SlabBlock.TYPE)==SlabType.TOP)
-                        {
-                            quads=getQuadsForSlabState(slabState,null,level,pos);
-                        }
-                    }
-
-                    if (!quads.isEmpty()) {
-                        VertexConsumer consumer = bufferSource.getBuffer(renderType);
-                        renderQuadsWithAO(level, slabState, pos, quads, consumer, modRenderer, shape, shapeFlags, aoFace, poseStack, packedOverlay);
-                    }
-                }
-                else {
-
-                    List<BakedQuad> quads=new ArrayList<>();
-                    quads=createSlbaQuads(block,dir);
-
-
+            if (paintPaths.containsKey(flag)) {//如果存在伪装
+                    Block block = RenderUtil.getBlockFromID(paintPaths.get(flag));
+                    List<BakedQuad> quads= createSlabQuads(dir);
 
                     if (!quads.isEmpty()) {
                         VertexConsumer consumer = bufferSource.getBuffer(RenderType.cutout());
                         renderQuadsWithAO(level, block.defaultBlockState(), pos, quads, consumer, modRenderer, shape, shapeFlags, aoFace, poseStack, packedOverlay);
                     }
-                }
             } else {
-//                 无自定义：渲染原方块的面
                 random.setSeed(seed);
                 List<BakedQuad> quads = model.getQuads(origin, dir, random, ModelData.EMPTY, renderType);
 
@@ -141,19 +107,16 @@ public class SlabBlockPaint extends AbstractPaint {
                     VertexConsumer consumer = bufferSource.getBuffer(renderType);
                     renderQuadsWithAO(level, origin, pos, quads, consumer, modRenderer, shape, shapeFlags, aoFace, poseStack, packedOverlay);
                 }
-
-
             }
         }
-
         poseStack.popPose();
     }
 
-    private List<BakedQuad> createSlbaQuads(Block block,Direction direction)
-    {
-        BlockColors blockColors = Minecraft.getInstance().getBlockColors();
 
-        List<BakedQuad> originQuads=getQuadsForDirection(block,direction);
+    private List<BakedQuad> createSlabQuads(Direction direction)
+    {
+        int flag=getFlag(direction);
+        List<BakedQuad> originQuads=objects.get(flag);
         List<BakedQuad> quads=new ArrayList<>();
 
         for(BakedQuad originQuad:originQuads)
@@ -175,6 +138,7 @@ public class SlabBlockPaint extends AbstractPaint {
 
         float[][] positions;
 
+        //顺序：左上，左下，右下，右上
         switch (direction) {
             case DOWN -> positions = new float[][]{
                     {0, yMin, 1}, {0, yMin, 0}, {1, yMin, 0}, {1, yMin, 1}
@@ -183,8 +147,7 @@ public class SlabBlockPaint extends AbstractPaint {
                     {0, yMax, 0}, {0, yMax, 1}, {1, yMax, 1}, {1, yMax, 0}
             };
             case NORTH -> positions = new float[][]{
-                    {1, yMax, 0},{1, yMin, 0},{0, yMin, 0},{0, yMax, 0},
-//                    {1, yMax, 0}, {1, yMin, 0}, {0, yMin, 0}, {0, yMax, 0}
+                    {1, yMax, 0},{1, yMin, 0},{0, yMin, 0},{0, yMax, 0}
             };
             case SOUTH -> positions = new float[][]{
                     {0, yMax, 1}, {0, yMin, 1}, {1, yMin, 1}, {1, yMax, 1}
@@ -239,33 +202,9 @@ public class SlabBlockPaint extends AbstractPaint {
         int nz = (int) (z * 127);
         return (nx & 0xFF) | ((ny & 0xFF) << 8) | ((nz & 0xFF) << 16);
     }
-    private BlockState getSlabStateForFace(Block block, Direction face) {
-        SlabType type=origin.getValue(SlabBlock.TYPE);
-        BlockState defaultState = block.defaultBlockState();
-        if (defaultState.hasProperty(SlabBlock.TYPE)) {
-            return defaultState.setValue(SlabBlock.TYPE, type);
-        }
-        return defaultState;
-    }
-
     private List<BakedQuad> getQuadsForSlabState(BlockState state, Direction dir, Level level, BlockPos pos) {
         BakedModel model = Minecraft.getInstance().getModelManager().getBlockModelShaper().getBlockModel(state);
         RandomSource random = RandomSource.create();
         return model.getQuads(state, dir, random, ModelData.EMPTY, RenderUtil.getRenderType(state));
-    }
-
-    private void renderQuadsWithAO(Level level, BlockState state, BlockPos pos, List<BakedQuad> quads,
-                                   VertexConsumer consumer, ModModelRender modRenderer,
-                                   float[] shape, BitSet shapeFlags, ModModelRender.AmbientOcclusionFace aoFace,
-                                   PoseStack poseStack, int packedOverlay) {
-        for (BakedQuad quad : quads) {
-            modRenderer.calculateShape(level, state, pos, quad.getVertices(), quad.getDirection(), shape, shapeFlags);
-
-            aoFace.calculate(level, state, pos, quad.getDirection(), shape, shapeFlags, quad.isShade());
-            modRenderer.putQuadData(level, state, pos, consumer, poseStack.last(), quad,
-                    aoFace.brightness[0], aoFace.brightness[1], aoFace.brightness[2], aoFace.brightness[3],
-                    aoFace.lightmap[0], aoFace.lightmap[1], aoFace.lightmap[2], aoFace.lightmap[3],
-                    packedOverlay);
-        }
     }
 }
