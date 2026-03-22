@@ -121,7 +121,6 @@ public class SlabBlockPaint extends AbstractPaint {
                     BlockState slabState = getSlabStateForFace(block, dir);
 
 
-                    //TODO:处理半砖面的平滑光照
                     if (!quads.isEmpty()) {
                         VertexConsumer consumer = bufferSource.getBuffer(RenderType.cutout());
                         renderQuadsWithAO(level, slabState, pos, quads, consumer, modRenderer, shape, shapeFlags, aoFace, poseStack, packedOverlay);
@@ -167,7 +166,6 @@ public class SlabBlockPaint extends AbstractPaint {
 
         float[][] positions;
 
-        //TODO:处理北面半砖渲染压缩的问题
         switch (direction) {
             case DOWN -> positions = new float[][]{
                     {0, yMin, 0}, {1, yMin, 0}, {1, yMin, 1}, {0, yMin, 1}
@@ -176,13 +174,15 @@ public class SlabBlockPaint extends AbstractPaint {
                     {0, yMax, 1}, {1, yMax, 1}, {1, yMax, 0}, {0, yMax, 0}
             };
             case NORTH -> positions = new float[][]{
-                    {1, yMax, 0}, {1, yMin, 0}, {0, yMin, 0}, {0, yMax, 0}
+                    {1, yMin, 0},{0, yMin, 0},{0, yMax, 0},{1, yMax, 0},
+//                    {1, yMax, 0}, {1, yMin, 0}, {0, yMin, 0}, {0, yMax, 0}
             };
             case SOUTH -> positions = new float[][]{
                     {0, yMin, 1}, {1, yMin, 1}, {1, yMax, 1}, {0, yMax, 1}
             };
             case WEST -> positions = new float[][]{
                     {0, yMin, 0}, {0, yMin, 1}, {0, yMax, 1}, {0, yMax, 0}
+
             };
             case EAST -> positions = new float[][]{
                     {1, yMin, 1}, {1, yMin, 0}, {1, yMax, 0}, {1, yMax, 1}
@@ -194,7 +194,7 @@ public class SlabBlockPaint extends AbstractPaint {
         float u0 = sprite.getU0(), u1 = sprite.getU1();
         float v0 = sprite.getV0(), v1 = sprite.getV1();
         if (direction.getAxis().isHorizontal()) {
-            if (isTopSlab) {
+            if (!isTopSlab) {
                 v0 = sprite.getV0() + (sprite.getV1() - sprite.getV0()) * 0.5f; // 上半纹理
             } else {
                 v1 = sprite.getV0() + (sprite.getV1() - sprite.getV0()) * 0.5f; // 下半纹理
