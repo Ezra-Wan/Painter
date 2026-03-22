@@ -115,7 +115,7 @@ public class SlabBlockPaint extends AbstractPaint {
 
                     if (!quads.isEmpty()) {
                         VertexConsumer consumer = bufferSource.getBuffer(RenderType.cutout());
-                        renderQuadsWithAO(level, origin, pos, quads, consumer, modRenderer, shape, shapeFlags, aoFace, poseStack, packedOverlay);
+                        renderQuadsWithAO(level, block.defaultBlockState(), pos, quads, consumer, modRenderer, shape, shapeFlags, aoFace, poseStack, packedOverlay);
                     }
                 }
             } else {
@@ -160,7 +160,7 @@ public class SlabBlockPaint extends AbstractPaint {
         {
             TextureAtlasSprite sprite=originQuad.getSprite();
 
-            BakedQuad quad=createSlabQuad(sprite,direction);
+            BakedQuad quad=createSlabQuad(sprite,direction,originQuad.getTintIndex());
 
             quads.add(quad);
         }
@@ -168,7 +168,7 @@ public class SlabBlockPaint extends AbstractPaint {
         return quads;
     }
 
-    private BakedQuad createSlabQuad(TextureAtlasSprite sprite, Direction direction) {
+    private BakedQuad createSlabQuad(TextureAtlasSprite sprite, Direction direction,int tintIndex) {
         boolean isTopSlab = origin.getValue(SlabBlock.TYPE) == SlabType.TOP;
         float yMin = isTopSlab ? 0.5f : 0.0f;
         float yMax = isTopSlab ? 1.0f : 0.5f;
@@ -230,7 +230,7 @@ public class SlabBlockPaint extends AbstractPaint {
             vertexData[offset + 7] = packedNormal;
         }
 
-        return new BakedQuad(vertexData, -1, direction, sprite, true);
+        return new BakedQuad(vertexData,tintIndex, direction, sprite, true);
     }
     // 辅助方法：将法线向量打包为 int（与 DefaultVertexFormat 一致）
     private static int packNormal(float x, float y, float z) {
