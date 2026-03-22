@@ -123,7 +123,7 @@ public class SlabBlockPaint extends AbstractPaint {
 
                     if (!quads.isEmpty()) {
                         VertexConsumer consumer = bufferSource.getBuffer(RenderType.cutout());
-                        renderQuadsWithAO(level, slabState, pos, quads, consumer, modRenderer, shape, shapeFlags, aoFace, poseStack, packedOverlay);
+                        renderQuadsWithAO(level, origin, pos, quads, consumer, modRenderer, shape, shapeFlags, aoFace, poseStack, packedOverlay);
                     }
                 }
             } else {
@@ -168,24 +168,24 @@ public class SlabBlockPaint extends AbstractPaint {
 
         switch (direction) {
             case DOWN -> positions = new float[][]{
-                    {0, yMin, 0}, {1, yMin, 0}, {1, yMin, 1}, {0, yMin, 1}
+                    {0, yMin, 1}, {0, yMin, 0}, {1, yMin, 0}, {1, yMin, 1}
             };
             case UP -> positions = new float[][]{
-                    {0, yMax, 1}, {1, yMax, 1}, {1, yMax, 0}, {0, yMax, 0}
+                    {0, yMax, 0}, {0, yMax, 1}, {1, yMax, 1}, {1, yMax, 0}
             };
             case NORTH -> positions = new float[][]{
-                    {1, yMin, 0},{0, yMin, 0},{0, yMax, 0},{1, yMax, 0},
+                    {1, yMax, 0},{1, yMin, 0},{0, yMin, 0},{0, yMax, 0},
 //                    {1, yMax, 0}, {1, yMin, 0}, {0, yMin, 0}, {0, yMax, 0}
             };
             case SOUTH -> positions = new float[][]{
-                    {0, yMin, 1}, {1, yMin, 1}, {1, yMax, 1}, {0, yMax, 1}
+                    {0, yMax, 1}, {0, yMin, 1}, {1, yMin, 1}, {1, yMax, 1}
             };
             case WEST -> positions = new float[][]{
-                    {0, yMin, 0}, {0, yMin, 1}, {0, yMax, 1}, {0, yMax, 0}
+                    {0, yMax, 0}, {0, yMin, 0}, {0, yMin, 1}, {0, yMax, 1}
 
             };
             case EAST -> positions = new float[][]{
-                    {1, yMin, 1}, {1, yMin, 0}, {1, yMax, 0}, {1, yMax, 1}
+                    {1, yMax, 1}, {1, yMin, 1}, {1, yMin, 0}, {1, yMax, 0}
             };
             default -> throw new IllegalArgumentException("Invalid direction: " + direction);
         }
@@ -201,7 +201,7 @@ public class SlabBlockPaint extends AbstractPaint {
             }
         }
         float[][] uvs = {
-                {u0, v1}, {u1, v1}, {u1, v0}, {u0, v0}
+                {u0, v0}, {u0, v1}, {u1, v1}, {u1, v0}
         };
 
         // 打包法线
@@ -251,6 +251,7 @@ public class SlabBlockPaint extends AbstractPaint {
                                    PoseStack poseStack, int packedOverlay) {
         for (BakedQuad quad : quads) {
             modRenderer.calculateShape(level, state, pos, quad.getVertices(), quad.getDirection(), shape, shapeFlags);
+
             aoFace.calculate(level, state, pos, quad.getDirection(), shape, shapeFlags, quad.isShade());
             modRenderer.putQuadData(level, state, pos, consumer, poseStack.last(), quad,
                     aoFace.brightness[0], aoFace.brightness[1], aoFace.brightness[2], aoFace.brightness[3],
