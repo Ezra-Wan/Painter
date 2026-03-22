@@ -1,7 +1,5 @@
 package com.SouthernWall_404.Painter.API.Paint;
 
-import com.SouthernWall_404.Painter.Common.World.BlockEntity.PaintBlockEntity;
-import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.Minecraft;
@@ -20,7 +18,6 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.SlabBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.block.state.properties.Property;
 import net.minecraft.world.level.block.state.properties.SlabType;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.client.model.data.ModelData;
@@ -112,13 +109,8 @@ public class SlabBlockPaint extends AbstractPaint {
                 else {
 
                     List<BakedQuad> quads=new ArrayList<>();
-                    TextureAtlasSprite texture=RenderUtil.getFaceFromBlock(block.defaultBlockState(),dir);
+                    quads=createSlbaQuads(block,dir);
 
-                    BakedQuad quad=createSlabQuadManual(texture,dir);
-
-                    quads=List.of(quad);
-
-                    BlockState slabState = getSlabStateForFace(block, dir);
 
 
                     if (!quads.isEmpty()) {
@@ -157,9 +149,26 @@ public class SlabBlockPaint extends AbstractPaint {
         poseStack.popPose();
     }
 
+    private List<BakedQuad> createSlbaQuads(Block block,Direction direction)
+    {
+        BlockColors blockColors = Minecraft.getInstance().getBlockColors();
 
+        List<BakedQuad> originQuads=getQuadsForDirection(block,direction);
+        List<BakedQuad> quads=new ArrayList<>();
 
-    private BakedQuad createSlabQuadManual(TextureAtlasSprite sprite, Direction direction) {
+        for(BakedQuad originQuad:originQuads)
+        {
+            TextureAtlasSprite sprite=originQuad.getSprite();
+
+            BakedQuad quad=createSlabQuad(sprite,direction);
+
+            quads.add(quad);
+        }
+
+        return quads;
+    }
+
+    private BakedQuad createSlabQuad(TextureAtlasSprite sprite, Direction direction) {
         boolean isTopSlab = origin.getValue(SlabBlock.TYPE) == SlabType.TOP;
         float yMin = isTopSlab ? 0.5f : 0.0f;
         float yMax = isTopSlab ? 1.0f : 0.5f;
