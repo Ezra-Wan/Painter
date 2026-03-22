@@ -1,7 +1,6 @@
 package com.SouthernWall_404.Painter.Common.World.BlockEntity;
 
-import com.SouthernWall_404.Painter.API.Paint.AbstractRender;
-import com.SouthernWall_404.Painter.API.Paint.IRender;
+import com.SouthernWall_404.Painter.API.Paint.API.AbstractRender;
 import com.SouthernWall_404.Painter.API.Paint.PaintContent;
 import com.SouthernWall_404.Painter.Common.Init.ModBlockEntities;
 import net.minecraft.core.BlockPos;
@@ -15,7 +14,6 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
-import org.checkerframework.checker.units.qual.A;
 
 public class PaintBlockEntity extends BlockEntity {
 

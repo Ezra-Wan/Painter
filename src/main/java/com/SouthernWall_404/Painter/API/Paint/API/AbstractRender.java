@@ -1,5 +1,6 @@
-package com.SouthernWall_404.Painter.API.Paint;
+package com.SouthernWall_404.Painter.API.Paint.API;
 
+import com.SouthernWall_404.Painter.API.Paint.Util.RenderUtil;
 import com.mojang.serialization.DataResult;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
@@ -76,7 +77,7 @@ public abstract class AbstractRender<T,F extends Object> implements IRender<T> {
     public void putRenderBlock(Object object, Block block) {
         int flag=getFlag(object);
 
-        ResourceLocation key=RenderUtil.getBlockKey(block);
+        ResourceLocation key= RenderUtil.getBlockKey(block);
 
         putRenderObject(flag,key);
     }

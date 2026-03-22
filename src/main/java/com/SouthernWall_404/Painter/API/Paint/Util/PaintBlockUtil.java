@@ -1,13 +1,13 @@
-package com.SouthernWall_404.Painter.API.Paint;
+package com.SouthernWall_404.Painter.API.Paint.Util;
 
+import com.SouthernWall_404.Painter.API.Paint.API.AbstractRender;
+import com.SouthernWall_404.Painter.API.Paint.Imply.SimpleBlockPaint;
+import com.SouthernWall_404.Painter.API.Paint.Imply.SlabBlockPaint;
 import com.SouthernWall_404.Painter.Common.Init.ModBlock;
-import com.SouthernWall_404.Painter.Common.Network.ModChannels;
-import com.SouthernWall_404.Painter.Common.Network.S2C.RenderS2CPacket;
 import com.SouthernWall_404.Painter.Common.World.Block.PaintBlock;
 import com.SouthernWall_404.Painter.Common.World.BlockEntity.PaintBlockEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BlockItem;
@@ -18,7 +18,7 @@ import net.minecraft.world.level.block.SlabBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 
-public class PaintBlockAPI {
+public class PaintBlockUtil {
 
 
     public static void placeARender(Level level, BlockPos blockPos, Player player, Direction direction)
@@ -26,7 +26,7 @@ public class PaintBlockAPI {
         BlockState origin=level.getBlockState(blockPos);
         if(origin.getBlock() instanceof PaintBlock)
         {
-            AbstractRender render=RenderUtil.getRender(level,blockPos);
+            AbstractRender render= RenderUtil.getRender(level,blockPos);
 
             ItemStack itemStack=player.getItemInHand(InteractionHand.OFF_HAND);
             if(itemStack.getItem() instanceof BlockItem item)
@@ -69,10 +69,5 @@ public class PaintBlockAPI {
             paintBlockEntity.init(render);
         }
 
-    }
-
-    public static void syncToClient(BlockEntity blockEntity, Player player)
-    {
-        ModChannels.sendToClient(new RenderS2CPacket(blockEntity.getUpdateTag(null),blockEntity.getBlockPos()),(ServerPlayer)player);
     }
 }

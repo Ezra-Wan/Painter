@@ -1,4 +1,4 @@
-package com.SouthernWall_404.Painter.API.Paint;
+package com.SouthernWall_404.Painter.API.Paint.API;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.renderer.MultiBufferSource;

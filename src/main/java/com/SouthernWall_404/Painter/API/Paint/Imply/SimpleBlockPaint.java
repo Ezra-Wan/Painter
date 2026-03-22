@@ -1,38 +1,26 @@
-package com.SouthernWall_404.Painter.API.Paint;
+package com.SouthernWall_404.Painter.API.Paint.Imply;
 
-import com.SouthernWall_404.Painter.Common.Init.ModBlock;
-import com.SouthernWall_404.Painter.Common.World.BlockEntity.PaintBlockEntity;
+import com.SouthernWall_404.Painter.API.Paint.API.AbstractPaint;
+import com.SouthernWall_404.Painter.API.Paint.ModModelRender;
+import com.SouthernWall_404.Painter.API.Paint.PaintContent;
+import com.SouthernWall_404.Painter.API.Paint.Util.RenderUtil;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.Options;
 import net.minecraft.client.color.block.BlockColors;
-import net.minecraft.client.gui.screens.PauseScreen;
-import net.minecraft.client.gui.screens.options.OptionsScreen;
-import net.minecraft.client.gui.screens.options.VideoSettingsScreen;
-import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.block.BlockRenderDispatcher;
-import net.minecraft.client.renderer.block.ModelBlockRenderer;
 import net.minecraft.client.renderer.block.model.BakedQuad;
-import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.Vec3i;
-import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.client.model.data.ModelData;
-import net.neoforged.neoforge.common.IShearable;
-import org.joml.Vector2d;
 
 import java.util.*;
 

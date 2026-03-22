@@ -40,7 +40,7 @@ import net.neoforged.neoforge.client.model.data.ModelData;
 public class ModModelRender {
     private static final int FACE_CUBIC = 0;
     private static final int FACE_PARTIAL = 1;
-    static final Direction[] DIRECTIONS = Direction.values();
+    public static final Direction[] DIRECTIONS = Direction.values();
     private final BlockColors blockColors;
     private static final int CACHE_SIZE = 100;
     static final ThreadLocal<Cache> CACHE = ThreadLocal.withInitial(Cache::new);
@@ -339,8 +339,8 @@ public class ModModelRender {
 
     @OnlyIn(Dist.CLIENT)
     public static class AmbientOcclusionFace {
-        final float[] brightness = new float[4];
-        final int[] lightmap = new int[4];
+        public final float[] brightness = new float[4];
+        public final int[] lightmap = new int[4];
 
         public AmbientOcclusionFace() {
         }

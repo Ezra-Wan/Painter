@@ -1,5 +1,9 @@
-package com.SouthernWall_404.Painter.API.Paint;
+package com.SouthernWall_404.Painter.API.Paint.Imply;
 
+import com.SouthernWall_404.Painter.API.Paint.API.AbstractPaint;
+import com.SouthernWall_404.Painter.API.Paint.ModModelRender;
+import com.SouthernWall_404.Painter.API.Paint.PaintContent;
+import com.SouthernWall_404.Painter.API.Paint.Util.RenderUtil;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.Minecraft;

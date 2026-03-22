@@ -1,5 +1,7 @@
-package com.SouthernWall_404.Painter.API.Paint;
+package com.SouthernWall_404.Painter.API.Paint.Util;
 
+import com.SouthernWall_404.Painter.API.Paint.API.AbstractRender;
+import com.SouthernWall_404.Painter.API.Paint.Imply.SimpleBlockPaint;
 import com.SouthernWall_404.Painter.Common.World.Block.PaintBlock;
 import com.SouthernWall_404.Painter.Common.World.BlockEntity.PaintBlockEntity;
 import it.unimi.dsi.fastutil.objects.Object2ByteLinkedOpenHashMap;
@@ -147,7 +149,7 @@ private static final ThreadLocal<Object2ByteLinkedOpenHashMap<Block.BlockStatePa
         return getQuads(state, direction, RenderUtil.getRenderType(state));
     }
 
-    public static AbstractRender getRender(Level level,BlockPos blockPos)
+    public static AbstractRender getRender(Level level, BlockPos blockPos)
     {
         BlockEntity blockEntity=level.getBlockEntity(blockPos);
         AbstractRender render=new SimpleBlockPaint();
