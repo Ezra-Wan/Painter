@@ -133,8 +133,34 @@ public class SlabBlockPaint extends AbstractPaint {
 
     private BakedQuad createSlabQuad(TextureAtlasSprite sprite, Direction direction,int tintIndex) {
         boolean isTopSlab = origin.getValue(SlabBlock.TYPE) == SlabType.TOP;
-        float yMin = isTopSlab ? 0.5f : 0.0f;
-        float yMax = isTopSlab ? 1.0f : 0.5f;
+
+        SlabType slabType=origin.getValue(SlabBlock.TYPE);
+        float yMin;
+        float yMax;
+//        float yMin = isTopSlab ? 0.5f : 0.0f;
+//        float yMax = isTopSlab ? 1.0f : 0.5f;
+
+        switch (slabType){
+            case SlabType.TOP -> {
+                yMin=0.5f;
+                yMax=1.0f;
+                break;
+            }
+            case SlabType.BOTTOM -> {
+                yMin=0.0f;
+                yMax=0.5f;
+                break;
+            }
+            case SlabType.DOUBLE -> {
+                yMin=0.0f;
+                yMax=1.0f;
+                break;
+            }
+            default -> {
+                return null;
+            }
+        }
+
 
         float[][] positions;
 
@@ -166,11 +192,30 @@ public class SlabBlockPaint extends AbstractPaint {
         float u0 = sprite.getU0(), u1 = sprite.getU1();
         float v0 = sprite.getV0(), v1 = sprite.getV1();
         if (direction.getAxis().isHorizontal()) {
-            if (!isTopSlab) {
-                v0 = sprite.getV0() + (sprite.getV1() - sprite.getV0()) * 0.5f; // 上半纹理
-            } else {
-                v1 = sprite.getV0() + (sprite.getV1() - sprite.getV0()) * 0.5f; // 下半纹理
+
+
+            switch (slabType){
+                case SlabType.TOP -> {
+                    v1 = sprite.getV0() + (sprite.getV1() - sprite.getV0()) * 0.5f; // 下半纹理
+                    break;
+                }
+                case SlabType.BOTTOM -> {
+                    v0 = sprite.getV0() + (sprite.getV1() - sprite.getV0()) * 0.5f; // 上半纹理
+                    break;
+                }
+                case SlabType.DOUBLE -> {
+                    break;
+                }
+                default -> {
+                    return null;
+                }
             }
+
+//            if (!isTopSlab) {
+//                v0 = sprite.getV0() + (sprite.getV1() - sprite.getV0()) * 0.5f; // 上半纹理
+//            } else {
+//                v1 = sprite.getV0() + (sprite.getV1() - sprite.getV0()) * 0.5f; // 下半纹理
+//            }
         }
         float[][] uvs = {
                 {u0, v0}, {u0, v1}, {u1, v1}, {u1, v0}
