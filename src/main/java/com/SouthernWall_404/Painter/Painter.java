@@ -20,6 +20,7 @@ public class Painter {
 
         ModItems.ITEMS.register(modEventBus);
         ModCreativeModeTab.CREATIVE_TABS.register(modEventBus);
+        ModAttachments.ATTACHMENT_TYPES.register(modEventBus);
 
         NeoForge.EVENT_BUS.register(BlockEvent.class);
     }
