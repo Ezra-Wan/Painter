@@ -46,10 +46,7 @@ public class SelectedZone{
         Direction.Axis axis=direction.getAxis();
         if(pos.get(axis)==A.get(axis))//是同一平面
         {
-            if(A.distToCenterSqr(pos.getX(),pos.getY(),pos.getZ())<=30||
-                    B.distToCenterSqr(pos.getX(),pos.getY(),pos.getZ())<=30||
-                    contains(pos)
-            )//检测范围向外延展30格
+            if(contains(pos))
             {
                 return true;
             }//超出则判定不在同一截面
@@ -58,18 +55,18 @@ public class SelectedZone{
         return false;
     }
 
-    public boolean isValid(BlockPos a, BlockPos b, Direction face)
+    public String isValid(BlockPos b)
     {
-        if(face==null)
+        if(this.face==null||this.A==null)
         {
-            return false;
+            return ToolContent.EMPTY_POSA;
         }
         Direction.Axis axis=face.getAxis();
-        if(a.get(axis)==b.get(axis))//若为同层
+        if(this.A.get(axis)==b.get(axis))//若为同层
         {
-            return true;
+            return ToolContent.PASS;
         }else {//不为同层
-            return false;
+            return ToolContent.NOT_IN_SURFACE;
         }
     }
 
@@ -93,15 +90,16 @@ public class SelectedZone{
         this.face=face;
     }
 
-    public boolean setB(BlockPos b)
+    public String setB(BlockPos b)
     {
-        if(isValid(this.A,b,this.face))
+        String result=isValid(b);
+        if(result==ToolContent.PASS)
         {
             this.B=b;
 
-            return true;//表示设置成功
         }
-        return false;//表示设置失败
+
+        return result;//表示设置成功
     }
 
     public boolean contains(BlockPos pos)
@@ -141,5 +139,7 @@ public class SelectedZone{
         A=null;
         B=null;
         face=null;
+
+
     }
 }

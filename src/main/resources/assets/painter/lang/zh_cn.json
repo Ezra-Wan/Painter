@@ -1,4 +1,23 @@
 {
+
+  "painter.direction.east": "东面",
+  "painter.direction.west": "西面",
+  "painter.direction.north": "北面",
+  "painter.direction.south": "南面",
+  "painter.direction.up": "上方",
+  "painter.direction.down": "下方",
+
+
+  "itemGroup.painter": "粉刷匠人",
+
   "item.painter.brush": "油漆刷",
-  "itemGroup.painter": "粉刷匠人"
+  "item.painter.chulk": "粉笔",
+
+  "painter.message.clear": "选区已清除！",
+  "painter.message.select_a": "第一选取点设置为[%s,%s,%s]，方向为%s",
+  "painter.message.select_b.pass": "第二选取点设置为[%s,%s,%s]",
+  "painter.message.select_b.missing_a": "第一选取点未设置",
+  "painter.message.select_b.not_in_surface": "不在已选取的墙面上",
+
+  "painter.message.failed_to_paint.out_of_range": "超出选区范围，左键以移除选区"
 }

@@ -1,7 +1,6 @@
 package com.SouthernWall_404.Painter.Common.Init;
 
 import com.SouthernWall_404.Painter.API.Tool.SelectedZone;
-import com.SouthernWall_404.Painter.API.Tool.SelectedZoneCodec;
 import com.SouthernWall_404.Painter.Painter;
 import net.neoforged.neoforge.attachment.AttachmentType;
 import net.neoforged.neoforge.registries.DeferredRegister;

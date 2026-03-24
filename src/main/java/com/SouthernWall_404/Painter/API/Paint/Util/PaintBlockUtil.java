@@ -24,50 +24,75 @@ public class PaintBlockUtil {
     public static void placeARender(Level level, BlockPos blockPos, Player player, Direction direction)
     {
         BlockState origin=level.getBlockState(blockPos);
-        if(origin.getBlock() instanceof PaintBlock)
+
+        if(origin.getBlock() instanceof PaintBlock)//如果对象是已经是渲染方块
         {
             AbstractRender render= RenderUtil.getRender(level,blockPos);
 
-            ItemStack itemStack=player.getItemInHand(InteractionHand.OFF_HAND);
+            ItemStack itemStack=player.getItemInHand(InteractionHand.OFF_HAND);//添加副手的方块
             if(itemStack.getItem() instanceof BlockItem item)
             {
                 Block block=item.getBlock();
-                render.putRenderBlock(direction,block);
+
+                if(!block.defaultBlockState().isCollisionShapeFullBlock(level,blockPos))//如果不是完整方块
+                {
+                    return;//不允许填充
+                }
+                render.putRenderBlock(direction,block);//放置新的渲染面
 
                 BlockEntity blockEntity=level.getBlockEntity(blockPos);
                 if(blockEntity instanceof PaintBlockEntity paintBlockEntity)
                 {
-                    paintBlockEntity.setRender(render);
+                    paintBlockEntity.setRender(render);//更新
                 }
             }
             return;
         }
+        //如果不是渲染方块
+        if(isPaintable(origin,level,blockPos))//只在是可粉刷方块时进行响应
+        {
+            AbstractRender render=new SimpleBlockPaint(origin);//默认普通方块
 
-        //建立render
+            if(origin.getBlock() instanceof SlabBlock)//如果是台阶
+            {
+                render=new SlabBlockPaint(origin);//修改为台阶渲染
+            }
+            ItemStack itemStack=player.getItemInHand(InteractionHand.OFF_HAND);
+            if(itemStack.getItem() instanceof BlockItem item)
+            {
+                Block block=item.getBlock();
+                if(!block.defaultBlockState().isCollisionShapeFullBlock(level,blockPos))//如果不是完整方块
+                {
+                    return;//不允许填充
+                }
+                render.putRenderBlock(direction,block);
+            }
 
-        AbstractRender render=new SimpleBlockPaint(origin);
+            BlockState renderBlock=ModBlock.RENDER_BEDROCK.get().defaultBlockState();//放置渲染方块
+            level.setBlock(blockPos,renderBlock,3);//放置
 
+            BlockEntity blockEntity=level.getBlockEntity(blockPos);
+            if(blockEntity instanceof PaintBlockEntity paintBlockEntity)
+            {
+                paintBlockEntity.init(render);//引入Render
+            }
+        }
+
+
+
+    }
+
+    public static boolean isPaintable(BlockState origin,Level level,BlockPos blockPos)
+    {
+        if (origin.isCollisionShapeFullBlock(level,blockPos))
+        {
+            return true;//完整方块可行
+        }
         if(origin.getBlock() instanceof SlabBlock)
         {
-            render=new SlabBlockPaint(origin);
-        }
-        ItemStack itemStack=player.getItemInHand(InteractionHand.OFF_HAND);
-        if(itemStack.getItem() instanceof BlockItem item)
-        {
-            Block block=item.getBlock();
-
-
-            render.putRenderBlock(direction,block);
+            return true;//半砖可行
         }
 
-        BlockState renderBlock=ModBlock.RENDER_BEDROCK.get().defaultBlockState();
-        level.setBlock(blockPos,renderBlock,3);
-
-        BlockEntity blockEntity=level.getBlockEntity(blockPos);
-        if(blockEntity instanceof PaintBlockEntity paintBlockEntity)
-        {
-            paintBlockEntity.init(render);
-        }
-
+        return false;
     }
 }
