@@ -21,7 +21,7 @@ import net.minecraft.world.level.block.state.BlockState;
 public class PaintBlockUtil {
 
 
-    public static void placeARender(Level level, BlockPos blockPos, Player player, Direction direction)
+    public static void paint(Level level, BlockPos blockPos, Player player, Direction direction)
     {
         BlockState origin=level.getBlockState(blockPos);
 
