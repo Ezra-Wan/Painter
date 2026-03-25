@@ -3,8 +3,11 @@ package com.SouthernWall_404.Painter.Common.Event;
 import com.SouthernWall_404.Painter.API.Paint.Util.PaintBlockUtil;
 import com.SouthernWall_404.Painter.API.Tool.SelectedZone;
 import com.SouthernWall_404.Painter.API.Tool.ToolContent;
+import com.SouthernWall_404.Painter.API.Tool.Wall.Filters.EmptyFilter;
+import com.SouthernWall_404.Painter.API.Tool.Wall.WallUtil;
 import com.SouthernWall_404.Painter.Common.Init.ModAttachments;
 import com.SouthernWall_404.Painter.Common.World.Item.ChulkItem;
+import com.SouthernWall_404.Painter.Common.World.Item.PaintBucketItem;
 import com.SouthernWall_404.Painter.Common.World.Item.PaintItem;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
@@ -61,8 +64,7 @@ public class BlockEvent {
 
         }
 
-        else if (item instanceof ChulkItem chulkItem)
-        {
+        else if (item instanceof ChulkItem chulkItem) {
             SelectedZone selectedZone=player.getData(ModAttachments.SELECTED_ZONE);
             if(selectedZone!=null)
             {
@@ -94,6 +96,29 @@ public class BlockEvent {
             }
 
             event.setCanceled(true);
+        }
+
+        else if (item instanceof PaintBucketItem paintBucketItem)
+        {
+            event.setCanceled(true);
+            SelectedZone selectedZone=player.getData(ModAttachments.SELECTED_ZONE);
+
+            if(selectedZone!=null)
+            {
+                if(selectedZone.isSelecting())
+                {
+
+                }else {
+
+                    Item itemToPaint=player.getItemInHand(InteractionHand.OFF_HAND).getItem();
+                    if(itemToPaint instanceof BlockItem blockItem)
+                    {
+                        WallUtil.paintOnWall(blockPos,event.getFace(),player,level,blockItem.getBlock().defaultBlockState(),new EmptyFilter());
+                    }
+
+
+                }
+            }
         }
     }
 

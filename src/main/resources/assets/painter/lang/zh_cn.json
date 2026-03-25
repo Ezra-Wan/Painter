@@ -12,6 +12,7 @@
 
   "item.painter.brush": "油漆刷",
   "item.painter.chulk": "粉笔",
+"  item.painter.paint_bucket": "油漆桶",
 
   "painter.message.clear": "选区已清除！",
   "painter.message.select_a": "第一选取点设置为[%s,%s,%s]，方向为%s",

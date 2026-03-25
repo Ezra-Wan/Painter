@@ -17,6 +17,9 @@ import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
+import net.neoforged.fml.loading.FMLEnvironment;
 import net.neoforged.neoforge.client.model.data.ModelData;
 
 import java.util.BitSet;
@@ -32,9 +35,14 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>,Direc
     }
 
     //========内部方法========
-
+    @OnlyIn(Dist.CLIENT)
     @Override
     protected void update() {
+
+        if(Minecraft.getInstance()==null)
+        {
+            return;
+        }
         for(Map.Entry<Integer,ResourceLocation> entry:paintPaths.entrySet())
         {
             int flag=entry.getKey();

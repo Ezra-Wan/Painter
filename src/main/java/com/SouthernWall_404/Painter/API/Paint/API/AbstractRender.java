@@ -9,6 +9,8 @@ import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 import org.jetbrains.annotations.UnknownNullability;
 
 import java.util.HashMap;
@@ -63,6 +65,8 @@ public abstract class AbstractRender<T,F extends Object> implements IRender<T> {
         }
     }
 
+
+    @OnlyIn(Dist.CLIENT)
     protected abstract void update();
 
     //========业务方法========

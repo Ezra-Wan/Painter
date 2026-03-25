@@ -2,6 +2,7 @@ package com.SouthernWall_404.Painter.Common.Init;
 
 
 import com.SouthernWall_404.Painter.Common.World.Item.ChulkItem;
+import com.SouthernWall_404.Painter.Common.World.Item.PaintBucketItem;
 import com.SouthernWall_404.Painter.Common.World.Item.PaintItem;
 import com.SouthernWall_404.Painter.Painter;
 import com.google.common.collect.Sets;
@@ -36,6 +37,10 @@ public class ModItems {
 
     public static final DeferredItem<Item> CHULK=registerWithTab("chulk",
             ()->new ChulkItem(new Item.Properties().rarity(Rarity.UNCOMMON).stacksTo(1))
+    );
+
+    public static final DeferredItem<Item> PAINT_BUCKET=registerWithTab("paint_bucket",
+            ()->new PaintBucketItem(new Item.Properties().rarity(Rarity.UNCOMMON).stacksTo(1))
     );
     static {
 

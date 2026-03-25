@@ -20,8 +20,24 @@ import net.minecraft.world.level.block.state.BlockState;
 
 public class PaintBlockUtil {
 
-
     public static void paint(Level level, BlockPos blockPos, Player player, Direction direction)
+    {
+        ItemStack itemStack=player.getItemInHand(InteractionHand.OFF_HAND);//添加副手的方块
+        if(itemStack.getItem() instanceof BlockItem item)
+        {
+            if(item instanceof BlockItem blockItem)
+            {
+                Block block=blockItem.getBlock();
+                if(!block.defaultBlockState().isCollisionShapeFullBlock(level,blockPos))//如果不是完整方块
+                {
+                    return;//不允许填充
+                }else {
+                    paint(level,blockPos,direction,block.defaultBlockState());
+                }
+            }
+        }
+    }
+    public static void paint(Level level, BlockPos blockPos, Direction direction,BlockState paint)
     {
         BlockState origin=level.getBlockState(blockPos);
 
@@ -29,22 +45,12 @@ public class PaintBlockUtil {
         {
             AbstractRender render= RenderUtil.getRender(level,blockPos);
 
-            ItemStack itemStack=player.getItemInHand(InteractionHand.OFF_HAND);//添加副手的方块
-            if(itemStack.getItem() instanceof BlockItem item)
+            render.putRenderBlock(direction,paint.getBlock());//放置新的渲染面
+
+            BlockEntity blockEntity=level.getBlockEntity(blockPos);
+            if(blockEntity instanceof PaintBlockEntity paintBlockEntity)
             {
-                Block block=item.getBlock();
-
-                if(!block.defaultBlockState().isCollisionShapeFullBlock(level,blockPos))//如果不是完整方块
-                {
-                    return;//不允许填充
-                }
-                render.putRenderBlock(direction,block);//放置新的渲染面
-
-                BlockEntity blockEntity=level.getBlockEntity(blockPos);
-                if(blockEntity instanceof PaintBlockEntity paintBlockEntity)
-                {
-                    paintBlockEntity.setRender(render);//更新
-                }
+                paintBlockEntity.setRender(render);//更新
             }
             return;
         }
@@ -57,16 +63,8 @@ public class PaintBlockUtil {
             {
                 render=new SlabBlockPaint(origin);//修改为台阶渲染
             }
-            ItemStack itemStack=player.getItemInHand(InteractionHand.OFF_HAND);
-            if(itemStack.getItem() instanceof BlockItem item)
-            {
-                Block block=item.getBlock();
-                if(!block.defaultBlockState().isCollisionShapeFullBlock(level,blockPos))//如果不是完整方块
-                {
-                    return;//不允许填充
-                }
-                render.putRenderBlock(direction,block);
-            }
+
+            render.putRenderBlock(direction,paint.getBlock());
 
             BlockState renderBlock=ModBlock.RENDER_BEDROCK.get().defaultBlockState();//放置渲染方块
             level.setBlock(blockPos,renderBlock,3);//放置
