@@ -82,6 +82,10 @@ public class PaintBlockUtil {
 
     public static boolean isPaintable(BlockState origin,Level level,BlockPos blockPos)
     {
+        if(origin.getBlock()instanceof PaintBlock)
+        {
+            return true;
+        }
         if (origin.isCollisionShapeFullBlock(level,blockPos))
         {
             return true;//完整方块可行
