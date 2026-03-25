@@ -111,10 +111,10 @@ public class BlockEvent {
             if(selectedZone!=null)
             {
                 List<IFilter> filters=new ArrayList<>();
-                filters.add(new SelectFilter());
+                filters.add(new EmptyFilter());
                 if(selectedZone.isSelecting())
                 {
-//                    filters.add(new SelectFilter());
+                    filters.add(new SelectFilter());
 
                 }else {
 

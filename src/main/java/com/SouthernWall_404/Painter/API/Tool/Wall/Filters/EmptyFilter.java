@@ -26,10 +26,10 @@ public class EmptyFilter implements IFilter {
             return false;
         }
 
-//        if(!RenderUtil.shouldRenderFace(level,pos,blockState,face))
-//        {
-//            return false;
-//        }
+        if(!RenderUtil.shouldRenderFace(level,pos,blockState,face))
+        {
+            return false;
+        }
         return true;//不论如何，什么影响都没有
     }
 }

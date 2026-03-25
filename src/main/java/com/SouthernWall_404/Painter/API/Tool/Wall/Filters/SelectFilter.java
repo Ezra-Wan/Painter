@@ -20,7 +20,12 @@ public class SelectFilter extends EmptyFilter {
         SelectedZone selectedZone=player.getData(ModAttachments.SELECTED_ZONE);
         if(selectedZone!=null)
         {
-            if(selectedZone.isSelecting()&&selectedZone.isInSurface(pos,face)) {//如果存在选区,且在同一平面
+            if(selectedZone.isSelecting()) {//如果存在选区,且在同一平面
+
+                if(!selectedZone.isInSurface(pos,face))
+                {
+                    return false;
+                }
                 if (selectedZone.contains(pos))
                 {
                     return super.check(pos,player,face);
