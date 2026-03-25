@@ -10,6 +10,7 @@ import net.minecraft.network.Connection;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -19,6 +20,7 @@ public class PaintBlockEntity extends BlockEntity {
 
     //========需要持久化的数据========
     private AbstractRender render;//渲染实例
+    private RandomSource randomSource=RandomSource.create();
 
     //========构造方法=========
     public PaintBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState blockState) {

@@ -64,7 +64,7 @@ public class WallUtil {
             boolean isAllowed=true;
             for(IFilter filter:filters)//遍历所有筛选项
             {
-                if(!filter.check(currentState,current, level, face))//只要有一个不满足，则终止继续蔓延
+                if(!filter.check(current,player,face))//只要有一个不满足，则终止继续蔓延
                 {
                     isAllowed=false;
                 }

@@ -4,6 +4,8 @@ import com.SouthernWall_404.Painter.API.Paint.Util.PaintBlockUtil;
 import com.SouthernWall_404.Painter.API.Tool.SelectedZone;
 import com.SouthernWall_404.Painter.API.Tool.ToolContent;
 import com.SouthernWall_404.Painter.API.Tool.Wall.Filters.EmptyFilter;
+import com.SouthernWall_404.Painter.API.Tool.Wall.Filters.SelectFilter;
+import com.SouthernWall_404.Painter.API.Tool.Wall.IFilter;
 import com.SouthernWall_404.Painter.API.Tool.Wall.WallUtil;
 import com.SouthernWall_404.Painter.Common.Init.ModAttachments;
 import com.SouthernWall_404.Painter.Common.World.Item.ChulkItem;
@@ -21,6 +23,9 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class BlockEvent {
 
@@ -105,19 +110,24 @@ public class BlockEvent {
 
             if(selectedZone!=null)
             {
+                List<IFilter> filters=new ArrayList<>();
+                filters.add(new SelectFilter());
                 if(selectedZone.isSelecting())
                 {
+//                    filters.add(new SelectFilter());
 
                 }else {
 
-                    Item itemToPaint=player.getItemInHand(InteractionHand.OFF_HAND).getItem();
-                    if(itemToPaint instanceof BlockItem blockItem)
-                    {
-                        WallUtil.paintOnWall(blockPos,event.getFace(),player,level,blockItem.getBlock().defaultBlockState(),new EmptyFilter());
-                    }
 
 
                 }
+
+                Item itemToPaint=player.getItemInHand(InteractionHand.OFF_HAND).getItem();
+                if(itemToPaint instanceof BlockItem blockItem)
+                {
+                    WallUtil.paintOnWall(blockPos,event.getFace(),player,level,blockItem.getBlock().defaultBlockState(),filters);
+                }
+
             }
         }
     }
