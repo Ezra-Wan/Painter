@@ -22,7 +22,12 @@ public class WallUtil {
      * @param paint  需要喷涂的方块状态
      * @param filter 过滤器，决定哪些方块可以被喷涂并继续扩散
      */
+
     public static void paintOnWall(BlockPos pos, Direction face, Player player, Level level, BlockState paint, IFilter filter) {
+        paintOnWall(pos,face,player,level,paint,List.of(filter));
+    }
+
+    public static void paintOnWall(BlockPos pos, Direction face, Player player, Level level, BlockState paint, List<IFilter> filters) {
         // 队列用于 BFS
         Queue<BlockPos> queue = new LinkedList<>();
         // 记录已处理过的方块，避免重复
@@ -55,9 +60,20 @@ public class WallUtil {
             BlockState currentState = level.getBlockState(current);
             // 检查当前方块是否符合喷涂条件
 
-            if (filter.check(currentState,current, level, face)) {
 
-                PaintBlockUtil.paint(level,current,player,face);
+            boolean isAllowed=true;
+            for(IFilter filter:filters)//遍历所有筛选项
+            {
+                if(!filter.check(currentState,current, level, face))//只要有一个不满足，则终止继续蔓延
+                {
+                    isAllowed=false;
+                }
+            }
+
+            if(isAllowed)
+            {
+                //如果所有筛选项均满足
+                PaintBlockUtil.paint(level,current,player,face);//执行喷涂
 
                 // 向墙面内的四个方向扩散
                 for (Direction wallDir : wallDirs) {
@@ -67,8 +83,9 @@ public class WallUtil {
                         queue.offer(neighbor);
                     }
                 }
+                // 如果当前方块不符合条件，则不再从它向外扩散
             }
-            // 如果当前方块不符合条件，则不再从它向外扩散
+
         }
     }
 
