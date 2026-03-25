@@ -105,13 +105,13 @@ private static final ThreadLocal<Object2ByteLinkedOpenHashMap<Block.BlockStatePa
         Minecraft mc = Minecraft.getInstance();
         BlockRenderDispatcher dispatcher = mc.getBlockRenderer();
 
-        try {
-            // 获取方块模型使用的渲染类型
-            var model = dispatcher.getBlockModel(state);
-            if(model==null){
-                return RenderType.solid();
-            }
-            var renderTypes = model.getRenderTypes(state,RandomSource.create(), ModelData.EMPTY);
+            try {
+                // 获取方块模型使用的渲染类型
+                var model = dispatcher.getBlockModel(state);
+                if(model==null){
+                    return RenderType.solid();
+                }
+                var renderTypes = model.getRenderTypes(state,mc.level.random, ModelData.EMPTY);
 
             // 返回第一个非空的渲染类型
             if (renderTypes != null) {

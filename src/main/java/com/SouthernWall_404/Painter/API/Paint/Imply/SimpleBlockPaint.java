@@ -55,7 +55,7 @@ public class SimpleBlockPaint extends AbstractPaint {
     @Override
     public void render(BlockEntity blockEntity, float partialTick, PoseStack poseStack,
                        MultiBufferSource bufferSource, int packedLight, int packedOverlay) {
-        update();
+//        update();
         if (origin == null) return;
 
         Level level = blockEntity.getLevel();
