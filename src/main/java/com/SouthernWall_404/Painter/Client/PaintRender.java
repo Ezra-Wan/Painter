@@ -29,6 +29,12 @@ public class PaintRender implements BlockEntityRenderer<PaintBlockEntity> {
     public PaintRender(BlockEntityRendererProvider.Context context) {
     }
 
+
+    @Override
+    public int getViewDistance() {
+
+        return Minecraft.getInstance().options.renderDistance().get()*16;
+    }
     @Override
     public void render(PaintBlockEntity blockEntity, float partialTick, PoseStack poseStack,
                        MultiBufferSource bufferSource, int packedLight, int packedOverlay) {
