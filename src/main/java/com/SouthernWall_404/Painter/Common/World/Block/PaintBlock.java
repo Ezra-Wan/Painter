@@ -54,6 +54,7 @@ public class PaintBlock extends Block implements EntityBlock {
         return null;
     }
 
+
     // ===== 获取伪装状态 =====
     private BlockState getOrigin(BlockGetter level, BlockPos pos) {
         BlockEntity blockEntity=level.getBlockEntity(pos);

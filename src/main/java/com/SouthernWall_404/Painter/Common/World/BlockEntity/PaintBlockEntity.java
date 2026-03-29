@@ -11,6 +11,7 @@ import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -20,7 +21,6 @@ public class PaintBlockEntity extends BlockEntity {
 
     //========需要持久化的数据========
     private AbstractRender render;//渲染实例
-    private RandomSource randomSource=RandomSource.create();
 
     //========构造方法=========
     public PaintBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState blockState) {
@@ -30,7 +30,6 @@ public class PaintBlockEntity extends BlockEntity {
     public PaintBlockEntity(BlockPos blockPos, BlockState blockState) {
         this(ModBlockEntities.RENDER_BEDROCK_ENTITY.get(), blockPos, blockState);
     }
-
 
     /**
      * 用于初始化
@@ -47,6 +46,8 @@ public class PaintBlockEntity extends BlockEntity {
     public AbstractRender getRender() {
         return render;
     }
+
+
 
     /**
      * 用于获取本源的BlockState,即方块本身的属性
@@ -69,6 +70,12 @@ public class PaintBlockEntity extends BlockEntity {
             level.getLightEngine().checkBlock(worldPosition);
         }
         setChanged();
+    }
+
+
+    @Override
+    public boolean hasCustomOutlineRendering(Player player) {
+        return super.hasCustomOutlineRendering(player);
     }
 
     //========NBT方法========
