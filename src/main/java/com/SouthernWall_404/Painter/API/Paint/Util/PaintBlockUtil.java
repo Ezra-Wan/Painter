@@ -12,29 +12,32 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.SlabBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.Vec3;
 
 public class PaintBlockUtil {
 
     public static void paint(Level level, BlockPos blockPos, Player player, Direction direction)
     {
         ItemStack itemStack=player.getItemInHand(InteractionHand.OFF_HAND);//添加副手的方块
-        if(itemStack.getItem() instanceof BlockItem item)
-        {
-            if(item instanceof BlockItem blockItem)
-            {
-                Block block=blockItem.getBlock();
-                if(!block.defaultBlockState().isCollisionShapeFullBlock(level,blockPos))//如果不是完整方块
-                {
-                    return;//不允许填充
-                }else {
-                    paint(level,blockPos,direction,block.defaultBlockState());
-                }
+        if (itemStack.getItem() instanceof BlockItem blockItem) {
+            Block block = blockItem.getBlock();
+            // 构造放置上下文
+            InteractionHand hand = InteractionHand.OFF_HAND;
+            BlockHitResult hitResult = new BlockHitResult(Vec3.atCenterOf(blockPos), direction, blockPos, false);
+            BlockPlaceContext context = new BlockPlaceContext(level, player, hand, itemStack, hitResult);
+            BlockState paintState = block.getStateForPlacement(context);
+            // 如果 getStateForPlacement 返回 null，回退到默认状态
+            if (paintState == null) {
+                paintState = block.defaultBlockState();
             }
+            paint(level, blockPos, direction, paintState);
         }
     }
     public static void paint(Level level, BlockPos blockPos, Direction direction,BlockState paint)

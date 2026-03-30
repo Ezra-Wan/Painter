@@ -23,6 +23,8 @@ public abstract class AbstractRender<T,F extends Object> implements IRender<T> {
     protected Map<Integer,T> objects=new HashMap<>();//渲染内容缓存
     protected String type;
     //========需要持久化的数据========
+
+    protected Map<Integer, BlockState> paintStates = new HashMap<>();//TODO：准备换成BlockState渲染
     protected Map<Integer, ResourceLocation> paintPaths = new HashMap<>();//渲染内容路径，便于保存
     protected BlockState origin;
 
@@ -77,6 +79,9 @@ public abstract class AbstractRender<T,F extends Object> implements IRender<T> {
         return this.origin;
     }
 
+
+
+    @Deprecated
     @Override
     public void putRenderBlock(Object object, Block block) {
         int flag=getFlag(object);
