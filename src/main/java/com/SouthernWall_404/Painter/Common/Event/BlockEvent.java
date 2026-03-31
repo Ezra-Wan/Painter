@@ -11,7 +11,6 @@ import com.SouthernWall_404.Painter.Common.Init.ModAttachments;
 import com.SouthernWall_404.Painter.Common.World.Item.ChulkItem;
 import com.SouthernWall_404.Painter.Common.World.Item.PaintBucketItem;
 import com.SouthernWall_404.Painter.Common.World.Item.PaintItem;
-import com.SouthernWall_404.Painter.Painter;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
@@ -25,7 +24,6 @@ import net.minecraft.world.level.Level;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 
-import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -50,6 +48,7 @@ public class BlockEvent {
         if(item instanceof PaintItem)
         {
             event.setCanceled(true);
+            player.swing(InteractionHand.MAIN_HAND);
             SelectedZone selectedZone=player.getData(ModAttachments.SELECTED_ZONE);
             if (selectedZone!=null&&selectedZone.isSelecting())
             {
@@ -103,11 +102,13 @@ public class BlockEvent {
             }
 
             event.setCanceled(true);
+            player.swing(InteractionHand.MAIN_HAND);
         }
 
         else if (item instanceof PaintBucketItem paintBucketItem)
         {
             event.setCanceled(true);
+            player.swing(InteractionHand.MAIN_HAND);
             SelectedZone selectedZone=player.getData(ModAttachments.SELECTED_ZONE);
 
             if(selectedZone!=null)
@@ -119,16 +120,9 @@ public class BlockEvent {
                     filters.add(new SelectFilter());
 
                 }else {
-
-
-
                 }
-
                 Item itemToPaint=player.getItemInHand(InteractionHand.OFF_HAND).getItem();
-                if(itemToPaint instanceof BlockItem blockItem)
-                {
-                    WallUtil.paintOnWall(blockPos,event.getFace(),player,level,blockItem.getBlock().defaultBlockState(),filters);
-                }
+                WallUtil.actOnWall(blockPos,event.getFace(),player,level,filters);
 
             }
         }

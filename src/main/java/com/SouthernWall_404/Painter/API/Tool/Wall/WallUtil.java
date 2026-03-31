@@ -11,6 +11,9 @@ import java.util.*;
 
 public class WallUtil {
 
+
+    public static final String PAINT="paint";
+    public static final String CYCLE="cycle";
     /**
      * 使用洪水算法，遍历四周相邻的每个垂直于face（喷涂面方向）的方块
      * 如果通过filter的check，喷涂
@@ -19,15 +22,14 @@ public class WallUtil {
      * @param pos    初始喷涂位置
      * @param face   喷涂的面
      * @param level  世界
-     * @param paint  需要喷涂的方块状态
      * @param filter 过滤器，决定哪些方块可以被喷涂并继续扩散
      */
 
-    public static void paintOnWall(BlockPos pos, Direction face, Player player, Level level, BlockState paint, IFilter filter) {
-        paintOnWall(pos,face,player,level,paint,List.of(filter));
+    public static void actOnWall(BlockPos pos, Direction face, Player player, Level level, IFilter filter) {
+        actOnWall(pos,face,player,level,List.of(filter));
     }
 
-    public static void paintOnWall(BlockPos pos, Direction face, Player player, Level level, BlockState paint, List<IFilter> filters) {
+    public static void actOnWall(BlockPos pos, Direction face, Player player, Level level, List<IFilter> filters) {
         // 队列用于 BFS
         Queue<BlockPos> queue = new LinkedList<>();
         // 记录已处理过的方块，避免重复
@@ -72,8 +74,15 @@ public class WallUtil {
 
             if(isAllowed)
             {
-                //如果所有筛选项均满足
-                PaintBlockUtil.paint(level,current,player,face);//执行喷涂
+//                switch (actType){
+//
+//                    case "paint":
+//
+//                    default:
+//                        break;
+//                }
+//                //如果所有筛选项均满足
+                PaintBlockUtil.dealWithPaintClick(level,current,player,face);//执行喷涂
 
                 // 向墙面内的四个方向扩散
                 for (Direction wallDir : wallDirs) {
