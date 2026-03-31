@@ -16,10 +16,11 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.TrapDoorBlock;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
-import net.neoforged.fml.loading.FMLEnvironment;
 import net.neoforged.neoforge.client.model.data.ModelData;
 
 import java.util.BitSet;
@@ -43,7 +44,7 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>,Direc
         {
             return;
         }
-        for(Map.Entry<Integer,BlockState> entry:paintStates.entrySet())
+        for(Map.Entry<Integer,BlockState> entry: materials.entrySet())
         {
             int flag=entry.getKey();
 
@@ -56,6 +57,29 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>,Direc
             objects.put(flag, quads);
         }
     }
+
+
+    public void cyclePaint(Direction direction)
+    {
+        BlockState material=getMaterial(direction);
+
+        if (material.hasProperty(TrapDoorBlock.HALF) && material.getOptionalValue(TrapDoorBlock.OPEN)
+                .orElse(false))
+            setMaterial(direction,material.cycle(TrapDoorBlock.HALF));
+        else if (material.hasProperty(BlockStateProperties.FACING))
+            setMaterial(direction,material.cycle(BlockStateProperties.FACING));
+        else if (material.hasProperty(BlockStateProperties.HORIZONTAL_FACING))
+            setMaterial(direction,material.setValue(BlockStateProperties.HORIZONTAL_FACING,
+                    material.getValue(BlockStateProperties.HORIZONTAL_FACING)
+                            .getClockWise()));
+        else if (material.hasProperty(BlockStateProperties.AXIS))
+            setMaterial(direction,material.cycle(BlockStateProperties.AXIS));
+        else if (material.hasProperty(BlockStateProperties.HORIZONTAL_AXIS))
+            setMaterial(direction,material.cycle(BlockStateProperties.HORIZONTAL_AXIS));
+        else if (material.hasProperty(BlockStateProperties.LIT))
+            setMaterial(direction,material.cycle(BlockStateProperties.LIT));
+    }
+
     public List<BakedQuad> getQuadsForDirection(BlockState state, Direction direction) {
         BakedModel model = Minecraft.getInstance().getModelManager().getBlockModelShaper().getBlockModel(state);
         RandomSource random = RandomSource.create();

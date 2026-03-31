@@ -24,11 +24,7 @@ public interface IRender<T extends Object> extends INBTSerializable<CompoundTag>
     String getType();
 
 
-    void putRenderObject(int flag, ResourceLocation key);
-    void putRenderBlock(Object object, Block block);//方块渲染的拓展方法
-
     BlockState getOrigin();
-    int getFlag(Object object);//用于获取某一flag
 
     void render(BlockEntity blockEntity, float partialTick, PoseStack poseStack, MultiBufferSource bufferSource,int packedLight, int packedOverlay);//用于渲染内容
 

@@ -24,6 +24,7 @@ import net.minecraft.world.level.Level;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 
+import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -64,6 +65,8 @@ public class BlockEvent {
             Item itemToPaint=player.getItemInHand(InteractionHand.OFF_HAND).getItem();
             if(itemToPaint instanceof BlockItem blockItem)
             {
+                //TODO:处理一下智能处理
+//                PaintBlockUtil.cycle(level,blockPos,player,event.getFace());
                 PaintBlockUtil.paint(level,blockPos,player,event.getFace());
             }
 

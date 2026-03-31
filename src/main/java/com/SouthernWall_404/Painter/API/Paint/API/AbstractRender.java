@@ -1,6 +1,5 @@
 package com.SouthernWall_404.Painter.API.Paint.API;
 
-import com.SouthernWall_404.Painter.API.Paint.Util.RenderUtil;
 import com.mojang.serialization.DataResult;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
@@ -8,6 +7,7 @@ import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
@@ -24,7 +24,7 @@ public abstract class AbstractRender<T,F extends Object> implements IRender<T> {
     protected String type;
     //========需要持久化的数据========
 
-    protected Map<Integer, BlockState> paintStates = new HashMap<>();
+    protected Map<Integer, BlockState> materials = new HashMap<>();
     //TODO:这里添加一个对于每类方块的默认放置方向
     protected Map<Integer, ResourceLocation> paintPaths = new HashMap<>();//渲染内容路径，便于保存
     protected BlockState origin;
@@ -81,23 +81,28 @@ public abstract class AbstractRender<T,F extends Object> implements IRender<T> {
     }
 
 
-    public void putRenderBlock(Object object,BlockState blockState)
+    public void putRenderBlock(F f,BlockState blockState)
     {
-        int flag=getFlag(object);
-
         int hasBlockFlag=hasBlockInPaint(blockState);
         if(hasBlockFlag!=-1)
         {
-            blockState=paintStates.get(hasBlockFlag);
-
-            paintStates.put(flag,blockState);
+            blockState= materials.get(hasBlockFlag);
         }
-        else
-        {
-            paintStates.put(flag,blockState);
+        setMaterial(f,blockState);
+    }
 
-        }
+    public void setMaterial(F f,BlockState blockState)
+    {
+        int flag=getFlag(f);
+        materials.put(flag,blockState);
         update();
+    }
+
+    public BlockState getMaterial(F f)
+    {
+        int flag=getFlag(f);
+
+        return materials.getOrDefault(flag, Blocks.AIR.defaultBlockState());
     }
 
     /**
@@ -108,7 +113,7 @@ public abstract class AbstractRender<T,F extends Object> implements IRender<T> {
     private int hasBlockInPaint(BlockState toCheck)
     {
 
-        for(Map.Entry<Integer,BlockState> entry:paintStates.entrySet())
+        for(Map.Entry<Integer,BlockState> entry: materials.entrySet())
         {
             int flag=entry.getKey();
             BlockState blockState=entry.getValue();
@@ -126,29 +131,27 @@ public abstract class AbstractRender<T,F extends Object> implements IRender<T> {
         return -1;
     }
 
-    @Deprecated
-    @Override
-    public void putRenderBlock(Object object, Block block) {
-//        int flag=getFlag(object);
+//    @Deprecated
+//    @Override
+//    public void putRenderBlock(F object, Block block) {
+////        int flag=getFlag(object);
+////
+////        ResourceLocation key= RenderUtil.getBlockKey(block);
+////
+////        putRenderObject(flag,key);
 //
-//        ResourceLocation key= RenderUtil.getBlockKey(block);
+//        putRenderBlock(object,block.defaultBlockState());
 //
-//        putRenderObject(flag,key);
+//        update();
+//    }
+//
+//    public void putRenderObject(int flag, ResourceLocation key) {
+//        paintPaths.put(flag,key);
+//
+//        update();
+//    }
 
-        putRenderBlock(object,block.defaultBlockState());
-
-        update();
-    }
-
-    @Override
-    public void putRenderObject(int flag, ResourceLocation key) {
-        paintPaths.put(flag,key);
-
-        update();
-    }
-
-    @Override
-    public int getFlag(Object object) {
+    public int getFlag(F object) {
         return flags.getOrDefault(object,-1);
     }
 // AbstractRender.java 片段
@@ -177,7 +180,7 @@ public abstract class AbstractRender<T,F extends Object> implements IRender<T> {
 
         // ===== 新增：序列化 paintStates =====
         CompoundTag statesTag = new CompoundTag();
-        for (Map.Entry<Integer, BlockState> entry : paintStates.entrySet()) {
+        for (Map.Entry<Integer, BlockState> entry : materials.entrySet()) {
             int flag = entry.getKey();
             BlockState state = entry.getValue();
             if (state != null) {
@@ -223,7 +226,7 @@ public abstract class AbstractRender<T,F extends Object> implements IRender<T> {
         }
 
         // ===== 新增：反序列化 paintStates =====
-        paintStates.clear();
+        materials.clear();
         if (compoundTag.contains("paint_states", CompoundTag.TAG_COMPOUND)) {
             CompoundTag statesTag = compoundTag.getCompound("paint_states");
             for (String key : statesTag.getAllKeys()) {
@@ -233,7 +236,7 @@ public abstract class AbstractRender<T,F extends Object> implements IRender<T> {
                     DataResult<BlockState> result = BlockState.CODEC.parse(provider.createSerializationContext(NbtOps.INSTANCE), stateTag);
                     result.resultOrPartial(error -> {
                         // 可在此记录日志
-                    }).ifPresent(state -> paintStates.put(flag, state));
+                    }).ifPresent(state -> materials.put(flag, state));
                 } catch (NumberFormatException e) {
                     // 忽略非整数键
                 }

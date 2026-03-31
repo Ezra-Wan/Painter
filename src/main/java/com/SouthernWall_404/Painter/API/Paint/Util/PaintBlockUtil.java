@@ -1,5 +1,6 @@
 package com.SouthernWall_404.Painter.API.Paint.Util;
 
+import com.SouthernWall_404.Painter.API.Paint.API.AbstractPaint;
 import com.SouthernWall_404.Painter.API.Paint.API.AbstractRender;
 import com.SouthernWall_404.Painter.API.Paint.Imply.SimpleBlockPaint;
 import com.SouthernWall_404.Painter.API.Paint.Imply.SlabBlockPaint;
@@ -22,6 +23,26 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 
 public class PaintBlockUtil {
+
+    public static void cycle(Level level, BlockPos blockPos, Player player, Direction direction)
+    {
+        BlockState origin=level.getBlockState(blockPos);
+
+        if(origin.getBlock() instanceof PaintBlock)//如果对象是已经是渲染方块
+        {
+            AbstractRender render = RenderUtil.getRender(level, blockPos);
+            BlockState material=render.getMaterial(direction);
+
+            if(player.getItemInHand(InteractionHand.OFF_HAND).getItem() instanceof BlockItem blockItem)
+            {
+                Block block=blockItem.getBlock();
+                if(block==material.getBlock()&&render instanceof AbstractPaint paint)
+                {
+                    paint.cyclePaint(direction);
+                }
+            }
+        }
+    }
 
     public static void paint(Level level, BlockPos blockPos, Player player, Direction direction)
     {
