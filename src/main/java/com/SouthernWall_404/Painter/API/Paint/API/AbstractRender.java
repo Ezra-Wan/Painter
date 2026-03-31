@@ -2,6 +2,7 @@ package com.SouthernWall_404.Painter.API.Paint.API;
 
 import com.mojang.serialization.DataResult;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.Tag;
@@ -20,13 +21,13 @@ public abstract class AbstractRender<T,F extends Object> implements IRender<T> {
 
     //========不需要持久化的数据========
     protected Map<F,Integer> flags=new HashMap<>();//识别码定义系统
-    protected Map<Integer,T> objects=new HashMap<>();//渲染内容缓存
+    protected Map<Integer, T> objects = new HashMap<>();//渲染内容缓存
     protected String type;
     //========需要持久化的数据========
 
     protected Map<Integer, BlockState> materials = new HashMap<>();
-    //TODO:这里添加一个对于每类方块的默认放置方向
-    protected Map<Integer, ResourceLocation> paintPaths = new HashMap<>();//渲染内容路径，便于保存
+
+    protected Map<Block,F> placeRecord=new HashMap<>();//每类material的默认放置方向
     protected BlockState origin;
 
     //========构造方法========
@@ -88,7 +89,12 @@ public abstract class AbstractRender<T,F extends Object> implements IRender<T> {
         {
             blockState= materials.get(hasBlockFlag);
         }
+        else {
+            placeRecord.put(blockState.getBlock(),f);//存储此类方块的初始放置方向
+        }
         setMaterial(f,blockState);
+
+
     }
 
     public void setMaterial(F f,BlockState blockState)
@@ -169,14 +175,6 @@ public abstract class AbstractRender<T,F extends Object> implements IRender<T> {
             }).ifPresent(originTag -> tag.put("origin", originTag));
         }
 
-        // 序列化 paintPaths
-        CompoundTag pathsTag = new CompoundTag();
-        for (Map.Entry<Integer, ResourceLocation> entry : paintPaths.entrySet()) {
-            int flag = entry.getKey();
-            ResourceLocation location = entry.getValue();
-            pathsTag.putString(String.valueOf(flag), location.toString());
-        }
-        tag.put("paint_paths", pathsTag);
 
         // ===== 新增：序列化 paintStates =====
         CompoundTag statesTag = new CompoundTag();
@@ -205,24 +203,6 @@ public abstract class AbstractRender<T,F extends Object> implements IRender<T> {
             result.resultOrPartial(error -> {
                 // 可在此记录日志
             }).ifPresent(state -> this.origin = state);
-        }
-
-        // 反序列化 paintPaths
-        paintPaths.clear();
-        if (compoundTag.contains("paint_paths", CompoundTag.TAG_COMPOUND)) {
-            CompoundTag pathsTag = compoundTag.getCompound("paint_paths");
-            for (String key : pathsTag.getAllKeys()) {
-                try {
-                    int flag = Integer.parseInt(key);
-                    String pathStr = pathsTag.getString(key);
-                    ResourceLocation location = ResourceLocation.tryParse(pathStr);
-                    if (location != null) {
-                        paintPaths.put(flag, location);
-                    }
-                } catch (NumberFormatException e) {
-                    // 忽略非整数键（正常情况下不应出现）
-                }
-            }
         }
 
         // ===== 新增：反序列化 paintStates =====

@@ -11,6 +11,7 @@ import com.SouthernWall_404.Painter.Common.Init.ModAttachments;
 import com.SouthernWall_404.Painter.Common.World.Item.ChulkItem;
 import com.SouthernWall_404.Painter.Common.World.Item.PaintBucketItem;
 import com.SouthernWall_404.Painter.Common.World.Item.PaintItem;
+import com.SouthernWall_404.Painter.Painter;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
@@ -63,12 +64,10 @@ public class BlockEvent {
             }
 
             Item itemToPaint=player.getItemInHand(InteractionHand.OFF_HAND).getItem();
-            if(itemToPaint instanceof BlockItem blockItem)
-            {
-                //TODO:处理一下智能处理
+
+            PaintBlockUtil.dealWithPaintClick(level,blockPos,player,event.getFace());
 //                PaintBlockUtil.cycle(level,blockPos,player,event.getFace());
-                PaintBlockUtil.paint(level,blockPos,player,event.getFace());
-            }
+//                PaintBlockUtil.paint(level,blockPos,player,event.getFace());
 
         }
 

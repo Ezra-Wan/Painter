@@ -105,14 +105,6 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>,Direc
                     packedOverlay);
         }
     }
-    public Block getPaintedBlock(Direction direction)
-    {
-        int flag=getFlag(direction);
-
-        Block block=RenderUtil.getBlockFromID(paintPaths.get(flag));
-
-        return block;
-    }
 
     private Direction getDirection(int flag)
     {

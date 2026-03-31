@@ -12,6 +12,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.Level;
@@ -24,24 +25,50 @@ import net.minecraft.world.phys.Vec3;
 
 public class PaintBlockUtil {
 
-    public static void cycle(Level level, BlockPos blockPos, Player player, Direction direction)
+
+    public static void dealWithPaintClick(Level level, BlockPos blockPos, Player player, Direction direction)
     {
         BlockState origin=level.getBlockState(blockPos);
 
+        ItemStack handItemStack=player.getItemInHand(InteractionHand.OFF_HAND);
+
         if(origin.getBlock() instanceof PaintBlock)//如果对象是已经是渲染方块
         {
-            AbstractRender render = RenderUtil.getRender(level, blockPos);
-            BlockState material=render.getMaterial(direction);
-
-            if(player.getItemInHand(InteractionHand.OFF_HAND).getItem() instanceof BlockItem blockItem)
+            if(handItemStack.isEmpty())
             {
-                Block block=blockItem.getBlock();
-                if(block==material.getBlock()&&render instanceof AbstractPaint paint)
+                cycle(level,blockPos,player,direction);
+            }
+            else
+            {
+                if(handItemStack.getItem() instanceof BlockItem blockItem)
                 {
-                    paint.cyclePaint(direction);
+                    Block block=blockItem.getBlock();
+                    AbstractRender render = RenderUtil.getRender(level, blockPos);
+
+//                    if(render.getMaterial(direction).getBlock()==block)
+//                    {
+////                        cycle(level, blockPos, player, direction);
+//                    }else {
+                        paint(level,blockPos,player,direction);
+//                    }
                 }
             }
+        }else {
+            paint(level,blockPos,player,direction);
+
         }
+    }
+
+    public static void cycle(Level level, BlockPos blockPos, Player player, Direction direction)
+    {
+
+        AbstractRender render = RenderUtil.getRender(level, blockPos);
+        if(render instanceof AbstractPaint paint)
+        {
+            paint.cyclePaint(direction);
+        }
+
+
     }
 
     public static void paint(Level level, BlockPos blockPos, Player player, Direction direction)

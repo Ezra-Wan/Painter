@@ -83,12 +83,12 @@ public class SlabBlockPaint extends AbstractPaint {
             if (!RenderUtil.shouldRenderFace(origin, level, pos, dir, pos.relative(dir))) continue;
 
             if (materials.containsKey(flag)) {//如果存在伪装
-                    Block block = RenderUtil.getBlockFromID(paintPaths.get(flag));
+                    BlockState material=getMaterial(dir);
                     List<BakedQuad> quads= createSlabQuads(dir);
 
                     if (!quads.isEmpty()) {
                         VertexConsumer consumer = bufferSource.getBuffer(RenderType.cutout());
-                        renderQuadsWithAO(level, block.defaultBlockState(), pos, quads, consumer, modRenderer, shape, shapeFlags, aoFace, poseStack, packedOverlay);
+                        renderQuadsWithAO(level,material, pos, quads, consumer, modRenderer, shape, shapeFlags, aoFace, poseStack, packedOverlay);
                     }
             } else {
                 random.setSeed(seed);
