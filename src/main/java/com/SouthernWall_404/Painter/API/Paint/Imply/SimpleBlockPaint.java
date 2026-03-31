@@ -95,7 +95,7 @@ public class SimpleBlockPaint extends AbstractPaint {
             if (objects.containsKey(flag)) {
                 quads=objects.get(flag);
 
-                BlockState state=getPaintedBlock(direction).defaultBlockState();
+                BlockState state=paintStates.get(flag);
                 VertexConsumer consumer = bufferSource.getBuffer(RenderUtil.getRenderType(state));
 
                 renderQuadsWithAO(level,state,pos,quads,consumer,modRenderer,shape,shapeFlags,aoFace,poseStack,packedOverlay);

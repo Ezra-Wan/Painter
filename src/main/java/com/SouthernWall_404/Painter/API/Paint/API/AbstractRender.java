@@ -80,15 +80,26 @@ public abstract class AbstractRender<T,F extends Object> implements IRender<T> {
     }
 
 
+    public void putRenderBlock(Object object,BlockState blockState)
+    {
+        int flag=getFlag(object);
+
+        paintStates.put(flag,blockState);
+        update();
+    }
 
     @Deprecated
     @Override
     public void putRenderBlock(Object object, Block block) {
-        int flag=getFlag(object);
+//        int flag=getFlag(object);
+//
+//        ResourceLocation key= RenderUtil.getBlockKey(block);
+//
+//        putRenderObject(flag,key);
 
-        ResourceLocation key= RenderUtil.getBlockKey(block);
+        putRenderBlock(object,block.defaultBlockState());
 
-        putRenderObject(flag,key);
+        update();
     }
 
     @Override
@@ -104,8 +115,7 @@ public abstract class AbstractRender<T,F extends Object> implements IRender<T> {
     }
 // AbstractRender.java 片段
 
-// AbstractRender.java 片段
-
+// AbstractRender.java 片段=
     @Override
     public @UnknownNullability CompoundTag serializeNBT(HolderLookup.Provider provider) {
         CompoundTag tag = new CompoundTag();
@@ -123,10 +133,24 @@ public abstract class AbstractRender<T,F extends Object> implements IRender<T> {
         for (Map.Entry<Integer, ResourceLocation> entry : paintPaths.entrySet()) {
             int flag = entry.getKey();
             ResourceLocation location = entry.getValue();
-            // 将 ResourceLocation 编码为 String（也可使用 CODEC，但字符串已足够）
             pathsTag.putString(String.valueOf(flag), location.toString());
         }
         tag.put("paint_paths", pathsTag);
+
+        // ===== 新增：序列化 paintStates =====
+        CompoundTag statesTag = new CompoundTag();
+        for (Map.Entry<Integer, BlockState> entry : paintStates.entrySet()) {
+            int flag = entry.getKey();
+            BlockState state = entry.getValue();
+            if (state != null) {
+                DataResult<Tag> result = BlockState.CODEC.encodeStart(provider.createSerializationContext(NbtOps.INSTANCE), state);
+                result.resultOrPartial(error -> {
+                    // 可在此记录日志
+                }).ifPresent(stateTag -> statesTag.put(String.valueOf(flag), stateTag));
+            }
+        }
+        tag.put("paint_states", statesTag);
+        // ===== 新增结束 =====
 
         return tag;
     }
@@ -138,7 +162,7 @@ public abstract class AbstractRender<T,F extends Object> implements IRender<T> {
             Tag originTag = compoundTag.get("origin");
             DataResult<BlockState> result = BlockState.CODEC.parse(provider.createSerializationContext(NbtOps.INSTANCE), originTag);
             result.resultOrPartial(error -> {
-                // 可在此记录日志，例如：LOGGER.error("Failed to decode origin: {}", error);
+                // 可在此记录日志
             }).ifPresent(state -> this.origin = state);
         }
 
@@ -159,6 +183,25 @@ public abstract class AbstractRender<T,F extends Object> implements IRender<T> {
                 }
             }
         }
+
+        // ===== 新增：反序列化 paintStates =====
+        paintStates.clear();
+        if (compoundTag.contains("paint_states", CompoundTag.TAG_COMPOUND)) {
+            CompoundTag statesTag = compoundTag.getCompound("paint_states");
+            for (String key : statesTag.getAllKeys()) {
+                try {
+                    int flag = Integer.parseInt(key);
+                    Tag stateTag = statesTag.get(key);
+                    DataResult<BlockState> result = BlockState.CODEC.parse(provider.createSerializationContext(NbtOps.INSTANCE), stateTag);
+                    result.resultOrPartial(error -> {
+                        // 可在此记录日志
+                    }).ifPresent(state -> paintStates.put(flag, state));
+                } catch (NumberFormatException e) {
+                    // 忽略非整数键
+                }
+            }
+        }
+        // ===== 新增结束 =====
 
         // 重建缓存
         update();

@@ -43,25 +43,34 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>,Direc
         {
             return;
         }
-        for(Map.Entry<Integer,ResourceLocation> entry:paintPaths.entrySet())
+        for(Map.Entry<Integer,BlockState> entry:paintStates.entrySet())
         {
             int flag=entry.getKey();
 
             Direction direction= getDirection(flag);
+            BlockState state=entry.getValue();
 
-            Block block= RenderUtil.getBlockFromID(paintPaths.get(flag));
-            List<BakedQuad> quads = getQuadsForDirection(block, direction);
+//            Block block= RenderUtil.getBlockFromID(paintPaths.get(flag));
+            List<BakedQuad> quads = getQuadsForDirection(state,direction);
 
             objects.put(flag, quads);
-
-
         }
+    }
+    public List<BakedQuad> getQuadsForDirection(BlockState state, Direction direction) {
+        BakedModel model = Minecraft.getInstance().getModelManager().getBlockModelShaper().getBlockModel(state);
+        RandomSource random = RandomSource.create();
+        RenderType renderType = RenderUtil.getRenderType(state);
+        return model.getQuads(state, direction, random, ModelData.EMPTY, renderType);
     }
 
     protected void renderQuadsWithAO(Level level, BlockState state, BlockPos pos, List<BakedQuad> quads,
                                    VertexConsumer consumer, ModModelRender modRenderer,
                                    float[] shape, BitSet shapeFlags, ModModelRender.AmbientOcclusionFace aoFace,
                                    PoseStack poseStack, int packedOverlay) {
+        if(state==null)
+        {
+            return;
+        }
         for (BakedQuad quad : quads) {
             modRenderer.calculateShape(level, state, pos, quad.getVertices(), quad.getDirection(), shape, shapeFlags);
 

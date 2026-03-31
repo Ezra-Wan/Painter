@@ -48,7 +48,7 @@ public class PaintBlockUtil {
         {
             AbstractRender render= RenderUtil.getRender(level,blockPos);
 
-            render.putRenderBlock(direction,paint.getBlock());//放置新的渲染面
+            render.putRenderBlock(direction,paint);//放置新的渲染面
 
             BlockEntity blockEntity=level.getBlockEntity(blockPos);
             if(blockEntity instanceof PaintBlockEntity paintBlockEntity)
@@ -67,7 +67,7 @@ public class PaintBlockUtil {
                 render=new SlabBlockPaint(origin);//修改为台阶渲染
             }
 
-            render.putRenderBlock(direction,paint.getBlock());
+            render.putRenderBlock(direction,paint);
 
             BlockState renderBlock=ModBlock.RENDER_BEDROCK.get().defaultBlockState();//放置渲染方块
             level.setBlock(blockPos,renderBlock,3);//放置
