@@ -24,7 +24,8 @@ public abstract class AbstractRender<T,F extends Object> implements IRender<T> {
     protected String type;
     //========需要持久化的数据========
 
-    protected Map<Integer, BlockState> paintStates = new HashMap<>();//TODO：准备换成BlockState渲染
+    protected Map<Integer, BlockState> paintStates = new HashMap<>();
+    //TODO:这里添加一个对于每类方块的默认放置方向
     protected Map<Integer, ResourceLocation> paintPaths = new HashMap<>();//渲染内容路径，便于保存
     protected BlockState origin;
 
@@ -84,8 +85,45 @@ public abstract class AbstractRender<T,F extends Object> implements IRender<T> {
     {
         int flag=getFlag(object);
 
-        paintStates.put(flag,blockState);
+        int hasBlockFlag=hasBlockInPaint(blockState);
+        if(hasBlockFlag!=-1)
+        {
+            blockState=paintStates.get(hasBlockFlag);
+
+            paintStates.put(flag,blockState);
+        }
+        else
+        {
+            paintStates.put(flag,blockState);
+
+        }
         update();
+    }
+
+    /**
+     *
+     * @param toCheck
+     * @return 检查到的已有的BlockState的对应flag
+     */
+    private int hasBlockInPaint(BlockState toCheck)
+    {
+
+        for(Map.Entry<Integer,BlockState> entry:paintStates.entrySet())
+        {
+            int flag=entry.getKey();
+            BlockState blockState=entry.getValue();
+
+            if(blockState!=null)
+            {
+                if(blockState.getBlock()==toCheck.getBlock())
+                {
+                    return flag;
+                }
+            }
+
+        }
+
+        return -1;
     }
 
     @Deprecated
