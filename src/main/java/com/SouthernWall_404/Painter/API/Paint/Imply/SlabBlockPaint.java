@@ -82,7 +82,7 @@ public class SlabBlockPaint extends AbstractPaint {
             int flag = getFlag(dir);
             if (!RenderUtil.shouldRenderFace(origin, level, pos, dir, pos.relative(dir))) continue;
 
-            if (paintPaths.containsKey(flag)) {//如果存在伪装
+            if (paintStates.containsKey(flag)) {//如果存在伪装
                     Block block = RenderUtil.getBlockFromID(paintPaths.get(flag));
                     List<BakedQuad> quads= createSlabQuads(dir);
 
