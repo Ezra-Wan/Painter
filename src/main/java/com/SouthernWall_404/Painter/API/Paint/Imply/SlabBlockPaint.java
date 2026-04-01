@@ -16,6 +16,8 @@ import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 
+import net.minecraft.core.HolderLookup;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
@@ -25,13 +27,16 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.SlabType;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.client.model.data.ModelData;
+import org.jetbrains.annotations.UnknownNullability;
 
-import java.util.ArrayList;
-import java.util.BitSet;
-import java.util.List;
+import java.util.*;
 
 public class SlabBlockPaint extends AbstractPaint {
     private static final int NORTH = 1, SOUTH = 2, WEST = 4, EAST = 8, UP = 16, DOWN = 32;
+
+
+    //========需要持久化的数据========
+    private Map<Integer,SlabType> slabTypes=new HashMap<>();//用于标定
 
     public SlabBlockPaint(BlockState origin) {
         super(origin, PaintContent.SLAB_BLOCK);
@@ -47,11 +52,46 @@ public class SlabBlockPaint extends AbstractPaint {
         registerFlag(Direction.DOWN, DOWN);
     }
 
-//    @Override
+    @Override
+    public void init(BlockState origin) {
+        super.init(origin);
+
+    }
+
+    //    @Override
 //    protected void update() {
 //        // 半砖不预生成 quads，因为依赖渲染时的方向
 //        objects.clear();
 //    }
+
+
+
+    @Override
+    public void cyclePaint(Direction direction) {
+
+        //TODO测试用例，记得改回来
+        int key=getFlag(direction);
+        SlabType defaultType=origin.getValue(SlabBlock.TYPE);
+        SlabType current=slabTypes.getOrDefault(getFlag(direction),defaultType);
+
+        switch (current){
+
+            case TOP:
+                slabTypes.put(key,SlabType.BOTTOM);
+                break;
+            case BOTTOM:
+                slabTypes.put(key,SlabType.DOUBLE);
+
+                break;
+            case DOUBLE:
+                slabTypes.put(key,SlabType.TOP);
+
+                break;
+            default:
+                break;
+        }
+//        super.cyclePaint(direction);
+    }
 
     @Override
     public void render(BlockEntity blockEntity, float partialTick, PoseStack poseStack,
@@ -137,9 +177,10 @@ public class SlabBlockPaint extends AbstractPaint {
     }
 
     private BakedQuad createSlabQuad(TextureAtlasSprite sprite, Direction direction,int tintIndex) {
-        boolean isTopSlab = origin.getValue(SlabBlock.TYPE) == SlabType.TOP;
+//        boolean isTopSlab = origin.getValue(SlabBlock.TYPE) == SlabType.TOP;
 
         SlabType slabType=origin.getValue(SlabBlock.TYPE);
+        SlabType uvSlabType=slabTypes.getOrDefault(getFlag(direction),slabType);
         float yMin;
         float yMax;
 //        float yMin = isTopSlab ? 0.5f : 0.0f;
@@ -199,7 +240,7 @@ public class SlabBlockPaint extends AbstractPaint {
         if (direction.getAxis().isHorizontal()) {
 
 
-            switch (slabType){
+            switch (uvSlabType){
                 case SlabType.TOP -> {
                     v1 = sprite.getV0() + (sprite.getV1() - sprite.getV0()) * 0.5f; // 下半纹理
                     break;
@@ -256,5 +297,56 @@ public class SlabBlockPaint extends AbstractPaint {
         BakedModel model = Minecraft.getInstance().getModelManager().getBlockModelShaper().getBlockModel(state);
         RandomSource random = RandomSource.create();
         return model.getQuads(state, dir, random, ModelData.EMPTY, RenderUtil.getRenderType(state));
+    }
+
+
+    // ======== 序列化/反序列化 ========
+    @Override
+    public @UnknownNullability CompoundTag serializeNBT(HolderLookup.Provider provider) {
+        CompoundTag tag = super.serializeNBT(provider);
+
+        // 保存 slabTypes
+        CompoundTag slabTypesTag = new CompoundTag();
+        for (Map.Entry<Integer, SlabType> entry : slabTypes.entrySet()) {
+            int flag = entry.getKey();
+            SlabType type = entry.getValue();
+            if (type != null) {
+                slabTypesTag.putString(String.valueOf(flag), type.name());
+            }
+        }
+        tag.put("slab_types", slabTypesTag);
+
+        return tag;
+    }
+
+    @Override
+    public void deserializeNBT(HolderLookup.Provider provider, CompoundTag compoundTag) {
+        // 先调用父类，恢复 origin 和 materials
+        super.deserializeNBT(provider, compoundTag);
+
+        // 初始化 slabTypes 默认值（基于 origin 的 SlabType 属性）
+        slabTypes.clear();
+        SlabType defaultType = origin.hasProperty(SlabBlock.TYPE) ?
+                origin.getValue(SlabBlock.TYPE) : SlabType.BOTTOM;
+        for (Map.Entry<Direction, Integer> entry : flags.entrySet()) {
+            slabTypes.put(entry.getValue(), defaultType);
+        }
+
+        // 从 NBT 中读取保存的 slabTypes 并覆盖
+        if (compoundTag.contains("slab_types", CompoundTag.TAG_COMPOUND)) {
+            CompoundTag slabTypesTag = compoundTag.getCompound("slab_types");
+            for (String key : slabTypesTag.getAllKeys()) {
+                try {
+                    int flag = Integer.parseInt(key);
+                    String typeName = slabTypesTag.getString(key);
+                    SlabType type = SlabType.valueOf(typeName);
+                    slabTypes.put(flag, type);
+                } catch ( IllegalArgumentException e) {
+                    // 忽略无效键或值
+                }
+            }
+        }
+
+        // 注意：这里不需要调用 update()，因为半砖的 quads 是实时生成的，无需预缓存
     }
 }
