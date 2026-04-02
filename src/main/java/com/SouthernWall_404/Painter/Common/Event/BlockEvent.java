@@ -11,6 +11,7 @@ import com.SouthernWall_404.Painter.Common.Init.ModAttachments;
 import com.SouthernWall_404.Painter.Common.World.Item.ChulkItem;
 import com.SouthernWall_404.Painter.Common.World.Item.PaintBucketItem;
 import com.SouthernWall_404.Painter.Common.World.Item.PaintItem;
+import com.ibm.icu.impl.Pair;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
@@ -24,8 +25,7 @@ import net.minecraft.world.level.Level;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 public class BlockEvent {
 
@@ -45,6 +45,13 @@ public class BlockEvent {
         Player player=event.getEntity();
         ItemStack itemStack=player.getItemInHand(InteractionHand.MAIN_HAND);
         Item item=itemStack.getItem().asItem();
+
+        if (event.getHand()!=InteractionHand.MAIN_HAND)
+        {
+            return;
+        }
+
+
         if(item instanceof PaintItem)
         {
             event.setCanceled(true);
@@ -64,7 +71,13 @@ public class BlockEvent {
 
             Item itemToPaint=player.getItemInHand(InteractionHand.OFF_HAND).getItem();
 
-            PaintBlockUtil.dealWithPaintClick(level,blockPos,player,event.getFace());
+//            if(event.getSide().isServer())
+            {
+                PaintBlockUtil.dealWithPaintClick(level,blockPos,player,event.getFace());
+
+            }
+
+            return;
 //                PaintBlockUtil.cycle(level,blockPos,player,event.getFace());
 //                PaintBlockUtil.paint(level,blockPos,player,event.getFace());
 

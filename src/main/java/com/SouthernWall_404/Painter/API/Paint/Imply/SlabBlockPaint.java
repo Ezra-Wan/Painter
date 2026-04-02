@@ -80,12 +80,10 @@ public class SlabBlockPaint extends AbstractPaint {
                 slabTypes.put(key,SlabType.BOTTOM);
                 break;
             case BOTTOM:
-                slabTypes.put(key,SlabType.DOUBLE);
+                slabTypes.put(key,SlabType.TOP);
 
                 break;
             case DOUBLE:
-                slabTypes.put(key,SlabType.TOP);
-
                 break;
             default:
                 break;
