@@ -45,12 +45,12 @@ public class PaintBlockUtil {
                     Block block=blockItem.getBlock();
                     AbstractRender render = RenderUtil.getRender(level, blockPos);
 
-//                    if(render.getMaterial(direction).getBlock()==block)
-//                    {
-////                        cycle(level, blockPos, player, direction);
-//                    }else {
+                    if(render.getMaterial(direction).getBlock()==block)
+                    {
+                        cycle(level, blockPos, player, direction);
+                    }else {
                         paint(level,blockPos,player,direction);
-//                    }
+                    }
                 }
             }
         }else {
