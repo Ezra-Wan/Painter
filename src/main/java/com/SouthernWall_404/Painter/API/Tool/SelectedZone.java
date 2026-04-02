@@ -4,31 +4,38 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.Vec3i;
 import net.minecraft.world.phys.AABB;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 public class SelectedZone{
 
-    private BlockPos A;
-    private BlockPos B;
+    private List<BlockPos> selected=new ArrayList<>();
     private Direction face;
+
+
+
+    //待移除
+    private BlockPos A;
+
 
     public SelectedZone(){
 
     }
 
-    public SelectedZone(BlockPos a, BlockPos b, Direction face) {
-        A = a;
-        B = b;
-        this.face = face;
+    public void addAPosition(BlockPos pos) {
+        selected.add(pos);
+    }
+
+    public void removeAPosition(BlockPos pos)
+    {
+        if(selected.contains(pos))selected.remove(pos);
     }
 
     public boolean isSelecting()
     {
-        if(A!=null&&B!=null&&face!=null)
+        if(!selected.isEmpty()&&face!=null)
         {
             return true;
         }
@@ -37,22 +44,7 @@ public class SelectedZone{
 
     public boolean isInSurface(BlockPos pos,Direction direction)
     {
-
-        if(direction!=face)//如果不是同一朝向，不算
-        {
-            return false;
-        }
-
-        Direction.Axis axis=direction.getAxis();
-        if(pos.get(axis)==A.get(axis))//是同一平面
-        {
-            if(contains(pos))
-            {
-                return true;
-            }//超出则判定不在同一截面
-        }
-
-        return false;
+        return direction==face&&selected.contains(pos);
     }
 
     public String isValid(BlockPos b)
@@ -70,75 +62,81 @@ public class SelectedZone{
         }
     }
 
-
-
-    public BlockPos getA() {
-        return A;
-    }
-
-    public BlockPos getB() {
-        return B;
-    }
-
-    public Direction getFace() {
-        return face;
-    }
-
     public void setA(BlockPos a, Direction face)
     {
         this.A=a;
         this.face=face;
     }
-
-    public String setB(BlockPos b)
-    {
-        String result=isValid(b);
-        if(result==ToolContent.PASS)
-        {
-            this.B=b;
-
+    public String setB(BlockPos b) {
+        String result = isValid(b);
+        if (!ToolContent.PASS.equals(result)) {
+            return result;
         }
 
-        return result;//表示设置成功
+        // 法向量（轴向单位向量）
+        Vec3i n = face.getNormal();
+        // 获取两个垂直于 n 的基向量
+        Vec3i u = getPerpendicularU(n);
+        Vec3i v = getPerpendicularV(n);
+
+        // 平面上的恒定坐标值（即 A 在法向量上的投影）
+        int constCoord = dot(A, n);
+
+        // A 和 b 在 (u, v) 坐标系下的坐标
+        int a_u = dot(A, u);
+        int a_v = dot(A, v);
+        int b_u = dot(b, u);
+        int b_v = dot(b, v);
+
+        int minU = Math.min(a_u, b_u);
+        int maxU = Math.max(a_u, b_u);
+        int minV = Math.min(a_v, b_v);
+        int maxV = Math.max(a_v, b_v);
+
+        // 遍历矩形区域
+        for (int du = minU; du <= maxU; du++) {
+            for (int dv = minV; dv <= maxV; dv++) {
+                BlockPos pos = new BlockPos(
+                        constCoord * n.getX() + du * u.getX() + dv * v.getX(),
+                        constCoord * n.getY() + du * u.getY() + dv * v.getY(),
+                        constCoord * n.getZ() + du * u.getZ() + dv * v.getZ()
+                );
+                selected.add(pos);
+            }
+        }
+
+        return ToolContent.PASS;
+    }
+
+    // 点积
+    private int dot(BlockPos p, Vec3i vec) {
+        return p.getX() * vec.getX() + p.getY() * vec.getY() + p.getZ() * vec.getZ();
+    }
+
+    // 根据法向量 n 返回第一个垂直基向量
+    private Vec3i getPerpendicularU(Vec3i n) {
+        if (n.getX() != 0) return new Vec3i(0, 1, 0);
+        if (n.getY() != 0) return new Vec3i(1, 0, 0);
+        return new Vec3i(1, 0, 0); // n.getZ() != 0
+    }
+
+    // 第二个垂直基向量（保证与 n 和 u 都垂直）
+    private Vec3i getPerpendicularV(Vec3i n) {
+        if (n.getX() != 0) return new Vec3i(0, 0, 1);
+        if (n.getY() != 0) return new Vec3i(0, 0, 1);
+        return new Vec3i(0, 1, 0); // n.getZ() != 0
     }
 
     public boolean contains(BlockPos pos)
     {
-        if(face!=null&&A!=null&&B!=null)
-        {
-            AABB aabb=new AABB(A.getX(),A.getY(),A.getZ(),B.getX(),B.getY(),B.getZ());
-//            boolean contain=aabb.contains(pos.getX(),pos.getY(),pos.getZ());
-
-            int minX = Math.min(A.getX(), B.getX());
-            int minY = Math.min(A.getY(), B.getY());
-            int minZ = Math.min(A.getZ(), B.getZ());
-            int maxX = Math.max(A.getX(), B.getX());
-            int maxY = Math.max(A.getY(), B.getY());
-            int maxZ = Math.max(A.getZ(), B.getZ());
-
-            boolean contain=
-                    pos.getX()>=minX&&
-                    pos.getX()<=maxX&&
-                    pos.getY()>=minY&&
-                    pos.getY()<=maxY&&
-                    pos.getZ()>=minZ&&
-                    pos.getZ()<=maxZ;
-
-            return contain;
-
-        }else {
-
-            System.out.println("missing elements for!");
-            return false;
-        }
-
+        return selected.contains(pos);
     }
 
     public void clear()
     {
         A=null;
-        B=null;
         face=null;
+        selected.clear();
 
 
     }
