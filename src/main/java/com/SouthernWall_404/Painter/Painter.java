@@ -2,7 +2,6 @@ package com.SouthernWall_404.Painter;
 
 import com.SouthernWall_404.Painter.Common.Event.BlockEvent;
 import com.SouthernWall_404.Painter.Common.Init.*;
-import com.SouthernWall_404.Painter.Common.Network.ModChannels;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.neoforge.common.NeoForge;

@@ -1,7 +1,6 @@
 package com.SouthernWall_404.Painter.Common.Init;
 
 import com.SouthernWall_404.Painter.Painter;
-import net.minecraft.ChatFormatting;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.CreativeModeTab;

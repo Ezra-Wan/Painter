@@ -1,13 +1,10 @@
 package com.SouthernWall_404.Painter.API.Tool.Wall.Filters;
 
 import com.SouthernWall_404.Painter.API.Tool.SelectedZone;
-import com.SouthernWall_404.Painter.API.Tool.Wall.IFilter;
 import com.SouthernWall_404.Painter.Common.Init.ModAttachments;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.state.BlockState;
 
 public class SelectFilter extends EmptyFilter {
 

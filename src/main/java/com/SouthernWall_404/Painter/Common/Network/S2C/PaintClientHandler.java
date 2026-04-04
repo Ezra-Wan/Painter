@@ -1,11 +1,5 @@
 package com.SouthernWall_404.Painter.Common.Network.S2C;
 
-import com.SouthernWall_404.Painter.Common.World.BlockEntity.PaintBlockEntity;
-import net.minecraft.client.Minecraft;
-import net.minecraft.core.BlockPos;
-import net.minecraft.world.level.ChunkPos;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.entity.BlockEntity;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 public class PaintClientHandler {

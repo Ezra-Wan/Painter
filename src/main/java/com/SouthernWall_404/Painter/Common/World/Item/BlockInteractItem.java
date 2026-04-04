@@ -1,6 +1,5 @@
 package com.SouthernWall_404.Painter.Common.World.Item;
 
-import com.SouthernWall_404.Painter.Common.Event.BlockEvent;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
