@@ -22,6 +22,11 @@ public class SelectedZone{
 
     }
 
+
+    public List<BlockPos> getSelected() {
+        return selected;
+    }
+
     public void addAPosition(BlockPos pos) {
         selected.add(pos);
     }
