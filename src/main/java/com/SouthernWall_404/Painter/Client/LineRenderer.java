@@ -1,5 +1,6 @@
 package com.SouthernWall_404.Painter.Client;
 
+import com.SouthernWall_404.Painter.API.Paint.Util.PaintBlockUtil;
 import com.SouthernWall_404.Painter.API.Tool.SelectedZone;
 import com.SouthernWall_404.Painter.Common.Init.ModAttachments;
 import com.SouthernWall_404.Painter.Painter;
@@ -11,6 +12,8 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Vec3i;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -36,8 +39,9 @@ public class LineRenderer {
 
         Minecraft mc = Minecraft.getInstance();
         Player player=mc.player;
+        Level level=mc.level;
 
-        if (mc.player == null || mc.level == null) return;
+        if (player == null || level == null) return;
 
 
         SelectedZone selectedZone=player.getData(ModAttachments.SELECTED_ZONE);
@@ -55,7 +59,10 @@ public class LineRenderer {
         var buffer = bufferSource.getBuffer(CustomRenderTypes.PURE_COLOR);
         for(BlockPos pos:poses)
         {
-
+            if(!PaintBlockUtil.isPaintable(level,pos))
+            {
+                continue;
+            }
             var poseStack = event.getPoseStack();
             poseStack.pushPose();
             // 4. 获取VertexConsumer并开始渲染线条

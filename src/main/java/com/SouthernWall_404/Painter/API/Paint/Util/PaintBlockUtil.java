@@ -130,6 +130,11 @@ public class PaintBlockUtil {
 
     }
 
+    public static boolean isPaintable(Level level,BlockPos blockPos)
+    {
+        BlockState origin=level.getBlockState(blockPos);
+        return isPaintable(origin,level,blockPos);
+    }
     public static boolean isPaintable(BlockState origin,Level level,BlockPos blockPos)
     {
         if(origin.getBlock()instanceof PaintBlock)

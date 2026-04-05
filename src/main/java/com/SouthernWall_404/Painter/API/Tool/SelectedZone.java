@@ -3,15 +3,16 @@ package com.SouthernWall_404.Painter.API.Tool;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Vec3i;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.neoforge.event.level.BlockEvent;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class SelectedZone{
+public class SelectedZone {
 
-    private List<BlockPos> selected=new ArrayList<>();
+    private List<BlockPos> selected = new ArrayList<>();
     private Direction face;
-
 
 
     //待移除
@@ -28,7 +29,7 @@ public class SelectedZone{
     }
 
     public void addAPosition(BlockPos pos) {
-        selected.add(pos);
+        if(!selected.contains(pos)) selected.add(pos);
     }
 
     public void removeAPosition(BlockPos pos)
@@ -104,7 +105,7 @@ public class SelectedZone{
                         constCoord * n.getY() + du * u.getY() + dv * v.getY(),
                         constCoord * n.getZ() + du * u.getZ() + dv * v.getZ()
                 );
-                selected.add(pos);
+                addAPosition(pos);
             }
         }
 
