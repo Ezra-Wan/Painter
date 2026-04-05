@@ -24,12 +24,17 @@ public class SelectedZone {
     }
 
 
+    public Direction getFace() {
+        return face;
+    }
+
     public List<BlockPos> getSelected() {
         return selected;
     }
 
     public void addAPosition(BlockPos pos) {
         if(!selected.contains(pos)) selected.add(pos);
+        //TODO:添加对渲染可见性的检验
     }
 
     public void removeAPosition(BlockPos pos)
@@ -70,6 +75,8 @@ public class SelectedZone {
     {
         this.A=a;
         this.face=face;
+
+        //TODO:添加对已有选区的清除
     }
     public String setB(BlockPos b) {
         String result = isValid(b);
