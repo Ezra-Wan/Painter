@@ -1,18 +1,20 @@
 package com.SouthernWall_404.Painter.API.Tool;
 
+import com.SouthernWall_404.Painter.API.Tool.Wall.Squad;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Vec3i;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.neoforge.event.level.BlockEvent;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class SelectedZone {
 
-    private List<BlockPos> selected = new ArrayList<>();
+    private List<BlockPos> contains = new ArrayList<>();
     private Direction face;
+
+    private List<Squad> squads=new ArrayList<>();
+    private Squad cacheSquad;
 
 
     //待移除
@@ -28,23 +30,23 @@ public class SelectedZone {
         return face;
     }
 
-    public List<BlockPos> getSelected() {
-        return selected;
+    public List<BlockPos> getContains() {
+        return contains;
     }
 
     public void addAPosition(BlockPos pos) {
-        if(!selected.contains(pos)) selected.add(pos);
+        if(!contains.contains(pos)) contains.add(pos);
         //TODO:添加对渲染可见性的检验
     }
 
     public void removeAPosition(BlockPos pos)
     {
-        if(selected.contains(pos))selected.remove(pos);
+        if(contains.contains(pos)) contains.remove(pos);
     }
 
     public boolean isSelecting()
     {
-        if(!selected.isEmpty()&&face!=null)
+        if(!contains.isEmpty()&&face!=null)
         {
             return true;
         }
@@ -53,7 +55,7 @@ public class SelectedZone {
 
     public boolean isInSurface(BlockPos pos,Direction direction)
     {
-        return direction==face&&selected.contains(pos);
+        return direction==face&& contains.contains(pos);
     }
 
     public String isValid(BlockPos b)
@@ -71,52 +73,94 @@ public class SelectedZone {
         }
     }
 
+
+    public void addSquad(Squad squad)
+    {
+        squads.add(squad);
+
+        List<BlockPos> squadContains=squad.getContians();
+
+        squadContains.forEach(
+                (blockpos)->{
+                    if(!contains.contains(blockpos))
+                    {
+                        contains.add(blockpos);
+                    }
+                }
+        );
+    }
     public void setA(BlockPos a, Direction face)
     {
-        this.A=a;
-        this.face=face;
+        if(this.face==null)
+        {
+            this.face=face;
+        }
+        else {
+            if(face!=this.getFace())
+            {
+                return;
+            }
+        }
+
+        cacheSquad=new Squad(a,face);
 
         //TODO:添加对已有选区的清除
     }
     public String setB(BlockPos b) {
-        String result = isValid(b);
-        if (!ToolContent.PASS.equals(result)) {
+
+        if(cacheSquad==null)
+        {
+            return ToolContent.EMPTY_POSA;
+        }
+        String result=cacheSquad.setB(b);
+
+        if(result.equals(ToolContent.PASS))
+        {
+            addSquad(cacheSquad);
+
+            cacheSquad=null;
+
             return result;
         }
-
-        // 法向量（轴向单位向量）
-        Vec3i n = face.getNormal();
-        // 获取两个垂直于 n 的基向量
-        Vec3i u = getPerpendicularU(n);
-        Vec3i v = getPerpendicularV(n);
-
-        // 平面上的恒定坐标值（即 A 在法向量上的投影）
-        int constCoord = dot(A, n);
-
-        // A 和 b 在 (u, v) 坐标系下的坐标
-        int a_u = dot(A, u);
-        int a_v = dot(A, v);
-        int b_u = dot(b, u);
-        int b_v = dot(b, v);
-
-        int minU = Math.min(a_u, b_u);
-        int maxU = Math.max(a_u, b_u);
-        int minV = Math.min(a_v, b_v);
-        int maxV = Math.max(a_v, b_v);
-
-        // 遍历矩形区域
-        for (int du = minU; du <= maxU; du++) {
-            for (int dv = minV; dv <= maxV; dv++) {
-                BlockPos pos = new BlockPos(
-                        constCoord * n.getX() + du * u.getX() + dv * v.getX(),
-                        constCoord * n.getY() + du * u.getY() + dv * v.getY(),
-                        constCoord * n.getZ() + du * u.getZ() + dv * v.getZ()
-                );
-                addAPosition(pos);
-            }
-        }
-
-        return ToolContent.PASS;
+        return result;
+//        String result = isValid(b);
+//        if (!ToolContent.PASS.equals(result)) {
+//            return result;
+//        }
+//
+//        // 法向量（轴向单位向量）
+//        Vec3i n = face.getNormal();
+//        // 获取两个垂直于 n 的基向量
+//        Vec3i u = getPerpendicularU(n);
+//        Vec3i v = getPerpendicularV(n);
+//
+//        // 平面上的恒定坐标值（即 A 在法向量上的投影）
+//        int constCoord = dot(A, n);
+//
+//        // A 和 b 在 (u, v) 坐标系下的坐标
+//        int a_u = dot(A, u);
+//        int a_v = dot(A, v);
+//        int b_u = dot(b, u);
+//        int b_v = dot(b, v);
+//
+//        int minU = Math.min(a_u, b_u);
+//        int maxU = Math.max(a_u, b_u);
+//        int minV = Math.min(a_v, b_v);
+//        int maxV = Math.max(a_v, b_v);
+//
+//        // 遍历矩形区域
+//        for (int du = minU; du <= maxU; du++) {
+//            for (int dv = minV; dv <= maxV; dv++) {
+//                BlockPos pos = new BlockPos(
+//                        constCoord * n.getX() + du * u.getX() + dv * v.getX(),
+//                        constCoord * n.getY() + du * u.getY() + dv * v.getY(),
+//                        constCoord * n.getZ() + du * u.getZ() + dv * v.getZ()
+//                );
+//                addAPosition(pos);
+//            }
+//        }
+//
+//        return ToolContent.PASS;
     }
 
     // 点积
@@ -140,14 +184,16 @@ public class SelectedZone {
 
     public boolean contains(BlockPos pos)
     {
-        return selected.contains(pos);
+        return contains.contains(pos);
     }
 
     public void clear()
     {
         A=null;
         face=null;
-        selected.clear();
+        contains.clear();
+        squads.clear();
+        cacheSquad=null;
 
 
     }

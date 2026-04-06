@@ -9,22 +9,17 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.block.model.BakedQuad;
-import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Vec3i;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.SlabBlock;
-import net.minecraft.world.level.block.state.properties.SlabType;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
 import org.joml.Matrix4f;
-import org.joml.Vector3f;
 
 import java.util.List;
 
@@ -50,7 +45,7 @@ public class SelectedRenderer {
 
 
         SelectedZone selectedZone=player.getData(ModAttachments.SELECTED_ZONE);
-        List<BlockPos> poses=selectedZone.getSelected();
+        List<BlockPos> poses=selectedZone.getContains();
         Direction face=selectedZone.getFace();
 
         // 2. 获取相机位置用于坐标转换
@@ -150,6 +145,7 @@ public class SelectedRenderer {
         float yMin=0;
         float yMax=1;
 
+        if(face==null)return;
 
         Vec3i normal=face.getNormal();
         float[][] positions;

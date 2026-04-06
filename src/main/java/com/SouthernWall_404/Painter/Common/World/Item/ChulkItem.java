@@ -27,6 +27,11 @@ public class ChulkItem extends BlockInteractItem {
 
     @Override
     public void dealRightClick(PlayerInteractEvent.RightClickBlock event) {
+
+        if(event.getHand()!=InteractionHand.MAIN_HAND)
+        {
+            return;
+        }
         // 原 BlockEvent 中处理 ChulkItem 右键的逻辑
         var player = event.getEntity();
         var selectedZone = player.getData(ModAttachments.SELECTED_ZONE);
@@ -60,6 +65,10 @@ public class ChulkItem extends BlockInteractItem {
 
     @Override
     public void dealLeftClick(PlayerInteractEvent.LeftClickBlock event) {
+        if(event.getHand()!=InteractionHand.MAIN_HAND)
+        {
+            return;
+        }
         // 原 BlockEvent 中处理 ChulkItem 左键的逻辑
         var player = event.getEntity();
         var selectedZone = player.getData(ModAttachments.SELECTED_ZONE);

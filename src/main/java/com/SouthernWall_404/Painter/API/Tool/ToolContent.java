@@ -17,6 +17,9 @@ public class ToolContent {
     //========结果处理========
     public static String PASS="pass";
     public static String EMPTY_POSA="missing_a";
+    public static String EMPTY_POSB="missing_a";
+    public static String EMPTY_FACE="missing_face";
+
     public static String NOT_IN_SURFACE="not_in_surface";
 
 
