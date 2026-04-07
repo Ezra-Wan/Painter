@@ -1,5 +1,6 @@
 package com.SouthernWall_404.Painter.API.Tool;
 
+import com.SouthernWall_404.Painter.API.Tool.Wall.Edge;
 import com.SouthernWall_404.Painter.API.Tool.Wall.Squad;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -15,6 +16,8 @@ public class SelectedZone {
 
     private List<Squad> squads=new ArrayList<>();
     private Squad cacheSquad;
+
+    private List<Edge> cachedEdges=new ArrayList<>();
 
 
     //待移除
@@ -73,21 +76,40 @@ public class SelectedZone {
         }
     }
 
+    public void update()
+    {
+        for(Squad squad:squads)
+        {
+            List<BlockPos> squadContains=squad.getContians();
+
+            squadContains.forEach(
+                    (blockpos)->{
+                        if(!contains.contains(blockpos))
+                        {
+                            addAPosition(blockpos);
+                        }
+                    }
+            );
+
+
+        }
+
+        cachedEdges.clear();
+        for(Squad squad:squads)
+        {
+            cachedEdges.addAll(squad.getEdges(contains));
+        }
+
+        cachedEdges.isEmpty();
+
+    }
+
 
     public void addSquad(Squad squad)
     {
         squads.add(squad);
 
-        List<BlockPos> squadContains=squad.getContians();
-
-        squadContains.forEach(
-                (blockpos)->{
-                    if(!contains.contains(blockpos))
-                    {
-                        contains.add(blockpos);
-                    }
-                }
-        );
+        update();
     }
     public void setA(BlockPos a, Direction face)
     {
@@ -194,6 +216,7 @@ public class SelectedZone {
         contains.clear();
         squads.clear();
         cacheSquad=null;
+        cachedEdges.clear();
 
 
     }

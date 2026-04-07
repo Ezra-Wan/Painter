@@ -1,8 +1,11 @@
 package com.SouthernWall_404.Painter.API.Tool.Wall;
 
+import com.SouthernWall_404.Painter.API.Paint.Util.CommonUtil;
 import com.SouthernWall_404.Painter.API.Tool.ToolContent;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.phys.Vec3;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -106,27 +109,12 @@ public class Squad {
         minZ = Math.min(A.getZ(), b.getZ());
         maxZ = Math.max(A.getZ(), b.getZ());
 
-        return ToolContent.PASS;
-    }
-
-
-    public String isValid()
-    {
-        if(A==null)
-        {
-            return ToolContent.EMPTY_POSA;
-        }
-        if(B==null)
-        {
-            return ToolContent.EMPTY_POSB;
-        }
-        if(face==null)
-        {
-            return ToolContent.EMPTY_FACE;
-        }
+        minPos = new BlockPos(minX, minY, minZ);
+        maxPos = new BlockPos(maxX, maxY, maxZ);
 
         return ToolContent.PASS;
     }
+
 
     public List<BlockPos> getContians() {
 
@@ -188,5 +176,121 @@ public class Squad {
         return result;
     }
 
+    public String isValid()
+    {
+        if(this.A==null)
+        {
+            return ToolContent.EMPTY_POSA;
+        }
+        if(this.B==null)
+        {
+            return ToolContent.EMPTY_POSB;
+        }
+        if(this.face==null)
+        {
+            return ToolContent.EMPTY_FACE;
+        }
+        return ToolContent.PASS;
+    }
 
+    /**
+     * 结合face,获取某一方向上的所有Edge
+     * @param edgeDirection
+     * @return
+     */
+    public List<Edge> getDirectionEdge(List<BlockPos> cover,Direction edgeDirection)
+    {
+
+        List<Edge> result=new ArrayList<>();
+
+        if(edgeDirection.getAxis()==face.getAxis())
+        {
+            throw new IllegalArgumentException("Invalid EdgeDirection");
+        }
+
+        int facePos=minPos.get(face.getAxis());//整个Squad的法线方向上的坐标
+        int edgePos;//Edge垂直方向坐标
+        int startPos;//Edge纵向方向起始坐标
+        int endPos;//Edge纵向方向终止坐标
+
+
+        //获取edge垂直方向坐标
+        Direction.Axis edgeDirectionAxis=edgeDirection.getAxis();
+        if(CommonUtil.isPositiveAxis(edgeDirection))
+        {
+            edgePos=maxPos.get(edgeDirectionAxis);//正向轴，则给最大值
+        }else {
+            edgePos=minPos.get(edgeDirectionAxis);//负向轴，则给最小值
+        }
+
+        List<Direction> posDirections=CommonUtil.getOtherDirection(face,edgeDirection);
+        Direction posDirection=posDirections.get(0);
+
+        //处理edge纵向方向坐标情况
+        Direction.Axis posAxis=posDirection.getAxis();
+        startPos=minPos.get(posAxis);
+        endPos=maxPos.get(posAxis);
+
+        BlockPos start=new BlockPos(0,0,0).relative(face.getAxis(),facePos).relative(edgeDirectionAxis,edgePos).relative(posAxis,startPos);
+
+        for(int i=startPos;i<=endPos;i++)
+        {
+            //建立当前所在的BlockPos
+            BlockPos current=new BlockPos(0,0,0);
+            current=current.relative(face.getAxis(),facePos);
+            current=current.relative(edgeDirection.getAxis(),edgePos);
+            current=current.relative(posAxis,i);
+
+            BlockPos relative=current.relative(edgeDirection);//获取跨边缘的另一个方块的情况
+
+            if(cover.contains(relative)!=cover.contains(current))//如果只有一个被包含
+            {
+                //则其为边内
+
+                if(i==endPos)//截断
+                {
+                    Edge edge=new Edge(CommonUtil.pos2Vec3(start),CommonUtil.pos2Vec3(current.relative(posDirection)));
+                    result.add(edge);
+                }
+
+                continue;
+            }
+            else//如果均包含或均不包含
+            {
+                //则需要考虑建立Edge
+                if(startPos!=i)//如果与目前最近的出发点不重叠
+                {
+                    Edge edge=new Edge(CommonUtil.pos2Vec3(start),CommonUtil.pos2Vec3(current.relative(posDirection)));
+                    result.add(edge);
+                }
+
+                startPos=i+1;//startPos前移
+                start=new BlockPos(0,0,0).relative(face.getAxis(),facePos).relative(edgeDirectionAxis,edgePos).relative(posAxis,startPos);
+
+            }
+
+        }
+        return result;
+    }
+
+
+
+
+    /**
+     *
+     * @param cover
+     * @return
+     */
+    public List<Edge> getEdges(List<BlockPos> cover)
+    {
+        List<Edge> result=new ArrayList<>();
+
+        List<Direction> directions=CommonUtil.getTanDir(face);
+        for(Direction direction:directions)
+        {
+            List<Edge> directionEdges=getDirectionEdge(cover,direction);
+            result.addAll(directionEdges);
+        }
+        return result;
+    }
 }
