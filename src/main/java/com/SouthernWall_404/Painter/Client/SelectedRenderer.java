@@ -143,7 +143,7 @@ public class SelectedRenderer {
         poseStack.translate(edge.A.x - camPos.x, edge.A. y- camPos.y, edge.A.z - camPos.z);
         Matrix4f matrix = poseStack.last().pose();
 
-        edge.render(poseStack, buffer, 0,0,0,128, face);
+        edge.render(poseStack, buffer,  face);
 
 
         poseStack.popPose();
