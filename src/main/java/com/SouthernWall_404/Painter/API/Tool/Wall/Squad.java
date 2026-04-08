@@ -249,7 +249,14 @@ public class Squad {
 
                 if(i==endPos)//截断
                 {
-                    Edge edge=new Edge(CommonUtil.pos2Vec3(start),CommonUtil.pos2Vec3(current.relative(posDirection)));
+                    BlockPos displayStart=start;
+                    BlockPos displayEnd=current.relative(posDirection);
+                    if(CommonUtil.isPositiveAxis(edgeDirection))
+                    {
+                        displayStart=displayStart.relative(edgeDirection);
+                        displayEnd=displayEnd.relative(edgeDirection);
+                    }
+                    Edge edge=new Edge(CommonUtil.pos2Vec3(displayStart),CommonUtil.pos2Vec3(displayEnd));
                     result.add(edge);
                 }
 
@@ -260,7 +267,14 @@ public class Squad {
                 //则需要考虑建立Edge
                 if(startPos!=i)//如果与目前最近的出发点不重叠
                 {
-                    Edge edge=new Edge(CommonUtil.pos2Vec3(start),CommonUtil.pos2Vec3(current.relative(posDirection)));
+                    BlockPos displayStart=start;
+                    BlockPos displayEnd=current.relative(posDirection);
+                    if(CommonUtil.isPositiveAxis(edgeDirection))
+                    {
+                        displayStart=displayStart.relative(edgeDirection);
+                        displayEnd=displayEnd.relative(edgeDirection);
+                    }
+                    Edge edge=new Edge(CommonUtil.pos2Vec3(displayStart),CommonUtil.pos2Vec3(displayEnd));
                     result.add(edge);
                 }
 
