@@ -2,6 +2,7 @@ package com.SouthernWall_404.Painter.Client;
 
 import com.SouthernWall_404.Painter.API.Paint.Util.PaintBlockUtil;
 import com.SouthernWall_404.Painter.API.Tool.SelectedZone;
+import com.SouthernWall_404.Painter.API.Tool.Wall.Edge;
 import com.SouthernWall_404.Painter.Common.Init.ModAttachments;
 import com.SouthernWall_404.Painter.Painter;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -9,6 +10,7 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Vec3i;
@@ -58,13 +60,14 @@ public class SelectedRenderer {
         // 起点
         MultiBufferSource.BufferSource bufferSource = mc.renderBuffers().bufferSource();
         var buffer = bufferSource.getBuffer(CustomRenderTypes.PURE_COLOR);
+        var poseStack = event.getPoseStack();
         for(BlockPos pos:poses)
         {
             if(!PaintBlockUtil.isPaintable(level,pos))
             {
                 continue;
             }
-            var poseStack = event.getPoseStack();
+
 
             renderFace(pos,face,camPos,buffer,poseStack);
 //            poseStack.pushPose();
@@ -112,11 +115,39 @@ public class SelectedRenderer {
 //
 //            poseStack.popPose();
         }
+
+
+
+        List<Edge> edges=selectedZone.getCachedEdges();
+
+        VertexConsumer lineBuffer=bufferSource.getBuffer(RenderType.LINES);
+
+        edges.forEach((edge)->{
+
+            renderEdge(edge,face,camPos,lineBuffer,poseStack);
+
+        });
+
         bufferSource.endBatch(CustomRenderTypes.PURE_COLOR);
+        bufferSource.endBatch(RenderType.LINES);
 
     }
 
+    public static void renderEdge(Edge edge, Direction face, Vec3 camPos, VertexConsumer buffer, PoseStack poseStack)
+    {
+        poseStack.pushPose();
+        // 4. 获取VertexConsumer并开始渲染线条
 
+        // 3. 设置PoseStack，将世界坐标转换为相机相对坐标
+
+        poseStack.translate(edge.A.x - camPos.x, edge.A. y- camPos.y, edge.A.z - camPos.z);
+        Matrix4f matrix = poseStack.last().pose();
+
+        edge.render(poseStack, buffer, 0,0,0,128, face);
+
+
+        poseStack.popPose();
+    }
     public static void renderFace(BlockPos pos, Direction face, Vec3 camPos, VertexConsumer buffer, PoseStack poseStack)
     {
         poseStack.pushPose();
@@ -172,6 +203,8 @@ public class SelectedRenderer {
             };
             default -> throw new IllegalArgumentException("Invalid direction: " + face);
         }
+
+
 
         buffer.addVertex(matrix4f,positions[0][0]+normal.getX()*offset,positions[0][1]+normal.getY()*offset,positions[0][2]+normal.getZ()*offset)
                 .setNormal(normal.getX(),normal.getY(),normal.getZ())

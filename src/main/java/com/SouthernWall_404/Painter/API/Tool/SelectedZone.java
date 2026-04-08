@@ -56,7 +56,11 @@ public class SelectedZone {
         return false;
     }
 
-    public boolean isInSurface(BlockPos pos,Direction direction)
+    public List<Edge> getCachedEdges() {
+        return cachedEdges;
+    }
+
+    public boolean isInSurface(BlockPos pos, Direction direction)
     {
         return direction==face&& contains.contains(pos);
     }
