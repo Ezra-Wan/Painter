@@ -122,7 +122,7 @@ public class SelectedZone {
             this.face=face;
         }
         else {
-            if(face!=this.getFace())
+            if(!this.squads.isEmpty()&&face!=this.getFace())
             {
                 return;
             }

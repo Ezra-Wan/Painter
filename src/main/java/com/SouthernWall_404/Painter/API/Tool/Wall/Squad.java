@@ -256,6 +256,12 @@ public class Squad {
                         displayStart=displayStart.relative(edgeDirection);
                         displayEnd=displayEnd.relative(edgeDirection);
                     }
+
+                    if(CommonUtil.isPositiveAxis(face))
+                    {
+                        displayStart=displayStart.relative(face);
+                        displayEnd=displayEnd.relative(face);
+                    }
                     Edge edge=new Edge(CommonUtil.pos2Vec3(displayStart),CommonUtil.pos2Vec3(displayEnd));
                     result.add(edge);
                 }
@@ -273,6 +279,12 @@ public class Squad {
                     {
                         displayStart=displayStart.relative(edgeDirection);
                         displayEnd=displayEnd.relative(edgeDirection);
+
+                    }
+                    if(CommonUtil.isPositiveAxis(face))
+                    {
+                        displayStart=displayStart.relative(face);
+                        displayEnd=displayEnd.relative(face);
                     }
                     Edge edge=new Edge(CommonUtil.pos2Vec3(displayStart),CommonUtil.pos2Vec3(displayEnd));
                     result.add(edge);
