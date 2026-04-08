@@ -208,13 +208,13 @@ public class Squad {
             throw new IllegalArgumentException("Invalid EdgeDirection");
         }
 
-        int facePos=minPos.get(face.getAxis());//整个Squad的法线方向上的坐标
-        int edgePos;//Edge垂直方向坐标
-        int startPos;//Edge纵向方向起始坐标
+        int facePos=minPos.get(face.getAxis());//Squad定位坐标
+        int edgePos;//Edge定位坐标
+        int startPos;//Edge纵向方向起始点定位坐标
         int endPos;//Edge纵向方向终止坐标
 
 
-        //获取edge垂直方向坐标
+        //获取edge定位坐标
         Direction.Axis edgeDirectionAxis=edgeDirection.getAxis();
         if(CommonUtil.isPositiveAxis(edgeDirection))
         {
@@ -243,11 +243,11 @@ public class Squad {
 
             BlockPos relative=current.relative(edgeDirection);//获取跨边缘的另一个方块的情况
 
-            if(cover.contains(relative)!=cover.contains(current))//如果只有一个被包含
+            if(cover.contains(relative)!=cover.contains(current))//如果只有一个被包含，即可以判定为边框的情况
             {
                 //则其为边内
 
-                if(i==endPos)//截断
+                if(i==endPos)//如果抵达终点
                 {
                     BlockPos displayStart=start;
                     BlockPos displayEnd=current.relative(posDirection);
@@ -255,26 +255,27 @@ public class Squad {
                     {
                         displayStart=displayStart.relative(edgeDirection);
                         displayEnd=displayEnd.relative(edgeDirection);
-                    }
+                    }//轴定位正轴补偿
 
                     if(CommonUtil.isPositiveAxis(face))
                     {
                         displayStart=displayStart.relative(face);
                         displayEnd=displayEnd.relative(face);
-                    }
+                    }//面定位正轴补偿
+
                     Edge edge=new Edge(CommonUtil.pos2Vec3(displayStart),CommonUtil.pos2Vec3(displayEnd));
                     result.add(edge);
                 }
 
                 continue;
             }
-            else//如果均包含或均不包含
+            else//如果均包含或均不包含，即非边框的情况
             {
                 //则需要考虑建立Edge
                 if(startPos!=i)//如果与目前最近的出发点不重叠
                 {
                     BlockPos displayStart=start;
-                    BlockPos displayEnd=current.relative(posDirection);
+                    BlockPos displayEnd=current;
                     if(CommonUtil.isPositiveAxis(edgeDirection))
                     {
                         displayStart=displayStart.relative(edgeDirection);
