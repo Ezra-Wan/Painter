@@ -70,6 +70,7 @@ public class SelectedRenderer {
 
         // 起点
         MultiBufferSource.BufferSource bufferSource = mc.renderBuffers().bufferSource();
+
         var buffer = bufferSource.getBuffer(CustomRenderTypes.PURE_COLOR);
         var poseStack = event.getPoseStack();
         for(BlockPos pos:poses)
