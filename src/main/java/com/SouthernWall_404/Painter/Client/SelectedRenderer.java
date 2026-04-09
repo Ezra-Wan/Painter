@@ -4,6 +4,9 @@ import com.SouthernWall_404.Painter.API.Paint.Util.PaintBlockUtil;
 import com.SouthernWall_404.Painter.API.Tool.SelectedZone;
 import com.SouthernWall_404.Painter.API.Tool.Wall.Edge;
 import com.SouthernWall_404.Painter.Common.Init.ModAttachments;
+import com.SouthernWall_404.Painter.Common.World.Item.ChulkItem;
+import com.SouthernWall_404.Painter.Common.World.Item.PaintBucketItem;
+import com.SouthernWall_404.Painter.Common.World.Item.PaintItem;
 import com.SouthernWall_404.Painter.Painter;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
@@ -14,7 +17,9 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Vec3i;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.api.distmarker.Dist;
@@ -45,6 +50,12 @@ public class SelectedRenderer {
 
         if (player == null || level == null) return;
 
+        ItemStack itemStack=player.getItemInHand(InteractionHand.MAIN_HAND);
+        if(itemStack.getItem()instanceof PaintItem||
+                itemStack.getItem()instanceof ChulkItem||itemStack.getItem() instanceof PaintBucketItem)
+        {
+
+        }else return;
 
         SelectedZone selectedZone=player.getData(ModAttachments.SELECTED_ZONE);
         List<BlockPos> poses=selectedZone.getContains();
@@ -117,7 +128,7 @@ public class SelectedRenderer {
         }
 
 
-
+        bufferSource.endBatch(CustomRenderTypes.PURE_COLOR);
         List<Edge> edges=selectedZone.getCachedEdges();
 
         VertexConsumer lineBuffer=bufferSource.getBuffer(RenderType.LINES);
@@ -128,7 +139,7 @@ public class SelectedRenderer {
 
         });
 
-        bufferSource.endBatch(CustomRenderTypes.PURE_COLOR);
+
         bufferSource.endBatch(RenderType.LINES);
 
     }
