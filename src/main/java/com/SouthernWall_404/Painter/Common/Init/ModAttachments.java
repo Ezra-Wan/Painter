@@ -1,5 +1,6 @@
 package com.SouthernWall_404.Painter.Common.Init;
 
+import com.SouthernWall_404.Painter.API.Paint.Attachment.PaintInfo;
 import com.SouthernWall_404.Painter.API.Tool.SelectedZone;
 import com.SouthernWall_404.Painter.Painter;
 import net.neoforged.neoforge.attachment.AttachmentType;
@@ -19,7 +20,10 @@ public class ModAttachments {
 //                .copyOnDeath()                                    // 死亡时保留
 //                .build()
 //        );
-
+public static final Supplier<AttachmentType<PaintInfo>> PAINT_INFO =
+        ATTACHMENT_TYPES.register("paint_info",
+                () -> AttachmentType.serializable(()->new PaintInfo())
+                        .build());
     public static final Supplier<AttachmentType<SelectedZone>> SELECTED_ZONE =
             ATTACHMENT_TYPES.register(Painter.MODID+".selected_zone",
                     () -> AttachmentType.builder(() ->

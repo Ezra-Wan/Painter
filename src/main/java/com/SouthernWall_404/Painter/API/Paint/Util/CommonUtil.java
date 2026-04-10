@@ -10,6 +10,10 @@ import java.util.List;
 public class CommonUtil {
 
 
+    public static BlockPos vec32Pos(Vec3 vec3)
+    {
+        return new BlockPos((int)Math.floor(vec3.x),(int)Math.floor(vec3.y),(int)Math.floor(vec3.z));
+    }
 
     public static Vec3 pos2Vec3(BlockPos pos)
     {

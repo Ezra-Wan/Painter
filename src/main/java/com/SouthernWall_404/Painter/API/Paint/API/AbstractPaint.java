@@ -2,15 +2,18 @@ package com.SouthernWall_404.Painter.API.Paint.API;
 
 import com.SouthernWall_404.Painter.API.Paint.ModModelRender;
 import com.SouthernWall_404.Painter.API.Paint.Util.RenderUtil;
+import com.SouthernWall_404.RegulappleCore.Render.BakedQuadRender;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.inventory.InventoryMenu;
@@ -44,18 +47,8 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>,Direc
         {
             return;
         }
-        for(Map.Entry<Integer,BlockState> entry: materials.entrySet())
-        {
-            int flag=entry.getKey();
 
-            Direction direction= getDirection(flag);
-            BlockState state=entry.getValue();
-
-//            Block block= RenderUtil.getBlockFromID(paintPaths.get(flag));
-            List<BakedQuad> quads = getQuadsForDirection(state,direction);
-
-            objects.put(flag, quads);
-        }
+        createQuads();
     }
 
 
@@ -106,7 +99,12 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>,Direc
         }
     }
 
-    private Direction getDirection(int flag)
+    /**
+     * 
+     * @param flag
+     * @return
+     */
+    public Direction getDirection(int flag)
     {
         for(Map.Entry<Direction,Integer> entry:flags.entrySet())
         {
@@ -128,27 +126,64 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>,Direc
         // 2. 获取 ModelManager 并得到这个 BlockState 对应的 BakedModel
         //    注意：这段代码必须在客户端执行，因为 ModelManager 只在客户端存在。
         BakedModel model =
-        Minecraft.getInstance().getModelManager().getBlockModelShaper().getBlockModel(state);
+                Minecraft.getInstance().getModelManager().getBlockModelShaper().getBlockModel(state);
         // 3. 创建一个 RandomSource 实例，用于需要随机化的模型（如有些方块的多重变体）
         //    通常情况下，如果你不需要随机化，可以使用 RandomSource.create(0) 或类似方法。
         RandomSource random = RandomSource.create();
 
-    // 4. 调用 getQuads 方法，传入我们想要的方向
-    //    这样就能拿到该方向上的所有 Quad
-    RenderType renderType = RenderUtil.getRenderType(state);
-    List<BakedQuad> quadsForDirection = model.getQuads(state, direction, random, ModelData.EMPTY,renderType);
+        // 4. 调用 getQuads 方法，传入我们想要的方向
+        //    这样就能拿到该方向上的所有 Quad
+        RenderType renderType = RenderUtil.getRenderType(state);
+        List<BakedQuad> quadsForDirection = model.getQuads(state, direction, random, ModelData.EMPTY,renderType);
 
         return quadsForDirection;
-}
-//========业务方法========
+    }
 
 
-public static TextureAtlasSprite getTexture(ResourceLocation key)
-{
-    return  Minecraft.getInstance()
-            .getTextureAtlas(InventoryMenu.BLOCK_ATLAS)
-            .apply(key);
-}
+    @Override
+    protected void serializeF(Direction direction, CompoundTag tag, String key) {
+        tag.putString(key, direction.getName());
+    }
+
+    @Override
+    protected Direction deserializeF(CompoundTag tag, String key) {
+        return Direction.byName(tag.getString(key));
+    }
+
+    public abstract void createQuads();
+
+
+    @Override
+    public void render(BlockPos blockPos, PoseStack poseStack, MultiBufferSource.BufferSource bufferSource, int packedLight, int packedOverlay, float partialTick) {
+
+        for(Map.Entry<Integer,List<BakedQuad>> entry:objects.entrySet())//遍历所有缓存的quad
+        {
+            List<BakedQuad> quads=entry.getValue();
+            int flag=entry.getKey();
+
+            BlockState state=materials.get(flag);
+
+            for(BakedQuad quad:quads)
+            {
+
+                BakedQuadRender.renderWithAO(quad,state,blockPos,poseStack,RenderType.CUTOUT,bufferSource,new ModModelRender.AmbientOcclusionFace());
+            }
+
+        }
+        bufferSource.endBatch(RenderType.CUTOUT);
+
+    }
+
+
+    //========业务方法========
+
+
+    public static TextureAtlasSprite getTexture(ResourceLocation key)
+    {
+        return  Minecraft.getInstance()
+                .getTextureAtlas(InventoryMenu.BLOCK_ATLAS)
+                .apply(key);
+    }
 
 
 

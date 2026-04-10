@@ -2,24 +2,12 @@ package com.SouthernWall_404.Painter.Client;
 
 import com.SouthernWall_404.Painter.Common.World.BlockEntity.PaintBlockEntity;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
-import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
-import net.minecraft.core.Vec3i;
-import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.inventory.InventoryMenu;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.LightLayer;
-import net.minecraft.world.level.block.Block;
 import net.minecraft.world.phys.AABB;
-import net.minecraft.world.phys.Vec3;
 
 public class PaintRender implements BlockEntityRenderer<PaintBlockEntity> {
 
@@ -43,7 +31,7 @@ public class PaintRender implements BlockEntityRenderer<PaintBlockEntity> {
         {
             return;
         }
-        blockEntity.getRender().render(blockEntity,partialTick,poseStack,bufferSource,packedLight,packedOverlay);
+//        blockEntity.getRender().render(blockEntity, blockEntity.getBlockPos(),poseStack, bufferSource, packedLight, packedOverlay, partialTick, );
     }
 
         // 注意：上面的 for 循环方式在较新版本中可能已改变，你需要根据你的 NeoForge 版本调整。

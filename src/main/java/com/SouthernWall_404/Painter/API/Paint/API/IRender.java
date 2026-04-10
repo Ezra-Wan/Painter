@@ -2,8 +2,8 @@ package com.SouthernWall_404.Painter.API.Paint.API;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.neoforge.common.util.INBTSerializable;
 
@@ -24,6 +24,6 @@ public interface IRender<T extends Object> extends INBTSerializable<CompoundTag>
 
     BlockState getOrigin();
 
-    void render(BlockEntity blockEntity, float partialTick, PoseStack poseStack, MultiBufferSource bufferSource,int packedLight, int packedOverlay);//用于渲染内容
+    void render(BlockPos blockPos, PoseStack poseStack, MultiBufferSource.BufferSource bufferSource, int packedLight, int packedOverlay, float partialTick);//用于渲染内容
 
 }

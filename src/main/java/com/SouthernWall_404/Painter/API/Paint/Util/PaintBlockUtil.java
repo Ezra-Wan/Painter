@@ -2,8 +2,10 @@ package com.SouthernWall_404.Painter.API.Paint.Util;
 
 import com.SouthernWall_404.Painter.API.Paint.API.AbstractPaint;
 import com.SouthernWall_404.Painter.API.Paint.API.AbstractRender;
+import com.SouthernWall_404.Painter.API.Paint.Attachment.PaintInfo;
 import com.SouthernWall_404.Painter.API.Paint.Imply.SimpleBlockPaint;
 import com.SouthernWall_404.Painter.API.Paint.Imply.SlabBlockPaint;
+import com.SouthernWall_404.Painter.Common.Init.ModAttachments;
 import com.SouthernWall_404.Painter.Common.Init.ModBlock;
 import com.SouthernWall_404.Painter.Common.World.Block.PaintBlock;
 import com.SouthernWall_404.Painter.Common.World.BlockEntity.PaintBlockEntity;
@@ -16,9 +18,11 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.SlabBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 
@@ -87,48 +91,61 @@ public class PaintBlockUtil {
             paint(level, blockPos, direction, paintState);
         }
     }
-    public static void paint(Level level, BlockPos blockPos, Direction direction,BlockState paint)
-    {
-        BlockState origin=level.getBlockState(blockPos);
+    public static void paint(Level level, BlockPos blockPos, Direction direction,BlockState paint){
 
-        if(origin.getBlock() instanceof PaintBlock)//如果对象是已经是渲染方块
-        {
-            AbstractRender render= RenderUtil.getRender(level,blockPos);
+        LevelChunk chunk=level.getChunkAt(blockPos);
+        PaintInfo paintInfo=chunk.getData(ModAttachments.PAINT_INFO);
 
-            render.putRenderBlock(direction,paint);//放置新的渲染面
+        AbstractRender render=new SimpleBlockPaint(Blocks.AIR.defaultBlockState());//默认普通方块
 
-            BlockEntity blockEntity=level.getBlockEntity(blockPos);
-            if(blockEntity instanceof PaintBlockEntity paintBlockEntity)
-            {
-                paintBlockEntity.setRender(render);//更新
-            }
-            return;
-        }
-        //如果不是渲染方块
-        if(isPaintable(origin,level,blockPos))//只在是可粉刷方块时进行响应
-        {
-            AbstractRender render=new SimpleBlockPaint(origin);//默认普通方块
+        render.putRenderBlock(direction,paint);
 
-            if(origin.getBlock() instanceof SlabBlock)//如果是台阶
-            {
-                render=new SlabBlockPaint(origin);//修改为台阶渲染
-            }
-
-            render.putRenderBlock(direction,paint);
-
-            BlockState renderBlock=ModBlock.RENDER_BEDROCK.get().defaultBlockState();//放置渲染方块
-            level.setBlock(blockPos,renderBlock,3);//放置
-
-            BlockEntity blockEntity=level.getBlockEntity(blockPos);
-            if(blockEntity instanceof PaintBlockEntity paintBlockEntity)
-            {
-                paintBlockEntity.init(render);//引入Render
-            }
-        }
-
-
-
+        paintInfo.putRender(blockPos,render);
     }
+
+//    @Deprecated
+//    public static void paint(Level level, BlockPos blockPos, Direction direction,BlockState paint)
+//    {
+//        BlockState origin=level.getBlockState(blockPos);
+//
+//        if(origin.getBlock() instanceof PaintBlock)//如果对象是已经是渲染方块
+//        {
+//            AbstractRender render= RenderUtil.getRender(level,blockPos);
+//
+//            render.putRenderBlock(direction,paint);//放置新的渲染面
+//
+//            BlockEntity blockEntity=level.getBlockEntity(blockPos);
+//            if(blockEntity instanceof PaintBlockEntity paintBlockEntity)
+//            {
+//                paintBlockEntity.setRender(render);//更新
+//            }
+//            return;
+//        }
+//        //如果不是渲染方块
+//        if(isPaintable(origin,level,blockPos))//只在是可粉刷方块时进行响应
+//        {
+//            AbstractRender render=new SimpleBlockPaint(origin);//默认普通方块
+//
+//            if(origin.getBlock() instanceof SlabBlock)//如果是台阶
+//            {
+//                render=new SlabBlockPaint(origin);//修改为台阶渲染
+//            }
+//
+//            render.putRenderBlock(direction,paint);
+//
+//            BlockState renderBlock=ModBlock.RENDER_BEDROCK.get().defaultBlockState();//放置渲染方块
+//            level.setBlock(blockPos,renderBlock,3);//放置
+//
+//            BlockEntity blockEntity=level.getBlockEntity(blockPos);
+//            if(blockEntity instanceof PaintBlockEntity paintBlockEntity)
+//            {
+//                paintBlockEntity.init(render);//引入Render
+//            }
+//        }
+//
+//
+//
+//    }
 
     public static boolean isPaintable(Level level,BlockPos blockPos)
     {

@@ -2,14 +2,16 @@ package com.SouthernWall_404.Painter.API.Paint.API;
 
 import com.mojang.serialization.DataResult;
 import net.minecraft.core.HolderLookup;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.NbtOps;
-import net.minecraft.nbt.Tag;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.nbt.*;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
+import net.neoforged.fml.loading.FMLEnvironment;
 import org.jetbrains.annotations.UnknownNullability;
 
 import java.util.HashMap;
@@ -21,12 +23,14 @@ public abstract class AbstractRender<T,F extends Object> implements IRender<T> {
     protected Map<F,Integer> flags=new HashMap<>();//识别码定义系统
     protected Map<Integer, T> objects = new HashMap<>();//渲染内容缓存
     protected String type;
+
+    protected BlockState origin;//TODO 待移除
     //========需要持久化的数据========
 
     protected Map<Integer, BlockState> materials = new HashMap<>();
 
     protected Map<Block,F> placeRecord=new HashMap<>();//每类material的默认放置方向
-    protected BlockState origin;
+
 
     //========构造方法========
 
@@ -160,69 +164,82 @@ public abstract class AbstractRender<T,F extends Object> implements IRender<T> {
     }
 // AbstractRender.java 片段
 
-// AbstractRender.java 片段=
+    // ========== 序列化 F 类型的抽象方法 ==========
+    protected abstract void serializeF(F f, CompoundTag tag, String key);
+
+    protected abstract F deserializeF(CompoundTag tag, String key);
+
+    // ========== NBT 序列化 ==========
+
     @Override
     public @UnknownNullability CompoundTag serializeNBT(HolderLookup.Provider provider) {
         CompoundTag tag = new CompoundTag();
+        tag.putString("type", type);
 
-        // 序列化 origin BlockState
-        if (origin != null) {
-            DataResult<Tag> result = BlockState.CODEC.encodeStart(provider.createSerializationContext(NbtOps.INSTANCE), origin);
-            result.resultOrPartial(error -> {
-                // 可在此记录日志，例如：LOGGER.error("Failed to encode origin: {}", error);
-            }).ifPresent(originTag -> tag.put("origin", originTag));
-        }
+//        // 序列化 origin (使用 CODEC)
+//        DataResult<Tag> originResult = BlockState.CODEC.encode(this.origin, provider.createSerializationContext(NbtOps.INSTANCE), new CompoundTag());
+//        tag.put("origin", originResult.getOrThrow());
 
-
-        // ===== 新增：序列化 paintStates =====
-        CompoundTag statesTag = new CompoundTag();
+        // 序列化 materials (Map<Integer, BlockState>)
+        ListTag materialsList = new ListTag();
         for (Map.Entry<Integer, BlockState> entry : materials.entrySet()) {
-            int flag = entry.getKey();
-            BlockState state = entry.getValue();
-            if (state != null) {
-                DataResult<Tag> result = BlockState.CODEC.encodeStart(provider.createSerializationContext(NbtOps.INSTANCE), state);
-                result.resultOrPartial(error -> {
-                    // 可在此记录日志
-                }).ifPresent(stateTag -> statesTag.put(String.valueOf(flag), stateTag));
-            }
+            CompoundTag entryTag = new CompoundTag();
+            entryTag.putInt("flag", entry.getKey());
+            // 使用 CODEC 序列化 BlockState
+            DataResult<Tag> stateResult = BlockState.CODEC.encode(entry.getValue(), provider.createSerializationContext(NbtOps.INSTANCE), new CompoundTag());
+            entryTag.put("state", stateResult.getOrThrow());
+            materialsList.add(entryTag);
         }
-        tag.put("paint_states", statesTag);
-        // ===== 新增结束 =====
+        tag.put("materials", materialsList);
+
+        // 序列化 placeRecord (Map<Block, F>)
+        ListTag placeList = new ListTag();
+        for (Map.Entry<Block, F> entry : placeRecord.entrySet()) {
+            CompoundTag entryTag = new CompoundTag();
+            ResourceLocation blockKey = BuiltInRegistries.BLOCK.getKey(entry.getKey());
+            entryTag.putString("block", blockKey.toString());
+            // 通过子类方法序列化 F
+            serializeF(entry.getValue(), entryTag, "f");
+            placeList.add(entryTag);
+        }
+        tag.put("placeRecord", placeList);
 
         return tag;
     }
 
     @Override
-    public void deserializeNBT(HolderLookup.Provider provider, CompoundTag compoundTag) {
-        // 反序列化 origin
-        if (compoundTag.contains("origin")) {
-            Tag originTag = compoundTag.get("origin");
-            DataResult<BlockState> result = BlockState.CODEC.parse(provider.createSerializationContext(NbtOps.INSTANCE), originTag);
-            result.resultOrPartial(error -> {
-                // 可在此记录日志
-            }).ifPresent(state -> this.origin = state);
+    public void deserializeNBT(HolderLookup.Provider provider, CompoundTag tag) {
+        this.type = tag.getString("type");
+
+//        // 反序列化 origin
+//        Tag originTag = tag.get("origin");
+//        DataResult<BlockState> originResult = BlockState.CODEC.parse(provider.createSerializationContext(NbtOps.INSTANCE), originTag);
+//        this.origin = originResult.getOrThrow();
+
+        // 反序列化 materials
+        this.materials.clear();
+        ListTag materialsList = tag.getList("materials", Tag.TAG_COMPOUND);
+        for (int i = 0; i < materialsList.size(); i++) {
+            CompoundTag entryTag = materialsList.getCompound(i);
+            int flag = entryTag.getInt("flag");
+            Tag stateTag = entryTag.get("state");
+            DataResult<BlockState> stateResult = BlockState.CODEC.parse(provider.createSerializationContext(NbtOps.INSTANCE), stateTag);
+            BlockState state = stateResult.getOrThrow();
+            materials.put(flag, state);
         }
 
-        // ===== 新增：反序列化 paintStates =====
-        materials.clear();
-        if (compoundTag.contains("paint_states", CompoundTag.TAG_COMPOUND)) {
-            CompoundTag statesTag = compoundTag.getCompound("paint_states");
-            for (String key : statesTag.getAllKeys()) {
-                try {
-                    int flag = Integer.parseInt(key);
-                    Tag stateTag = statesTag.get(key);
-                    DataResult<BlockState> result = BlockState.CODEC.parse(provider.createSerializationContext(NbtOps.INSTANCE), stateTag);
-                    result.resultOrPartial(error -> {
-                        // 可在此记录日志
-                    }).ifPresent(state -> materials.put(flag, state));
-                } catch (NumberFormatException e) {
-                    // 忽略非整数键
-                }
-            }
+        // 反序列化 placeRecord
+        this.placeRecord.clear();
+        ListTag placeList = tag.getList("placeRecord", Tag.TAG_COMPOUND);
+        for (int i = 0; i < placeList.size(); i++) {
+            CompoundTag entryTag = placeList.getCompound(i);
+            ResourceLocation blockKey = ResourceLocation.parse(entryTag.getString("block"));
+            Block block = BuiltInRegistries.BLOCK.get(blockKey);
+            F f = deserializeF(entryTag, "f");
+            placeRecord.put(block, f);
         }
-        // ===== 新增结束 =====
 
-        // 重建缓存
+        // 重建 flags (由子类 initFlags 定义)
         update();
     }
 }

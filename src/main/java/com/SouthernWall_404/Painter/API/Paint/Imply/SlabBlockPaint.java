@@ -89,70 +89,85 @@ public class SlabBlockPaint extends AbstractPaint {
 //        super.cyclePaint(direction);
     }
 
+//    @Override
+//    public void render(BlockEntity blockEntity, BlockPos blockPos, PoseStack poseStack, MultiBufferSource bufferSource, int packedLight, int packedOverlay, float partialTick) {
+//        update();
+//        if (origin == null) return;
+//        Level level = blockEntity.getLevel();
+//        if (level == null) return;
+//        BlockPos pos = blockEntity.getBlockPos();
+//
+//        BakedModel model = Minecraft.getInstance().getModelManager().getBlockModelShaper().getBlockModel(origin);
+//        BlockColors blockColors = Minecraft.getInstance().getBlockColors();
+//        RandomSource random = RandomSource.create();
+//        long seed = origin.getSeed(pos);
+//        RenderType renderType = RenderUtil.getRenderType(origin);
+//
+//        ModModelRender modRenderer = new ModModelRender(blockColors);
+//
+//        Vec3 offset = origin.getOffset(level, pos);
+//        poseStack.pushPose();
+//        poseStack.translate(offset.x, offset.y, offset.z);
+//
+//        float[] shape = new float[ModModelRender.DIRECTIONS.length * 2];
+//        BitSet shapeFlags = new BitSet(3);
+//        ModModelRender.AmbientOcclusionFace aoFace = new ModModelRender.AmbientOcclusionFace();
+//
+//        for (Direction dir : Direction.values()) {
+//            int flag = getFlag(dir);
+//            if (!RenderUtil.shouldRenderFace(origin, level, pos, dir, pos.relative(dir))) continue;
+//
+//            if (materials.containsKey(flag)) {//如果存在伪装
+//                    BlockState material=getMaterial(dir);
+//                    List<BakedQuad> quads= createSlabQuads(dir);
+//
+//                    if (!quads.isEmpty()) {
+//                        VertexConsumer consumer = bufferSource.getBuffer(RenderType.cutout());
+//                        renderQuadsWithAO(level,material, pos, quads, consumer, modRenderer, shape, shapeFlags, aoFace, poseStack, packedOverlay);
+//                    }
+//            } else {
+//                random.setSeed(seed);
+//                List<BakedQuad> quads = model.getQuads(origin, dir, random, ModelData.EMPTY, renderType);
+//
+//                if(dir==Direction.UP)
+//                {
+//                    if(origin.getValue(SlabBlock.TYPE)==SlabType.BOTTOM)
+//                    {
+//                        quads=getQuadsForSlabState(origin,null,level,pos);
+//                    }
+//                }
+//                if (dir==Direction.DOWN)
+//                {
+//                    if(origin.getValue(SlabBlock.TYPE)==SlabType.TOP)
+//                    {
+//                        quads=getQuadsForSlabState(origin,null,level,pos);
+//                    }
+//                }
+//                if (!quads.isEmpty()) {
+//                    VertexConsumer consumer = bufferSource.getBuffer(renderType);
+//                    renderQuadsWithAO(level, origin, pos, quads, consumer, modRenderer, shape, shapeFlags, aoFace, poseStack, packedOverlay);
+//                }
+//            }
+//        }
+//        poseStack.popPose();
+//    }
+
     @Override
-    public void render(BlockEntity blockEntity, float partialTick, PoseStack poseStack,
-                       MultiBufferSource bufferSource, int packedLight, int packedOverlay) {
-        update();
-        if (origin == null) return;
-        Level level = blockEntity.getLevel();
-        if (level == null) return;
-        BlockPos pos = blockEntity.getBlockPos();
+    public void createQuads() {
+        for(Map.Entry<Integer,BlockState> entry:materials.entrySet())
+        {
+            int flag=entry.getKey();
+            BlockState material=entry.getValue();
 
-        BakedModel model = Minecraft.getInstance().getModelManager().getBlockModelShaper().getBlockModel(origin);
-        BlockColors blockColors = Minecraft.getInstance().getBlockColors();
-        RandomSource random = RandomSource.create();
-        long seed = origin.getSeed(pos);
-        RenderType renderType = RenderUtil.getRenderType(origin);
+            Direction direction=getDirection(flag);
 
-        ModModelRender modRenderer = new ModModelRender(blockColors);
+            //            Block block= RenderUtil.getBlockFromID(paintPaths.get(flag));
+            List<BakedQuad> quads = createSlabQuads(direction);
 
-        Vec3 offset = origin.getOffset(level, pos);
-        poseStack.pushPose();
-        poseStack.translate(offset.x, offset.y, offset.z);
+            objects.put(flag, quads);
 
-        float[] shape = new float[ModModelRender.DIRECTIONS.length * 2];
-        BitSet shapeFlags = new BitSet(3);
-        ModModelRender.AmbientOcclusionFace aoFace = new ModModelRender.AmbientOcclusionFace();
-
-        for (Direction dir : Direction.values()) {
-            int flag = getFlag(dir);
-            if (!RenderUtil.shouldRenderFace(origin, level, pos, dir, pos.relative(dir))) continue;
-
-            if (materials.containsKey(flag)) {//如果存在伪装
-                    BlockState material=getMaterial(dir);
-                    List<BakedQuad> quads= createSlabQuads(dir);
-
-                    if (!quads.isEmpty()) {
-                        VertexConsumer consumer = bufferSource.getBuffer(RenderType.cutout());
-                        renderQuadsWithAO(level,material, pos, quads, consumer, modRenderer, shape, shapeFlags, aoFace, poseStack, packedOverlay);
-                    }
-            } else {
-                random.setSeed(seed);
-                List<BakedQuad> quads = model.getQuads(origin, dir, random, ModelData.EMPTY, renderType);
-
-                if(dir==Direction.UP)
-                {
-                    if(origin.getValue(SlabBlock.TYPE)==SlabType.BOTTOM)
-                    {
-                        quads=getQuadsForSlabState(origin,null,level,pos);
-                    }
-                }
-                if (dir==Direction.DOWN)
-                {
-                    if(origin.getValue(SlabBlock.TYPE)==SlabType.TOP)
-                    {
-                        quads=getQuadsForSlabState(origin,null,level,pos);
-                    }
-                }
-                if (!quads.isEmpty()) {
-                    VertexConsumer consumer = bufferSource.getBuffer(renderType);
-                    renderQuadsWithAO(level, origin, pos, quads, consumer, modRenderer, shape, shapeFlags, aoFace, poseStack, packedOverlay);
-                }
-            }
         }
-        poseStack.popPose();
     }
-
 
     private List<BakedQuad> createSlabQuads(Direction direction)
     {
