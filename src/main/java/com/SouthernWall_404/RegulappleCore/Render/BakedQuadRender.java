@@ -1,6 +1,7 @@
 package com.SouthernWall_404.RegulappleCore.Render;
 
 import com.SouthernWall_404.Painter.API.Paint.ModModelRender;
+import com.SouthernWall_404.Painter.API.Paint.Util.CommonUtil;
 import com.SouthernWall_404.Painter.API.Paint.Util.RenderUtil;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
@@ -37,13 +38,13 @@ public class BakedQuadRender {
      * 渲染单个Quad
      * @param quad 需要渲染的Quad
      * @param state 需要渲染的BlockState
-     * @param pos 需要渲染的位置
+     * @param renderVec 需要渲染的位置
      * @param poseStack 矩阵，外部传入
      * @param renderType 具体渲染类型
      * @param bufferSource VertexConsumer类来源，提供以便在外界进行渲染提交
      */
     @OnlyIn(Dist.CLIENT)
-    public static void renderWithAO(BakedQuad quad, BlockState state, BlockPos pos, PoseStack poseStack, RenderType renderType, MultiBufferSource bufferSource, ModModelRender.AmbientOcclusionFace aoFace)
+    public static void renderWithAO(BakedQuad quad, BlockState state, Vec3 renderVec, PoseStack poseStack, RenderType renderType, MultiBufferSource bufferSource, ModModelRender.AmbientOcclusionFace aoFace)
     {
 
         Minecraft mc=Minecraft.getInstance();
@@ -59,7 +60,11 @@ public class BakedQuadRender {
 
 
         poseStack.pushPose();
-        poseStack.translate(pos.getX() - camPos.x, pos.getY() - camPos.y, pos.getZ() - camPos.z);
+        poseStack.translate(renderVec.x - camPos.x, renderVec.y - camPos.y, renderVec.z - camPos.z);
+
+
+
+        BlockPos pos=CommonUtil.vec32Pos(renderVec);
 
         float f;
         float f1;

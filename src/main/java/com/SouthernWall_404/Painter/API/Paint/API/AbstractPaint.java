@@ -1,6 +1,7 @@
 package com.SouthernWall_404.Painter.API.Paint.API;
 
 import com.SouthernWall_404.Painter.API.Paint.ModModelRender;
+import com.SouthernWall_404.Painter.API.Paint.Util.CommonUtil;
 import com.SouthernWall_404.Painter.API.Paint.Util.RenderUtil;
 import com.SouthernWall_404.RegulappleCore.Render.BakedQuadRender;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -13,6 +14,7 @@ import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.Vec3i;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.RandomSource;
@@ -22,6 +24,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.TrapDoorBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.phys.Vec3;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 import net.neoforged.neoforge.client.model.data.ModelData;
@@ -160,13 +163,20 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>,Direc
         {
             List<BakedQuad> quads=entry.getValue();
             int flag=entry.getKey();
+            double offset=0.001;
 
             BlockState state=materials.get(flag);
 
+
+            Direction direction=getDirection(flag);
+            Vec3i normal=direction.getNormal();
+
+
+            Vec3 vec3=new Vec3(blockPos.getX()+offset*normal.getX(),blockPos.getY()+offset*normal.getY(),blockPos.getZ()+offset*normal.getZ());
             for(BakedQuad quad:quads)
             {
 
-                BakedQuadRender.renderWithAO(quad,state,blockPos,poseStack,RenderType.CUTOUT,bufferSource,new ModModelRender.AmbientOcclusionFace());
+                BakedQuadRender.renderWithAO(quad,state,vec3,poseStack,RenderType.CUTOUT,bufferSource,new ModModelRender.AmbientOcclusionFace());
             }
 
         }
