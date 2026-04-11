@@ -1,16 +1,13 @@
-package com.SouthernWall_404.LaplaceAPI.Network.Packet.S2C;
+package com.SouthernWall_404.LaplaceAPI.xNetwork.Packet.S2C;
 
 import com.SouthernWall_404.LaplaceAPI.Laplace;
-import com.SouthernWall_404.Painter.Painter;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.Tag;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
-import net.neoforged.neoforge.attachment.AttachmentType;
 import org.jetbrains.annotations.NotNull;
 
 public record AttachmentPacket(@NotNull CompoundTag modPack, BlockPos pos, ResourceLocation handlerKey, ResourceLocation attachmentId) implements CustomPacketPayload {

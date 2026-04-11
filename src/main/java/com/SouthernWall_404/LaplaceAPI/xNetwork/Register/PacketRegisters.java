@@ -1,6 +1,6 @@
-package com.SouthernWall_404.LaplaceAPI.Network.Register;
+package com.SouthernWall_404.LaplaceAPI.xNetwork.Register;
 
-import com.SouthernWall_404.LaplaceAPI.Network.Packet.S2C.AttachmentPacket;
+import com.SouthernWall_404.LaplaceAPI.xNetwork.Packet.S2C.AttachmentPacket;
 import net.minecraft.resources.ResourceLocation;
 import net.neoforged.neoforge.network.handling.IPayloadHandler;
 

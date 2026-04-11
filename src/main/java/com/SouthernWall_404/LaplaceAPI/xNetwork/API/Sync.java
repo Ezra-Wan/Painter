@@ -1,13 +1,12 @@
-package com.SouthernWall_404.LaplaceAPI.Network.API;
+package com.SouthernWall_404.LaplaceAPI.xNetwork.API;
 
-import com.SouthernWall_404.LaplaceAPI.Network.ICompoundSerializer;
-import com.SouthernWall_404.LaplaceAPI.Network.ModChannels;
-import com.SouthernWall_404.LaplaceAPI.Network.Packet.S2C.AttachmentPacket;
-import com.SouthernWall_404.LaplaceAPI.Network.Packet.S2C.DefaultPacks.AttachmentDefaultHandlers;
+import com.SouthernWall_404.LaplaceAPI.VertinCore.ICompoundSerializer;
+import com.SouthernWall_404.LaplaceAPI.xNetwork.ModChannels;
+import com.SouthernWall_404.LaplaceAPI.xNetwork.Packet.S2C.AttachmentPacket;
+import com.SouthernWall_404.LaplaceAPI.xNetwork.Packet.S2C.DefaultPacks.AttachmentDefaultHandlers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.players.PlayerList;
 import net.minecraft.world.entity.player.Player;

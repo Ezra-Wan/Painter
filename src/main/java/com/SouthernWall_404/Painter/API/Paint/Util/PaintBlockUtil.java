@@ -4,6 +4,7 @@ import com.SouthernWall_404.Painter.API.Paint.API.AbstractPaint;
 import com.SouthernWall_404.Painter.API.Paint.API.AbstractRender;
 import com.SouthernWall_404.Painter.API.Paint.Attachment.PaintInfo;
 import com.SouthernWall_404.Painter.API.Paint.Imply.SimpleBlockPaint;
+import com.SouthernWall_404.Painter.API.Paint.Imply.SlabBlockPaint;
 import com.SouthernWall_404.Painter.Common.Init.ModAttachments;
 import com.SouthernWall_404.Painter.Common.Network.ClientRequestPack;
 import com.SouthernWall_404.Painter.Common.Network.ModChannels;
@@ -103,8 +104,9 @@ public class PaintBlockUtil {
         LevelChunk chunk = level.getChunkAt(blockPos);
         PaintInfo paintInfo = chunk.getData(ModAttachments.PAINT_INFO);
 
-        AbstractRender render = new SimpleBlockPaint(Blocks.AIR.defaultBlockState());//默认普通方块
+//        AbstractRender render = new SimpleBlockPaint();//默认普通方块
 
+        AbstractRender render=new SlabBlockPaint();//TODO 测试用例，记得删
         render.putRenderBlock(direction, paint);
 
         paintInfo.putRender(level,blockPos, render);

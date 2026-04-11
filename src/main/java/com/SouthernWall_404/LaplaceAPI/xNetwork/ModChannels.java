@@ -1,11 +1,9 @@
-package com.SouthernWall_404.LaplaceAPI.Network;
+package com.SouthernWall_404.LaplaceAPI.xNetwork;
 
-import com.SouthernWall_404.LaplaceAPI.Network.Packet.S2C.ClientHandler;
-import com.SouthernWall_404.LaplaceAPI.Network.Packet.S2C.AttachmentPacket;
-import com.SouthernWall_404.LaplaceAPI.Network.Register.Default.DefaultHandlers;
-import com.SouthernWall_404.LaplaceAPI.Network.Register.Default.DefaultPackets;
-import com.SouthernWall_404.LaplaceAPI.Network.Register.PacketRegister;
-import com.SouthernWall_404.LaplaceAPI.Network.Register.PacketRegisters;
+import com.SouthernWall_404.LaplaceAPI.xNetwork.Register.Default.DefaultHandlers;
+import com.SouthernWall_404.LaplaceAPI.xNetwork.Register.Default.DefaultPackets;
+import com.SouthernWall_404.LaplaceAPI.xNetwork.Register.PacketRegister;
+import com.SouthernWall_404.LaplaceAPI.xNetwork.Register.PacketRegisters;
 import com.SouthernWall_404.Painter.Painter;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.server.level.ServerPlayer;

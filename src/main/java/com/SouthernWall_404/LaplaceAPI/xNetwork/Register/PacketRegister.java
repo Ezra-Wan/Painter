@@ -1,4 +1,4 @@
-package com.SouthernWall_404.LaplaceAPI.Network.Register;
+package com.SouthernWall_404.LaplaceAPI.xNetwork.Register;
 
 import io.netty.buffer.ByteBuf;
 import net.minecraft.network.codec.StreamCodec;

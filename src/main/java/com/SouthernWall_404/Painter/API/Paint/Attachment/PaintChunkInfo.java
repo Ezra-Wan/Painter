@@ -1,16 +1,14 @@
 package com.SouthernWall_404.Painter.API.Paint.Attachment;
 
-import com.SouthernWall_404.LaplaceAPI.Network.API.Sync;
-import com.SouthernWall_404.LaplaceAPI.Network.ICompoundSerializer;
+import com.SouthernWall_404.LaplaceAPI.xNetwork.API.Sync;
+import com.SouthernWall_404.LaplaceAPI.VertinCore.ICompoundSerializer;
 import com.SouthernWall_404.Painter.Common.Init.ModAttachments;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
-import net.neoforged.neoforge.common.util.INBTSerializable;
 import org.jetbrains.annotations.UnknownNullability;
 
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;

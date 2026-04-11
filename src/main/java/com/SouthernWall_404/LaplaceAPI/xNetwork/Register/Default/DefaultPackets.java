@@ -1,7 +1,7 @@
-package com.SouthernWall_404.LaplaceAPI.Network.Register.Default;
+package com.SouthernWall_404.LaplaceAPI.xNetwork.Register.Default;
 
-import com.SouthernWall_404.LaplaceAPI.Network.Packet.S2C.AttachmentPacket;
-import com.SouthernWall_404.LaplaceAPI.Network.Packet.S2C.ClientHandler;
+import com.SouthernWall_404.LaplaceAPI.xNetwork.Packet.S2C.AttachmentPacket;
+import com.SouthernWall_404.LaplaceAPI.xNetwork.Packet.S2C.ClientHandler;
 import net.neoforged.neoforge.network.registration.PayloadRegistrar;
 
 public class DefaultPackets {

@@ -151,7 +151,7 @@ private static final ThreadLocal<Object2ByteLinkedOpenHashMap<Block.BlockStatePa
     public static List<BakedQuad> getQuads(BlockState state, @Nullable Direction direction) {
         return getQuads(state, direction, RenderUtil.getRenderType(state));
     }
-
+    @Deprecated
     public static AbstractRender getRender(Level level, BlockPos blockPos)
     {
         BlockEntity blockEntity=level.getBlockEntity(blockPos);
@@ -165,6 +165,7 @@ private static final ThreadLocal<Object2ByteLinkedOpenHashMap<Block.BlockStatePa
         return render;
     }
 
+    @Deprecated
     public static BlockState getPaintBlockOrigin(BlockGetter level,BlockPos neighborPos)
     {
         BlockState blockState= Blocks.AIR.defaultBlockState();

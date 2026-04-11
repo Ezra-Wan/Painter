@@ -90,7 +90,6 @@ public class PaintRenderRebuild {
     {
 
         Map<BlockPos,AbstractRender<?,?>> result=new HashMap<>();
-        int radius=32;
 
         Minecraft mc=Minecraft.getInstance();
         Player player=mc.player;
@@ -98,15 +97,17 @@ public class PaintRenderRebuild {
         Vec3 vec3=player.position();
         BlockPos origin= CommonUtil.vec32Pos(vec3);
 
+        int radius=Minecraft.getInstance().options.getEffectiveRenderDistance();
+
         LevelChunk originChunk=level.getChunkAt(origin);
 
         ChunkPos originChunkPos=originChunk.getPos();
 
 //        for(int i=-2;i<=2;i++)
-        for(int i=0;i<=0;i++)
+        for(int i=0;i<=radius;i++)
 
         {
-            for(int j=0;j<=0;j++)
+            for(int j=0;j<=radius;j++)
 //                for(int j=-2;j<=2;j++)
 
             {

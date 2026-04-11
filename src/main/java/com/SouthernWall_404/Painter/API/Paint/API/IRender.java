@@ -17,12 +17,9 @@ import net.neoforged.neoforge.common.util.INBTSerializable;
  */
 public interface IRender<T extends Object> extends INBTSerializable<CompoundTag> {
 
-    void init(BlockState blockState);//用于初始化
 
     String getType();
 
-
-    BlockState getOrigin();
 
     void render(BlockPos blockPos, PoseStack poseStack, MultiBufferSource.BufferSource bufferSource, int packedLight, int packedOverlay, float partialTick);//用于渲染内容
 

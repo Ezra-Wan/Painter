@@ -36,8 +36,8 @@ public class SlabBlockPaint extends AbstractPaint {
     //========需要持久化的数据========
     private Map<Integer,SlabType> slabTypes=new HashMap<>();//用于标定
 
-    public SlabBlockPaint(BlockState origin) {
-        super(origin, PaintContent.SLAB_BLOCK);
+    public SlabBlockPaint() {
+        super(PaintContent.SLAB_BLOCK);
     }
 
     @Override
@@ -51,25 +51,11 @@ public class SlabBlockPaint extends AbstractPaint {
     }
 
     @Override
-    public void init(BlockState origin) {
-        super.init(origin);
-
-    }
-
-    //    @Override
-//    protected void update() {
-//        // 半砖不预生成 quads，因为依赖渲染时的方向
-//        objects.clear();
-//    }
-
-
-
-    @Override
     public void cyclePaint(Direction direction) {
 
         //TODO测试用例，记得改回来
         int key=getFlag(direction);
-        SlabType defaultType=origin.getValue(SlabBlock.TYPE);
+        SlabType defaultType=SlabType.TOP;
         SlabType current=slabTypes.getOrDefault(getFlag(direction),defaultType);
 
         switch (current){
@@ -89,69 +75,6 @@ public class SlabBlockPaint extends AbstractPaint {
 //        super.cyclePaint(direction);
     }
 
-//    @Override
-//    public void render(BlockEntity blockEntity, BlockPos blockPos, PoseStack poseStack, MultiBufferSource bufferSource, int packedLight, int packedOverlay, float partialTick) {
-//        update();
-//        if (origin == null) return;
-//        Level level = blockEntity.getLevel();
-//        if (level == null) return;
-//        BlockPos pos = blockEntity.getBlockPos();
-//
-//        BakedModel model = Minecraft.getInstance().getModelManager().getBlockModelShaper().getBlockModel(origin);
-//        BlockColors blockColors = Minecraft.getInstance().getBlockColors();
-//        RandomSource random = RandomSource.create();
-//        long seed = origin.getSeed(pos);
-//        RenderType renderType = RenderUtil.getRenderType(origin);
-//
-//        ModModelRender modRenderer = new ModModelRender(blockColors);
-//
-//        Vec3 offset = origin.getOffset(level, pos);
-//        poseStack.pushPose();
-//        poseStack.translate(offset.x, offset.y, offset.z);
-//
-//        float[] shape = new float[ModModelRender.DIRECTIONS.length * 2];
-//        BitSet shapeFlags = new BitSet(3);
-//        ModModelRender.AmbientOcclusionFace aoFace = new ModModelRender.AmbientOcclusionFace();
-//
-//        for (Direction dir : Direction.values()) {
-//            int flag = getFlag(dir);
-//            if (!RenderUtil.shouldRenderFace(origin, level, pos, dir, pos.relative(dir))) continue;
-//
-//            if (materials.containsKey(flag)) {//如果存在伪装
-//                    BlockState material=getMaterial(dir);
-//                    List<BakedQuad> quads= createSlabQuads(dir);
-//
-//                    if (!quads.isEmpty()) {
-//                        VertexConsumer consumer = bufferSource.getBuffer(RenderType.cutout());
-//                        renderQuadsWithAO(level,material, pos, quads, consumer, modRenderer, shape, shapeFlags, aoFace, poseStack, packedOverlay);
-//                    }
-//            } else {
-//                random.setSeed(seed);
-//                List<BakedQuad> quads = model.getQuads(origin, dir, random, ModelData.EMPTY, renderType);
-//
-//                if(dir==Direction.UP)
-//                {
-//                    if(origin.getValue(SlabBlock.TYPE)==SlabType.BOTTOM)
-//                    {
-//                        quads=getQuadsForSlabState(origin,null,level,pos);
-//                    }
-//                }
-//                if (dir==Direction.DOWN)
-//                {
-//                    if(origin.getValue(SlabBlock.TYPE)==SlabType.TOP)
-//                    {
-//                        quads=getQuadsForSlabState(origin,null,level,pos);
-//                    }
-//                }
-//                if (!quads.isEmpty()) {
-//                    VertexConsumer consumer = bufferSource.getBuffer(renderType);
-//                    renderQuadsWithAO(level, origin, pos, quads, consumer, modRenderer, shape, shapeFlags, aoFace, poseStack, packedOverlay);
-//                }
-//            }
-//        }
-//        poseStack.popPose();
-//    }
-
     @Override
     public void createQuads() {
         for(Map.Entry<Integer,BlockState> entry:materials.entrySet())
@@ -162,35 +85,56 @@ public class SlabBlockPaint extends AbstractPaint {
             Direction direction=getDirection(flag);
 
             //            Block block= RenderUtil.getBlockFromID(paintPaths.get(flag));
-            List<BakedQuad> quads = createSlabQuads(direction);
+            List<BakedQuad> quads = createSlabQuads(direction,material);
 
             objects.put(flag, quads);
 
         }
     }
 
-    private List<BakedQuad> createSlabQuads(Direction direction)
+    private List<BakedQuad> createSlabQuads(Direction direction,BlockState material)
     {
-        int flag=getFlag(direction);
-        List<BakedQuad> originQuads=objects.get(flag);
-        List<BakedQuad> quads=new ArrayList<>();
+        List<BakedQuad> quads=RenderUtil.getQuads(material,direction);
 
-        for(BakedQuad originQuad:originQuads)
+        List<BakedQuad> result=new ArrayList<>();
+        for(BakedQuad quad:quads)
         {
-            TextureAtlasSprite sprite=originQuad.getSprite();
+            BakedQuad resultQuad=createSlabQuad(quad.getSprite(),direction,quad.getTintIndex());
 
-            BakedQuad quad=createSlabQuad(sprite,direction,originQuad.getTintIndex());
-
-            quads.add(quad);
+            result.add(resultQuad);
         }
 
-        return quads;
+        //TODO 半砖中间仍有待处理
+
+        return result;
     }
+
+//    @Deprecated
+//    private List<BakedQuad> createSlabQuads(Direction direction)
+//    {
+//        int flag=getFlag(direction);
+//
+//
+//
+//        List<BakedQuad> originQuads=objects.get(flag);
+//        List<BakedQuad> quads=new ArrayList<>();
+//
+//        for(BakedQuad originQuad:originQuads)
+//        {
+//            TextureAtlasSprite sprite=originQuad.getSprite();
+//
+//            BakedQuad quad=createSlabQuad(sprite,direction,originQuad.getTintIndex());
+//
+//            quads.add(quad);
+//        }
+//
+//        return quads;
+//    }
 
     private BakedQuad createSlabQuad(TextureAtlasSprite sprite, Direction direction,int tintIndex) {
 //        boolean isTopSlab = origin.getValue(SlabBlock.TYPE) == SlabType.TOP;
 
-        SlabType slabType=origin.getValue(SlabBlock.TYPE);
+        SlabType slabType=SlabType.TOP;
         SlabType uvSlabType=slabTypes.getOrDefault(getFlag(direction),slabType);
         float yMin;
         float yMax;
@@ -337,8 +281,7 @@ public class SlabBlockPaint extends AbstractPaint {
 
         // 初始化 slabTypes 默认值（基于 origin 的 SlabType 属性）
         slabTypes.clear();
-        SlabType defaultType = origin.hasProperty(SlabBlock.TYPE) ?
-                origin.getValue(SlabBlock.TYPE) : SlabType.BOTTOM;
+        SlabType defaultType = SlabType.TOP;
         for (Map.Entry<Direction, Integer> entry : flags.entrySet()) {
             slabTypes.put(entry.getValue(), defaultType);
         }

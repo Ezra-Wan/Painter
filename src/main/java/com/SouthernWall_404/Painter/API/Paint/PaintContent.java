@@ -34,12 +34,12 @@ public class PaintContent {
 
     public static Function<BlockState, AbstractRender> getRender(String type)
     {
-        return RENDERS.getOrDefault(type,(blockState -> new SimpleBlockPaint(blockState)));
+        return RENDERS.getOrDefault(type,(blockState -> new SimpleBlockPaint()));
     }
 
     static {
-        RENDERS.put(SIMPLE_BLOCK,(blockState -> new SimpleBlockPaint(blockState)));
-        RENDERS.put(SLAB_BLOCK,(blockState -> new SlabBlockPaint(blockState)));
+        RENDERS.put(SIMPLE_BLOCK,(blockState -> new SimpleBlockPaint()));
+        RENDERS.put(SLAB_BLOCK,(blockState -> new SlabBlockPaint()));
     }
 
 

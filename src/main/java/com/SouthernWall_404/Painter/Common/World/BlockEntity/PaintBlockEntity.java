@@ -54,11 +54,7 @@ public class PaintBlockEntity extends BlockEntity {
      */
     public BlockState getOrigin()
     {
-        if(render!=null)
-        {
-            return render.getOrigin();
-        }
-        else return Blocks.AIR.defaultBlockState();
+         return Blocks.AIR.defaultBlockState();
     }
 
 

@@ -36,8 +36,8 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>,Direc
 
 
     //========构造方法=========
-    public AbstractPaint(BlockState origin,String type) {
-        super(origin,type);
+    public AbstractPaint(String type) {
+        super(type);
     }
 
     //========内部方法========

@@ -34,10 +34,9 @@ public abstract class AbstractRender<T,F extends Object> implements IRender<T> {
 
     //========构造方法========
 
-    public AbstractRender(BlockState origin,String type) {
+    public AbstractRender(String type) {
         this.type=type;
         initFlags();
-        init(origin);
 
         update();
 
@@ -48,13 +47,6 @@ public abstract class AbstractRender<T,F extends Object> implements IRender<T> {
         return type;
     }
 
-    @Override
-    public void init(BlockState origin) {
-        this.origin=origin;
-
-
-        update();
-    }
 
     public abstract void initFlags();
 
@@ -78,10 +70,6 @@ public abstract class AbstractRender<T,F extends Object> implements IRender<T> {
     //========业务方法========
 
 
-    @Override
-    public BlockState getOrigin() {
-        return this.origin;
-    }
 
 
     public void putRenderBlock(F f,BlockState blockState)

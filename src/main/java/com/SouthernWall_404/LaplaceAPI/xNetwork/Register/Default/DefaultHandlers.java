@@ -1,10 +1,7 @@
-package com.SouthernWall_404.LaplaceAPI.Network.Register.Default;
+package com.SouthernWall_404.LaplaceAPI.xNetwork.Register.Default;
 
-import com.SouthernWall_404.LaplaceAPI.Network.ModChannels;
-import com.SouthernWall_404.LaplaceAPI.Network.Packet.S2C.AttachmentPacket;
-import com.SouthernWall_404.LaplaceAPI.Network.Packet.S2C.DefaultPacks.AttachmentDefaultHandlers;
-import com.SouthernWall_404.LaplaceAPI.Network.Register.PacketRegisters;
-import net.neoforged.neoforge.network.registration.PayloadRegistrar;
+import com.SouthernWall_404.LaplaceAPI.xNetwork.Packet.S2C.DefaultPacks.AttachmentDefaultHandlers;
+import com.SouthernWall_404.LaplaceAPI.xNetwork.Register.PacketRegisters;
 
 public class DefaultHandlers {
     public static void register()

@@ -36,13 +36,9 @@ public class SimpleBlockPaint extends AbstractPaint {
     private static final int UP    = 16;
     private static final int DOWN  = 32;
 
-    public SimpleBlockPaint()
-    {
-        this(Blocks.AIR.defaultBlockState());
-    }
 
-    public SimpleBlockPaint(BlockState origin) {
-        super(origin, PaintContent.SIMPLE_BLOCK);
+    public SimpleBlockPaint() {
+        super( PaintContent.SIMPLE_BLOCK);
     }
 
     @Override

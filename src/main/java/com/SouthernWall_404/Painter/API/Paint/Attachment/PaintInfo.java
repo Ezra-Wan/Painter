@@ -1,28 +1,21 @@
 package com.SouthernWall_404.Painter.API.Paint.Attachment;
 
-import com.SouthernWall_404.LaplaceAPI.Network.ICompoundSerializer;
+import com.SouthernWall_404.LaplaceAPI.VertinCore.ICompoundSerializer;
 import com.SouthernWall_404.Painter.API.Paint.API.AbstractRender;
 import com.SouthernWall_404.Painter.API.Paint.PaintContent;
-import com.SouthernWall_404.Painter.API.Paint.Util.PaintBlockUtil;
 import com.SouthernWall_404.Painter.Common.Init.ModAttachments;
-import com.mojang.serialization.DataResult;
-import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.NbtUtils;
 import net.minecraft.nbt.Tag;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
-import net.neoforged.fml.loading.FMLEnvironment;
-import net.neoforged.neoforge.common.util.INBTSerializable;
 import org.jetbrains.annotations.UnknownNullability;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 
 public class PaintInfo implements ICompoundSerializer {
 
