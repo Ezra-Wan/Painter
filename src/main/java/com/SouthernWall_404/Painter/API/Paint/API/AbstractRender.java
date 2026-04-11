@@ -3,7 +3,6 @@ package com.SouthernWall_404.Painter.API.Paint.API;
 import com.mojang.serialization.DataResult;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.*;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Block;
@@ -11,7 +10,6 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
-import net.neoforged.fml.loading.FMLEnvironment;
 import org.jetbrains.annotations.UnknownNullability;
 
 import java.util.HashMap;
@@ -72,7 +70,7 @@ public abstract class AbstractRender<T,F extends Object> implements IRender<T> {
 
 
 
-    public void putRenderBlock(F f,BlockState blockState)
+    public void putMaterial(F f, BlockState blockState)
     {
         int hasBlockFlag=hasBlockInPaint(blockState);
         if(hasBlockFlag!=-1)

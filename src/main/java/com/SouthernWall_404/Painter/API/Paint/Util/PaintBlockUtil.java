@@ -3,17 +3,14 @@ package com.SouthernWall_404.Painter.API.Paint.Util;
 import com.SouthernWall_404.Painter.API.Paint.API.AbstractPaint;
 import com.SouthernWall_404.Painter.API.Paint.API.AbstractRender;
 import com.SouthernWall_404.Painter.API.Paint.Attachment.PaintInfo;
-import com.SouthernWall_404.Painter.API.Paint.Imply.SimpleBlockPaint;
 import com.SouthernWall_404.Painter.API.Paint.Imply.SlabBlockPaint;
 import com.SouthernWall_404.Painter.Common.Init.ModAttachments;
 import com.SouthernWall_404.Painter.Common.Network.ClientRequestPack;
 import com.SouthernWall_404.Painter.Common.Network.ModChannels;
 import com.SouthernWall_404.Painter.Common.Network.S2C.ChunkS2CPacket;
 import com.SouthernWall_404.Painter.Common.World.Block.PaintBlock;
-import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.RegistryAccess;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
@@ -24,14 +21,13 @@ import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.SlabBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.fml.loading.FMLEnvironment;
+
+import java.util.Map;
 
 public class PaintBlockUtil {
 
@@ -99,18 +95,28 @@ public class PaintBlockUtil {
         }
     }
 
-    public static void paint(Level level, BlockPos blockPos, Direction direction, BlockState paint) {
+    public static void paint(Level level, BlockPos blockPos, Direction direction, BlockState material) {
 
         LevelChunk chunk = level.getChunkAt(blockPos);
         PaintInfo paintInfo = chunk.getData(ModAttachments.PAINT_INFO);
 
-//        AbstractRender render = new SimpleBlockPaint();//默认普通方块
+        Map<BlockPos, AbstractRender<?, ?>> renders=paintInfo.getRenders();
+        if(renders.containsKey(blockPos))
+        {
 
-        AbstractRender render=new SlabBlockPaint();//TODO 测试用例，记得删
-        render.putRenderBlock(direction, paint);
+            AbstractRender render=renders.get(blockPos);
 
-        paintInfo.putRender(level,blockPos, render);
+            render.putMaterial(direction,material);
 
+
+        }else {
+            //        AbstractRender render = new SimpleBlockPaint();//默认普通方块
+
+            AbstractRender render=new SlabBlockPaint();//TODO 测试用例，记得删
+            render.putMaterial(direction, material);
+
+            paintInfo.putRender(level,blockPos, render);
+        }
 
         chunk.setData(ModAttachments.PAINT_INFO, paintInfo);
 
