@@ -5,29 +5,20 @@ import com.SouthernWall_404.Painter.API.Paint.API.AbstractRender;
 import com.SouthernWall_404.Painter.API.Paint.Attachment.PaintInfo;
 import com.SouthernWall_404.Painter.API.Paint.ModModelRender;
 import com.SouthernWall_404.Painter.API.Paint.Util.CommonUtil;
+import com.SouthernWall_404.Painter.API.Paint.Util.PaintBlockUtil;
 import com.SouthernWall_404.Painter.API.Paint.Util.RenderUtil;
 import com.SouthernWall_404.Painter.Common.Init.ModAttachments;
 import com.SouthernWall_404.Painter.Painter;
-import com.SouthernWall_404.RegulappleCore.Render.BakedQuadRender;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.color.block.BlockColors;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.ModelBlockRenderer;
 import net.minecraft.client.renderer.block.model.BakedQuad;
-import net.minecraft.client.resources.model.BakedModel;
-import net.minecraft.client.resources.model.SimpleBakedModel;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
-import net.minecraft.server.level.ChunkLevel;
-import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.phys.Vec3;
@@ -35,7 +26,6 @@ import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
-import net.neoforged.neoforge.client.model.data.ModelData;
 
 import java.util.*;
 
@@ -56,6 +46,10 @@ public class PaintRenderRebuild {
 
         Map<BlockPos,AbstractRender<?,?>> renders=getRenderNearby();
 
+        if (renders.isEmpty())
+        {
+//            System.out.println("Client's Renders Empty");
+        }
         for(Map.Entry<BlockPos,AbstractRender<?,?>> entry:renders.entrySet())
         {
             BlockPos pos=entry.getKey();
@@ -87,7 +81,7 @@ public class PaintRenderRebuild {
 //        bufferSource.endBatch(RenderType.CUTOUT);
 
     }
-
+    public static final Set<ChunkPos> SYNCED_CHUNKS = new HashSet<>();
     /**
      * 遍历玩家周围radius范围，获取所有的Render
      * @return
@@ -108,14 +102,21 @@ public class PaintRenderRebuild {
 
         ChunkPos originChunkPos=originChunk.getPos();
 
-        for(int i=-2;i<=2;i++)
+//        for(int i=-2;i<=2;i++)
+        for(int i=0;i<=0;i++)
+
         {
-            for(int j=-2;j<=2;j++)
+            for(int j=0;j<=0;j++)
+//                for(int j=-2;j<=2;j++)
+
             {
-                LevelChunk chunk=level.getChunk(originChunkPos.x+i,originChunkPos.z+j);
+                ChunkPos currentChunkPos=new ChunkPos(originChunkPos.x+i,originChunkPos.z+j);
+//                PaintBlockUtil.RequireSync(currentChunkPos);
+                LevelChunk chunk=level.getChunk(currentChunkPos.x,currentChunkPos.z);
                 PaintInfo paintInfo=chunk.getData(ModAttachments.PAINT_INFO);
 
                 result.putAll(paintInfo.getRenders());
+
             }
 
         }

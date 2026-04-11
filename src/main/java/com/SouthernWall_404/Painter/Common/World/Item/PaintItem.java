@@ -31,6 +31,8 @@ public class PaintItem extends BlockInteractItem {
     @Override
     public void dealRightClick(PlayerInteractEvent.RightClickBlock event) {
         // 原 BlockEvent 中处理 PaintItem 右键的逻辑
+
+        event.setCanceled(true);
         var level = event.getLevel();
         var blockPos = event.getPos();
         var player = event.getEntity();

@@ -82,6 +82,7 @@ public class WallUtil {
 //                        break;
 //                }
 //                //如果所有筛选项均满足
+
                 PaintBlockUtil.dealWithPaintClick(level,current,player,face);//执行喷涂
 
                 // 向墙面内的四个方向扩散

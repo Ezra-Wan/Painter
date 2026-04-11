@@ -1,6 +1,7 @@
 package com.SouthernWall_404.Painter;
 
 import com.SouthernWall_404.Painter.Common.Event.BlockEvent;
+import com.SouthernWall_404.Painter.Common.Event.PlayerJoinEvent;
 import com.SouthernWall_404.Painter.Common.Init.*;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.common.Mod;
@@ -22,5 +23,7 @@ public class Painter {
         ModAttachments.ATTACHMENT_TYPES.register(modEventBus);
 
         NeoForge.EVENT_BUS.register(BlockEvent.class);
+        NeoForge.EVENT_BUS.register(PlayerJoinEvent.class);
+
     }
 }

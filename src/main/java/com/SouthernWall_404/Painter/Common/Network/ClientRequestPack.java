@@ -1,5 +1,6 @@
 package com.SouthernWall_404.Painter.Common.Network;
 
+import com.SouthernWall_404.Painter.API.Paint.Util.PaintBlockUtil;
 import com.SouthernWall_404.Painter.Painter;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -54,7 +55,7 @@ public record ClientRequestPack(int typeCode, ChunkPos pos) implements CustomPac
     }
 
     private static void handleSync(ServerPlayer player,ChunkPos pos) {
-//        PaintUtil.syncToClient(pos,player);
+        PaintBlockUtil.syncToClient(pos,player);
     }
 
 }

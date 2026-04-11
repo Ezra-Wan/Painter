@@ -1,5 +1,6 @@
 package com.SouthernWall_404.Painter.Common.Init;
 
+import com.SouthernWall_404.Painter.API.Paint.Attachment.PaintChunkInfo;
 import com.SouthernWall_404.Painter.API.Paint.Attachment.PaintInfo;
 import com.SouthernWall_404.Painter.API.Tool.SelectedZone;
 import com.SouthernWall_404.Painter.Painter;
@@ -23,6 +24,10 @@ public class ModAttachments {
 public static final Supplier<AttachmentType<PaintInfo>> PAINT_INFO =
         ATTACHMENT_TYPES.register("paint_info",
                 () -> AttachmentType.serializable(()->new PaintInfo())
+                        .build());
+public static final Supplier<AttachmentType<PaintChunkInfo>>PAINT_CHUNK_INFO=
+        ATTACHMENT_TYPES.register("paint_chunk_info",
+                ()->AttachmentType.serializable(()->new PaintChunkInfo())
                         .build());
     public static final Supplier<AttachmentType<SelectedZone>> SELECTED_ZONE =
             ATTACHMENT_TYPES.register(Painter.MODID+".selected_zone",

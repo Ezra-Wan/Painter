@@ -1,14 +1,19 @@
 package com.SouthernWall_404.Painter.API.Paint.Attachment;
 
+import com.SouthernWall_404.LaplaceAPI.Network.ICompoundSerializer;
 import com.SouthernWall_404.Painter.API.Paint.API.AbstractRender;
 import com.SouthernWall_404.Painter.API.Paint.PaintContent;
+import com.SouthernWall_404.Painter.API.Paint.Util.PaintBlockUtil;
+import com.SouthernWall_404.Painter.Common.Init.ModAttachments;
 import com.mojang.serialization.DataResult;
+import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.nbt.Tag;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.fml.loading.FMLEnvironment;
@@ -19,7 +24,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-public class PaintInfo implements INBTSerializable<CompoundTag> {
+public class PaintInfo implements ICompoundSerializer {
 
     private final Map<BlockPos, AbstractRender<?, ?>> renders = new HashMap<>();
 
@@ -30,12 +35,18 @@ public class PaintInfo implements INBTSerializable<CompoundTag> {
         return renders;
     }
 
-    public void putRender(BlockPos pos, AbstractRender<?, ?> render) {
+    public void putRender(Level level,BlockPos pos, AbstractRender<?, ?> render) {
         renders.put(pos, render);
+        PaintChunkInfo chunkInfo=level.getData(ModAttachments.PAINT_CHUNK_INFO);
+        chunkInfo.addChunk(level.getChunkAt(pos).getPos());
+
+
+
     }
 
-    public AbstractRender<?, ?> removeRender(BlockPos pos) {
-        return renders.remove(pos);
+    public void removeRender(BlockPos pos) {
+
+        renders.remove(pos);
     }
 
     @Override
@@ -59,6 +70,15 @@ public class PaintInfo implements INBTSerializable<CompoundTag> {
             rendersList.add(entryTag);
         }
         result.put("renders", rendersList);
+
+//        if (Minecraft.getInstance()!=null)
+//        {
+//            System.out.println("Server Saved");
+//        }else {
+//            System.out.println("Client Saved");
+//        }
+
+
         return result;
     }
 
@@ -89,6 +109,7 @@ public class PaintInfo implements INBTSerializable<CompoundTag> {
         // 直接通过无参构造创建实例（需要子类提供无参构造）
         BlockState blockState= Blocks.AIR.defaultBlockState();
         AbstractRender<?, ?> render = PaintContent.getRender(type).apply(blockState);
+
         if (render == null) {
             return null;
         }

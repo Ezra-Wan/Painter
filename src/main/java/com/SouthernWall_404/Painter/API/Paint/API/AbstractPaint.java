@@ -1,9 +1,8 @@
 package com.SouthernWall_404.Painter.API.Paint.API;
 
 import com.SouthernWall_404.Painter.API.Paint.ModModelRender;
-import com.SouthernWall_404.Painter.API.Paint.Util.CommonUtil;
 import com.SouthernWall_404.Painter.API.Paint.Util.RenderUtil;
-import com.SouthernWall_404.RegulappleCore.Render.BakedQuadRender;
+import com.SouthernWall_404.LaplaceAPI.RegulappleEngine.BakedQuadRender;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.Minecraft;

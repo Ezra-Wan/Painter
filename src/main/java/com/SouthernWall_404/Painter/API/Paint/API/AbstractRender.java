@@ -144,17 +144,17 @@ public abstract class AbstractRender<T,F extends Object> implements IRender<T> {
 //    public void putRenderBlock(F object, Block block) {
 ////        int flag=getFlag(object);
 ////
-////        ResourceLocation key= RenderUtil.getBlockKey(block);
+////        ResourceLocation handlerKey= RenderUtil.getBlockKey(block);
 ////
-////        putRenderObject(flag,key);
+////        putRenderObject(flag,handlerKey);
 //
 //        putRenderBlock(object,block.defaultBlockState());
 //
 //        update();
 //    }
 //
-//    public void putRenderObject(int flag, ResourceLocation key) {
-//        paintPaths.put(flag,key);
+//    public void putRenderObject(int flag, ResourceLocation handlerKey) {
+//        paintPaths.put(flag,handlerKey);
 //
 //        update();
 //    }
