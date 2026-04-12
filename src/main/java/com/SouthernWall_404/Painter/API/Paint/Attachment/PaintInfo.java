@@ -3,12 +3,15 @@ package com.SouthernWall_404.Painter.API.Paint.Attachment;
 import com.SouthernWall_404.LaplaceAPI.VertinCore.ICompoundSerializer;
 import com.SouthernWall_404.Painter.API.Paint.API.AbstractRender;
 import com.SouthernWall_404.Painter.API.Paint.PaintContent;
+import com.SouthernWall_404.Painter.API.Paint.Util.PaintUtil;
+import com.SouthernWall_404.Painter.API.Paint.Util.RenderUtil;
 import com.SouthernWall_404.Painter.Common.Init.ModAttachments;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
@@ -40,7 +43,23 @@ public class PaintInfo implements ICompoundSerializer {
     public void removeRender(BlockPos pos) {
 
         renders.remove(pos);
+
     }
+
+    /**
+     * 用于处理服务器的单端移除，执行同步
+     * @param level
+     * @param player
+     * @param pos
+     */
+    public void removeRender(Level level, Player player,BlockPos pos) {
+
+        removeRender(pos);
+
+        PaintUtil.syncToClient(level.getChunkAt(pos).getPos(),player);
+
+    }
+
 
     @Override
     public @UnknownNullability CompoundTag serializeNBT(HolderLookup.Provider provider) {
