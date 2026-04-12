@@ -9,7 +9,6 @@ import com.SouthernWall_404.Painter.Common.Init.ModAttachments;
 import com.SouthernWall_404.Painter.Common.Network.ClientRequestPack;
 import com.SouthernWall_404.Painter.Common.Network.ModChannels;
 import com.SouthernWall_404.Painter.Common.Network.S2C.ChunkS2CPacket;
-import com.SouthernWall_404.Painter.Common.World.Block.PaintBlock;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
@@ -28,7 +27,6 @@ import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 
-import java.util.List;
 import java.util.Map;
 
 public class PaintUtil {
@@ -142,11 +140,11 @@ public class PaintUtil {
 
         }else {
 
-            BlockState origin=level.getBlockState(blockPos);
+            BlockState origin=level.getBlockState(blockPos);//获取原本方块
 
-            if(!isPaintable(origin,level,blockPos))
+            if(!isPaintable(origin,level,blockPos))//检查是否是可以渲染的类型
             {
-                return;
+                return;//不是则不处理
             }
             if(origin.getBlock() instanceof SlabBlock)
             {
@@ -236,10 +234,7 @@ public class PaintUtil {
     }
     public static boolean isPaintable(BlockState origin,Level level,BlockPos blockPos)
     {
-        if(origin.getBlock()instanceof PaintBlock)
-        {
-            return true;
-        }
+
         if (origin.isCollisionShapeFullBlock(level,blockPos))
         {
             return true;//完整方块可行

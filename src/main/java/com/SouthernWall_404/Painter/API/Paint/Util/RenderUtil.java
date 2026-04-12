@@ -1,31 +1,17 @@
 package com.SouthernWall_404.Painter.API.Paint.Util;
 
-import com.SouthernWall_404.Painter.API.Paint.API.AbstractRender;
-import com.SouthernWall_404.Painter.API.Paint.Imply.SimpleBlockPaint;
-import com.SouthernWall_404.Painter.Common.World.Block.PaintBlock;
-import com.SouthernWall_404.Painter.Common.World.BlockEntity.PaintBlockEntity;
 import it.unimi.dsi.fastutil.objects.Object2ByteLinkedOpenHashMap;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.BlockRenderDispatcher;
 import net.minecraft.client.renderer.block.model.BakedQuad;
-import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.BakedModel;
-import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.BlockGetter;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.phys.shapes.BooleanOp;
-import net.minecraft.world.phys.shapes.Shapes;
-import net.minecraft.world.phys.shapes.VoxelShape;
 import net.neoforged.neoforge.client.model.data.ModelData;
 
 import javax.annotation.Nullable;
@@ -43,55 +29,12 @@ private static final ThreadLocal<Object2ByteLinkedOpenHashMap<Block.BlockStatePa
     return object2bytelinkedopenhashmap;
 });
 
-    public static ResourceLocation getBlockKey(Block block)
-    {
-        ResourceLocation key = BuiltInRegistries.BLOCK.getKey(block);
-        // 将方块注册名转换为纹理路径，例如 "minecraft:iron_block" -> "minecraft:block/iron_block"
 
 
-        return key;
-    }
-
-    public static ModelResourceLocation getModelKey(Block block)
-    {
-        ResourceLocation blockKey=getBlockKey(block);
-        ResourceLocation modelLocation = ResourceLocation.fromNamespaceAndPath(
-                blockKey.getNamespace(), "block/" + blockKey.getPath());
-
-        ModelResourceLocation modelResourceLocation=ModelResourceLocation.inventory(blockKey);
-        return modelResourceLocation;
-    }
-
-    public static TextureAtlasSprite getFaceFromBlock(BlockState state, Direction face)
-    {
-        Minecraft mc = Minecraft.getInstance();
-        BlockRenderDispatcher dispatcher = mc.getBlockRenderer();
-        BakedModel model = dispatcher.getBlockModel(state);
-
-        RandomSource random = RandomSource.create(); // 可传入种子，通常用静态随机即可
-        List<BakedQuad> quads = model.getQuads(state, face, random, ModelData.EMPTY, RenderType.solid());
-
-        if (!quads.isEmpty()) {
-            // 通常一个面可能包含多个四边形，这里取第一个作为代表
-            BakedQuad quad = quads.get(0);
-            return quad.getSprite(); // NeoForge 扩展方法
-        }
-
-        // 若该面无四边形，回退到粒子图标（常为默认面纹理）
-        return model.getParticleIcon();
-    }
-
-
-
+    @Deprecated
     public static RenderType getRenderType(BlockGetter level,BlockPos pos)
     {
         BlockState blockState=level.getBlockState(pos);
-
-        if(blockState.getBlock()instanceof PaintBlock)
-        {
-            blockState=getPaintBlockOrigin(level,pos);
-        }
-
         return getRenderType(blockState);
     }
 
@@ -151,42 +94,21 @@ private static final ThreadLocal<Object2ByteLinkedOpenHashMap<Block.BlockStatePa
     public static List<BakedQuad> getQuads(BlockState state, @Nullable Direction direction) {
         return getQuads(state, direction, RenderUtil.getRenderType(state));
     }
-    @Deprecated
-    public static AbstractRender getRender(Level level, BlockPos blockPos)
-    {
-        BlockEntity blockEntity=level.getBlockEntity(blockPos);
-        AbstractRender render=new SimpleBlockPaint();
-
-        if(blockEntity instanceof PaintBlockEntity paintBlockEntity)
-        {
-            render=paintBlockEntity.getRender();
-        }
-
-        return render;
-    }
 
     @Deprecated
     public static BlockState getPaintBlockOrigin(BlockGetter level,BlockPos neighborPos)
     {
-        BlockState blockState= Blocks.AIR.defaultBlockState();
-        BlockEntity blockEntity=level.getBlockEntity(neighborPos);
-        if(blockEntity instanceof PaintBlockEntity paintBlockEntity)
-        {
-            blockState =paintBlockEntity.getOrigin();
-        }
-
+        BlockState blockState=level.getBlockState(neighborPos);
         return blockState;
 
     }
 
+    @Deprecated
     public static boolean shouldRenderFace(BlockGetter level, BlockPos pos,BlockState state, Direction face ) {
 
-        BlockPos neighborPos=pos.relative(face);
-        BlockState neighborState = level.getBlockState(neighborPos);
-        if(neighborState.getBlock()instanceof PaintBlock)
-        {
-            neighborState=getPaintBlockOrigin(level,neighborPos);
-        }
+        BlockPos neighborPos=pos.relative(face);//获取对应方向的位置
+        BlockState neighborState = level.getBlockState(neighborPos);//获取对应方向相邻方块
+
 
         // 邻居是空气 → 必须渲染
         if (neighborState.isAir()) {
@@ -213,52 +135,5 @@ private static final ThreadLocal<Object2ByteLinkedOpenHashMap<Block.BlockStatePa
         // 默认渲染（包括邻居为半透明、流体等情况）
         return true;
     }
-
-    public static boolean shouldRenderFace(BlockState state, BlockGetter level, BlockPos offset, Direction face, BlockPos neighborPos) {
-        BlockState blockstate = level.getBlockState(neighborPos);
-
-        if(blockstate.getBlock()instanceof PaintBlock)blockstate=getPaintBlockOrigin(level,neighborPos);
-
-        if (state.skipRendering(blockstate, face)) {
-            return false;
-        } else if (blockstate.hidesNeighborFace(level, neighborPos, state, face.getOpposite()) && state.supportsExternalFaceHiding()) {
-            return false;
-        } else if (blockstate.canOcclude()) {
-            Block.BlockStatePairKey block$blockstatepairkey = new Block.BlockStatePairKey(state, blockstate, face);
-            Object2ByteLinkedOpenHashMap<Block.BlockStatePairKey> object2bytelinkedopenhashmap = (Object2ByteLinkedOpenHashMap)OCCLUSION_CACHE.get();
-            byte b0 = object2bytelinkedopenhashmap.getAndMoveToFirst(block$blockstatepairkey);
-            if (b0 != 127) {
-                return b0 != 0;
-            } else {
-                VoxelShape voxelshape = state.getFaceOcclusionShape(level, offset, face);
-                if (voxelshape.isEmpty()) {
-                    return true;
-                } else {
-                    VoxelShape voxelshape1 = blockstate.getFaceOcclusionShape(level, neighborPos, face.getOpposite());
-                    boolean flag = Shapes.joinIsNotEmpty(voxelshape, voxelshape1, BooleanOp.ONLY_FIRST);
-                    if (object2bytelinkedopenhashmap.size() == 2048) {
-                        object2bytelinkedopenhashmap.removeLastByte();
-                    }
-
-                    object2bytelinkedopenhashmap.putAndMoveToFirst(block$blockstatepairkey, (byte)(flag ? 1 : 0));
-                    return flag;
-                }
-            }
-        } else {
-            return true;
-        }
-    }
-
-
-    public static Block getBlockFromID(ResourceLocation key)
-    {
-        Block block=BuiltInRegistries.BLOCK.get(key);
-        if(block==null)return Blocks.AIR;
-
-        return block;
-    }
-
-
-
 }
 

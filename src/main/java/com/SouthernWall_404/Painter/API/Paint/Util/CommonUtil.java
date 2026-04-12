@@ -2,6 +2,9 @@ package com.SouthernWall_404.Painter.API.Paint.Util;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.phys.Vec3;
 
 import java.util.ArrayList;
@@ -125,5 +128,14 @@ public class CommonUtil {
             }
         }
         return result;
+    }
+
+    public static ResourceLocation getBlockKey(Block block)
+    {
+        ResourceLocation key = BuiltInRegistries.BLOCK.getKey(block);
+        // 将方块注册名转换为纹理路径，例如 "minecraft:iron_block" -> "minecraft:block/iron_block"
+
+
+        return key;
     }
 }

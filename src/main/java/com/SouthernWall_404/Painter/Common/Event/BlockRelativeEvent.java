@@ -55,10 +55,4 @@ public class BlockRelativeEvent {
         }
 
     }
-
-    // 注意：isPaintable 方法如果不再被其他地方使用，可以考虑删除或移入相关工具类
-    public static boolean isPaintable(Level level, BlockPos blockPos) {
-        // 原逻辑是直接返回 true，可以根据需要保留或修改
-        return true;
-    }
 }
