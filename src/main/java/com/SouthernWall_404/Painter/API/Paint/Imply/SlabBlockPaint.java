@@ -106,6 +106,8 @@ public class SlabBlockPaint extends AbstractPaint {
 
         //TODO 半砖中间仍有待处理
 
+        //TODO 需要处理对原本方块的兼容
+
         return result;
     }
 

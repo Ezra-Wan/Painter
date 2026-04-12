@@ -3,6 +3,7 @@ package com.SouthernWall_404.Painter.API.Paint.Util;
 import com.SouthernWall_404.Painter.API.Paint.API.AbstractPaint;
 import com.SouthernWall_404.Painter.API.Paint.API.AbstractRender;
 import com.SouthernWall_404.Painter.API.Paint.Attachment.PaintInfo;
+import com.SouthernWall_404.Painter.API.Paint.Imply.SimpleBlockPaint;
 import com.SouthernWall_404.Painter.API.Paint.Imply.SlabBlockPaint;
 import com.SouthernWall_404.Painter.Common.Init.ModAttachments;
 import com.SouthernWall_404.Painter.Common.Network.ClientRequestPack;
@@ -110,12 +111,26 @@ public class PaintBlockUtil {
 
 
         }else {
+
+            BlockState origin=level.getBlockState(blockPos);
+
+            if(!isPaintable(origin,level,blockPos))
+            {
+                return;
+            }
+            if(origin.getBlock() instanceof SlabBlock)
+            {
+                AbstractRender render=new SlabBlockPaint();
+                render.putMaterial(direction, material);
+                paintInfo.putRender(level,blockPos, render);
+            }
+            if(origin.isCollisionShapeFullBlock(level,blockPos))
+            {
+                AbstractRender render=new SimpleBlockPaint();
+                render.putMaterial(direction, material);
+                paintInfo.putRender(level,blockPos, render);
+            }
             //        AbstractRender render = new SimpleBlockPaint();//默认普通方块
-
-            AbstractRender render=new SlabBlockPaint();//TODO 测试用例，记得删
-            render.putMaterial(direction, material);
-
-            paintInfo.putRender(level,blockPos, render);
         }
 
         chunk.setData(ModAttachments.PAINT_INFO, paintInfo);
