@@ -1,6 +1,6 @@
 package com.SouthernWall_404.Painter.Client;
 
-import com.SouthernWall_404.Painter.API.Paint.Util.PaintBlockUtil;
+import com.SouthernWall_404.Painter.API.Paint.Util.PaintUtil;
 import com.SouthernWall_404.Painter.API.Tool.SelectedZone;
 import com.SouthernWall_404.Painter.API.Tool.Wall.Edge;
 import com.SouthernWall_404.Painter.Common.Init.ModAttachments;
@@ -75,7 +75,7 @@ public class SelectedRenderer {
         var poseStack = event.getPoseStack();
         for(BlockPos pos:poses)
         {
-            if(!PaintBlockUtil.isPaintable(level,pos))
+            if(!PaintUtil.isPaintable(level,pos))
             {
                 continue;
             }

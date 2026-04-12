@@ -28,27 +28,57 @@ import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 
+import java.util.List;
 import java.util.Map;
 
-public class PaintBlockUtil {
+public class PaintUtil {
 
+
+    public static Map<BlockPos,AbstractRender<?,?>> getRenders(Level level,BlockPos blockPos)
+    {
+        LevelChunk chunk=level.getChunkAt(blockPos);
+
+        PaintInfo paintInfo=chunk.getData(ModAttachments.PAINT_INFO);
+
+        return paintInfo.getRenders();
+    }
+    public static boolean hasPaint(Level level,BlockPos blockPos)
+    {
+
+        if(getRenders(level,blockPos).containsKey(blockPos))return true;
+
+        return false;
+
+    }
+
+    public static boolean hasPaint(Map<BlockPos,AbstractRender<?,?>> renders,BlockPos blockPos)
+    {
+
+        if(renders.containsKey(blockPos))return true;
+
+        return false;
+
+    }
 
     public static void dealWithPaintClick(Level level, BlockPos blockPos, Player player, Direction direction) {
-        BlockState origin = level.getBlockState(blockPos);
 
         ItemStack handItemStack = player.getItemInHand(InteractionHand.OFF_HAND);
 
-        if (origin.getBlock() instanceof PaintBlock)//如果对象是已经是渲染方块
+        Map<BlockPos,AbstractRender<?,?>> renders=getRenders(level,blockPos);
+
+        if (hasPaint(renders,blockPos))//如果对象是已经是渲染方块
         {
+
+            //TODO 需要修正
             if (handItemStack.isEmpty()) {
-                cycle(level, blockPos, player, direction);
+                cycle( blockPos, renders, direction);
             } else {
                 if (handItemStack.getItem() instanceof BlockItem blockItem) {
                     Block block = blockItem.getBlock();
-                    AbstractRender render = RenderUtil.getRender(level, blockPos);
+                    AbstractRender render = renders.get(blockPos);
 
                     if (render.getMaterial(direction).getBlock() == block) {
-                        cycle(level, blockPos, player, direction);
+                        cycle( blockPos, renders, direction);
                     } else {
                         paint(level, blockPos, player, direction);
                     }
@@ -60,9 +90,9 @@ public class PaintBlockUtil {
         }
     }
 
-    public static void cycle(Level level, BlockPos blockPos, Player player, Direction direction) {
+    public static void cycle( BlockPos blockPos, Map<BlockPos,AbstractRender<?,?>> renders, Direction direction) {
 
-        AbstractRender render = RenderUtil.getRender(level, blockPos);
+        AbstractRender render = renders.get(blockPos);
         if (render instanceof AbstractPaint paint) {
             paint.cyclePaint(direction);
         }
@@ -182,7 +212,8 @@ public class PaintBlockUtil {
 //
 //
 //
-//    }
+
+
 
     public static void RequireSync(ChunkPos pos)
     {

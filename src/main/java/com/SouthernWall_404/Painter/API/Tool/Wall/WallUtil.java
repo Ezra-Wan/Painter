@@ -1,6 +1,6 @@
 package com.SouthernWall_404.Painter.API.Tool.Wall;
 
-import com.SouthernWall_404.Painter.API.Paint.Util.PaintBlockUtil;
+import com.SouthernWall_404.Painter.API.Paint.Util.PaintUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.entity.player.Player;
@@ -83,7 +83,7 @@ public class WallUtil {
 //                }
 //                //如果所有筛选项均满足
 
-                PaintBlockUtil.dealWithPaintClick(level,current,player,face);//执行喷涂
+                PaintUtil.dealWithPaintClick(level,current,player,face);//执行喷涂
 
                 // 向墙面内的四个方向扩散
                 for (Direction wallDir : wallDirs) {

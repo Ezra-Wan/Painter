@@ -1,6 +1,6 @@
 package com.SouthernWall_404.Painter.Common.World.Item;
 
-import com.SouthernWall_404.Painter.API.Paint.Util.PaintBlockUtil;
+import com.SouthernWall_404.Painter.API.Paint.Util.PaintUtil;
 import com.SouthernWall_404.Painter.API.Tool.SelectedZone;
 import com.SouthernWall_404.Painter.API.Tool.ToolContent;
 import com.SouthernWall_404.Painter.Common.Content.ComponentContent;
@@ -54,7 +54,7 @@ public class PaintItem extends BlockInteractItem {
         }
 
         // 执行涂色
-        PaintBlockUtil.dealWithPaintClick(level, blockPos, player, event.getFace());
+        PaintUtil.dealWithPaintClick(level, blockPos, player, event.getFace());
         event.setCanceled(true);
         player.swing(InteractionHand.MAIN_HAND);
     }

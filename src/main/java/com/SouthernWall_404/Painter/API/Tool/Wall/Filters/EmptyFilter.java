@@ -1,6 +1,6 @@
 package com.SouthernWall_404.Painter.API.Tool.Wall.Filters;
 
-import com.SouthernWall_404.Painter.API.Paint.Util.PaintBlockUtil;
+import com.SouthernWall_404.Painter.API.Paint.Util.PaintUtil;
 import com.SouthernWall_404.Painter.API.Paint.Util.RenderUtil;
 import com.SouthernWall_404.Painter.API.Tool.Wall.IFilter;
 import net.minecraft.core.BlockPos;
@@ -20,7 +20,7 @@ public class EmptyFilter implements IFilter {
         Level level=player.level();
         BlockState blockState=level.getBlockState(pos);
 
-        if(!PaintBlockUtil.isPaintable(blockState,level,pos))
+        if(!PaintUtil.isPaintable(blockState,level,pos))
         {
             return false;
         }
