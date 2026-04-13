@@ -51,6 +51,8 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>,Direc
         }
 
         createQuads();
+
+        super.update();
     }
 
 

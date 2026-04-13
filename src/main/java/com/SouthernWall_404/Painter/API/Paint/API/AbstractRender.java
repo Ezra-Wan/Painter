@@ -1,5 +1,6 @@
 package com.SouthernWall_404.Painter.API.Paint.API;
 
+import com.SouthernWall_404.Painter.Client.PaintRender;
 import com.mojang.serialization.DataResult;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -10,6 +11,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.UnknownNullability;
 
 import java.util.HashMap;
@@ -63,7 +65,9 @@ public abstract class AbstractRender<T,F extends Object> implements IRender<T> {
 
 
     @OnlyIn(Dist.CLIENT)
-    protected abstract void update();
+    protected void update(){
+        PaintRender.redraw();
+    }
 
     //========业务方法========
 

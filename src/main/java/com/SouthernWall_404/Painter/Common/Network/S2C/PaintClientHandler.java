@@ -1,10 +1,9 @@
 package com.SouthernWall_404.Painter.Common.Network.S2C;
 
 import com.SouthernWall_404.Painter.API.Paint.Attachment.PaintInfo;
-import com.SouthernWall_404.Painter.Client.PaintRenderRebuild;
+import com.SouthernWall_404.Painter.Client.PaintRender;
 import com.SouthernWall_404.Painter.Common.Init.ModAttachments;
 import net.minecraft.client.Minecraft;
-import net.minecraft.core.RegistryAccess;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.chunk.LevelChunk;
@@ -24,6 +23,8 @@ public class PaintClientHandler {
             paintInfo.deserializeNBT(level.registryAccess(),packet.modPack());
 
             chunk.setData(ModAttachments.PAINT_INFO,paintInfo);
+
+            PaintRender.redraw();
 //            if (Minecraft.getInstance().levelRenderer != null) {
 //                // 标记整个区块需要重新渲染
 //                Minecraft.getInstance().levelRenderer.setBlocksDirty(

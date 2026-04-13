@@ -29,9 +29,10 @@ import java.util.*;
 
 @EventBusSubscriber(modid = Painter.MODID, value = Dist.CLIENT, bus = EventBusSubscriber.Bus.GAME)
 
-public class PaintRenderRebuild {
+public class PaintRender {
 
-
+    private static Map<BlockPos,AbstractRender<?,?>> renders=new HashMap<>();
+    private static boolean isFirstRender=true;
     @SubscribeEvent
     public static void onRenderLevelStage(RenderLevelStageEvent event) {
         if (event.getStage() != RenderLevelStageEvent.Stage.AFTER_TRANSLUCENT_BLOCKS) {
@@ -42,10 +43,11 @@ public class PaintRenderRebuild {
         MultiBufferSource.BufferSource bufferSource=Minecraft.getInstance().renderBuffers().bufferSource();
 
 
-        Map<BlockPos,AbstractRender<?,?>> renders=getRenderNearby();
+
 
         if (renders.isEmpty())
         {
+            if(isFirstRender)redraw();
 //            System.out.println("Client's Renders Empty");
         }
         for(Map.Entry<BlockPos,AbstractRender<?,?>> entry:renders.entrySet())
@@ -79,7 +81,12 @@ public class PaintRenderRebuild {
 //        bufferSource.endBatch(RenderType.CUTOUT);
 
     }
-    public static final Set<ChunkPos> SYNCED_CHUNKS = new HashSet<>();
+
+    public static void redraw()
+    {
+        renders=getRenderNearby();
+    }
+
     /**
      * 遍历玩家周围radius范围，获取所有的Render
      * @return
@@ -95,22 +102,20 @@ public class PaintRenderRebuild {
         Vec3 vec3=player.position();
         BlockPos origin= CommonUtil.vec32Pos(vec3);
 
-        int radius=Minecraft.getInstance().options.getEffectiveRenderDistance();
+        int radius=Minecraft.getInstance().options.getEffectiveRenderDistance()*16;
+
 
         LevelChunk originChunk=level.getChunkAt(origin);
 
         ChunkPos originChunkPos=originChunk.getPos();
 
-//        for(int i=-2;i<=2;i++)
-        for(int i=0;i<=radius;i++)
+        for(int i=-radius;i<=radius;i++)
 
         {
-            for(int j=0;j<=radius;j++)
-//                for(int j=-2;j<=2;j++)
+            for(int j=-radius;j<=radius;j++)
 
             {
                 ChunkPos currentChunkPos=new ChunkPos(originChunkPos.x+i,originChunkPos.z+j);
-//                PaintBlockUtil.RequireSync(currentChunkPos);
                 LevelChunk chunk=level.getChunk(currentChunkPos.x,currentChunkPos.z);
                 PaintInfo paintInfo=chunk.getData(ModAttachments.PAINT_INFO);
 
@@ -120,25 +125,5 @@ public class PaintRenderRebuild {
 
         }
         return result;
-    }
-
-
-    protected static void renderQuadsWithAO(Level level, BlockState state, BlockPos pos, List<BakedQuad> quads,
-                                     VertexConsumer consumer, ModModelRender modRenderer,
-                                     float[] shape, BitSet shapeFlags, ModModelRender.AmbientOcclusionFace aoFace,
-                                     PoseStack poseStack, int packedOverlay) {
-        if(state==null)
-        {
-            return;
-        }
-        for (BakedQuad quad : quads) {
-            modRenderer.calculateShape(level, state, pos, quad.getVertices(), quad.getDirection(), shape, shapeFlags);
-
-            aoFace.calculate(level, state, pos, quad.getDirection(), shape, shapeFlags, quad.isShade());
-            modRenderer.putQuadData(level, state, pos, consumer, poseStack.last(), quad,
-                    aoFace.brightness[0], aoFace.brightness[1], aoFace.brightness[2], aoFace.brightness[3],
-                    aoFace.lightmap[0], aoFace.lightmap[1], aoFace.lightmap[2], aoFace.lightmap[3],
-                    packedOverlay);
-        }
     }
 }
