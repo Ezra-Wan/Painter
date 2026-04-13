@@ -2,6 +2,7 @@ package com.SouthernWall_404.Painter.Client;
 
 
 import com.SouthernWall_404.Painter.API.Paint.API.AbstractRender;
+import com.SouthernWall_404.Painter.API.Paint.Attachment.PaintChunkInfo;
 import com.SouthernWall_404.Painter.API.Paint.Attachment.PaintInfo;
 import com.SouthernWall_404.Painter.API.Paint.ModModelRender;
 import com.SouthernWall_404.Painter.API.Paint.Util.CommonUtil;
@@ -84,7 +85,12 @@ public class PaintRender {
 
     public static void redraw()
     {
-        renders=getRenderNearby();
+        Minecraft mc=Minecraft.getInstance();
+        Level level=mc.level;
+        Player player=mc.player;
+
+        PaintChunkInfo chunkInfo=level.getData(ModAttachments.PAINT_CHUNK_INFO);
+        renders=chunkInfo.getRenderNearby(player.getOnPos());
     }
 
     /**

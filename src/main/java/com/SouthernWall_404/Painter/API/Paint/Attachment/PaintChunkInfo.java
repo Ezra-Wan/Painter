@@ -2,16 +2,18 @@ package com.SouthernWall_404.Painter.API.Paint.Attachment;
 
 import com.SouthernWall_404.LaplaceAPI.xNetwork.API.Sync;
 import com.SouthernWall_404.LaplaceAPI.VertinCore.ICompoundSerializer;
+import com.SouthernWall_404.Painter.API.Paint.API.AbstractRender;
 import com.SouthernWall_404.Painter.Common.Init.ModAttachments;
+import net.minecraft.client.Minecraft;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.chunk.LevelChunk;
 import org.jetbrains.annotations.UnknownNullability;
 
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 public class PaintChunkInfo implements ICompoundSerializer {
 
@@ -22,6 +24,11 @@ public class PaintChunkInfo implements ICompoundSerializer {
     private boolean isChanged=false;//记录是否有更新，有则触发全局更新
 
 
+    //TODO 需要应用起来
+    /**
+     * 统一进度
+     * @param level
+     */
     public void tick(Level level)
     {
         if(level.isClientSide)
@@ -33,6 +40,33 @@ public class PaintChunkInfo implements ICompoundSerializer {
             Sync.syncLevelAttachmentToAll(level, ModAttachments.PAINT_CHUNK_INFO.get());
             done();
         }
+    }
+
+    public Map<BlockPos, AbstractRender<?,?>>  getRenderNearby(BlockPos blockPos)
+    {
+        Map<BlockPos, AbstractRender<?,?>> result=new HashMap<>();
+        Minecraft mc=Minecraft.getInstance();
+        if(mc ==null)return new HashMap<>();
+        ChunkPos playerPos=new ChunkPos(blockPos);
+
+        Level level=mc.level;
+
+        int viewDistance=mc.options.getEffectiveRenderDistance();
+        int viewDistanceSquared=viewDistance*viewDistance;
+
+        for(ChunkPos pos:paintPoses){
+            if(pos.distanceSquared(playerPos)<=viewDistanceSquared){
+
+                LevelChunk chunk=level.getChunkSource().getChunkNow(pos.x,pos.z);
+                if(chunk!=null)
+                {
+                    PaintInfo paintInfo=chunk.getData(ModAttachments.PAINT_INFO);
+                    result.putAll(paintInfo.getRenders());
+                }
+            }
+        }
+
+        return result;
     }
 
 
