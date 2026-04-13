@@ -83,14 +83,6 @@ public class PaintInfo implements ICompoundSerializer {
         }
         result.put("renders", rendersList);
 
-//        if (Minecraft.getInstance()!=null)
-//        {
-//            System.out.println("Server Saved");
-//        }else {
-//            System.out.println("Client Saved");
-//        }
-
-
         return result;
     }
 

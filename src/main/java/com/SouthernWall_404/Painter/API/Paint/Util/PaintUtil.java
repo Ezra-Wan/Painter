@@ -64,7 +64,7 @@ public class PaintUtil {
 
         Map<BlockPos,AbstractRender<?,?>> renders=getRenders(level,blockPos);
 
-        if (hasPaint(renders,blockPos))//如果对象是已经是渲染方块
+        if (hasPaint(renders,blockPos))//如果已经存在渲染
         {
 
             //TODO 需要修正
@@ -99,15 +99,6 @@ public class PaintUtil {
     }
 
     public static void paint(Level level, BlockPos blockPos, Player player, Direction direction) {
-
-        if (level.isClientSide) {
-            System.out.println("Client paint");
-        }
-        if (!level.isClientSide){
-            System.out.println("Server paint");
-        }
-
-
         ItemStack itemStack = player.getItemInHand(InteractionHand.OFF_HAND);//添加副手的方块
         if (itemStack.getItem() instanceof BlockItem blockItem) {
             Block block = blockItem.getBlock();
