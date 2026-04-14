@@ -24,7 +24,6 @@ public abstract class AbstractRender<T,F extends Object> implements IRender<T> {
     protected Map<Integer, T> objects = new HashMap<>();//渲染内容缓存
     protected String type;
 
-    protected BlockState origin;//TODO 待移除
     //========需要持久化的数据========
 
     protected Map<Integer, BlockState> materials = new HashMap<>();
