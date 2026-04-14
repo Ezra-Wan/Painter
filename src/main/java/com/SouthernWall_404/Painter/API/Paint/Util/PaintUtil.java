@@ -23,6 +23,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.SlabBlock;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.SlabType;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
@@ -139,7 +140,8 @@ public class PaintUtil {
             }
             if(origin.getBlock() instanceof SlabBlock)
             {
-                AbstractRender render=new SlabBlockPaint();
+                SlabType slabType=origin.getValue(SlabBlock.TYPE);
+                AbstractRender render=new SlabBlockPaint(slabType);
                 render.putMaterial(direction, material);
                 paintInfo.putRender(level,blockPos, render);
             }

@@ -33,11 +33,24 @@ public class SlabBlockPaint extends AbstractPaint {
     private static final int NORTH = 1, SOUTH = 2, WEST = 4, EAST = 8, UP = 16, DOWN = 32;
 
 
+
     //========需要持久化的数据========
     private Map<Integer,SlabType> slabTypes=new HashMap<>();//用于标定
 
+
+    private SlabType slabType;
+
+
     public SlabBlockPaint() {
+        this(SlabType.TOP);
+    }
+
+    public SlabBlockPaint(SlabType slabType)
+    {
+
         super(PaintContent.SLAB_BLOCK);
+
+        this.slabType=slabType;
     }
 
     @Override
@@ -136,7 +149,7 @@ public class SlabBlockPaint extends AbstractPaint {
     private BakedQuad createSlabQuad(TextureAtlasSprite sprite, Direction direction,int tintIndex) {
 //        boolean isTopSlab = origin.getValue(SlabBlock.TYPE) == SlabType.TOP;
 
-        SlabType slabType=SlabType.TOP;
+        SlabType slabType=this.slabType;
         SlabType uvSlabType=slabTypes.getOrDefault(getFlag(direction),slabType);
         float yMin;
         float yMax;
@@ -262,6 +275,10 @@ public class SlabBlockPaint extends AbstractPaint {
     public @UnknownNullability CompoundTag serializeNBT(HolderLookup.Provider provider) {
         CompoundTag tag = super.serializeNBT(provider);
 
+        // 保存默认 slabType
+        if (slabType != null) {
+            tag.putString("slab_type", slabType.name());
+        }
         // 保存 slabTypes
         CompoundTag slabTypesTag = new CompoundTag();
         for (Map.Entry<Integer, SlabType> entry : slabTypes.entrySet()) {
@@ -280,7 +297,17 @@ public class SlabBlockPaint extends AbstractPaint {
     public void deserializeNBT(HolderLookup.Provider provider, CompoundTag compoundTag) {
         // 先调用父类，恢复 origin 和 materials
         super.deserializeNBT(provider, compoundTag);
-
+        // 1. 恢复默认 slabType
+        if (compoundTag.contains("slab_type", CompoundTag.TAG_STRING)) {
+            String typeName = compoundTag.getString("slab_type");
+            try {
+                slabType = SlabType.valueOf(typeName);
+            } catch (IllegalArgumentException e) {
+                slabType = SlabType.TOP; // fallback
+            }
+        } else {
+            slabType = SlabType.TOP; // 兼容旧数据
+        }
         // 初始化 slabTypes 默认值（基于 origin 的 SlabType 属性）
         slabTypes.clear();
         SlabType defaultType = SlabType.TOP;

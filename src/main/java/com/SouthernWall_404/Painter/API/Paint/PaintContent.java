@@ -5,6 +5,7 @@ import com.SouthernWall_404.Painter.API.Paint.Imply.SimpleBlockPaint;
 import com.SouthernWall_404.Painter.API.Paint.Imply.SlabBlockPaint;
 import com.mojang.datafixers.types.Func;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.level.block.SlabBlock;
 import net.minecraft.world.level.block.state.BlockState;
 
 import java.util.HashMap;
