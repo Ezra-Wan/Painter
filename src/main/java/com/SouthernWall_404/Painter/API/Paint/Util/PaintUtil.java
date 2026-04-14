@@ -5,6 +5,7 @@ import com.SouthernWall_404.Painter.API.Paint.API.AbstractRender;
 import com.SouthernWall_404.Painter.API.Paint.Attachment.PaintInfo;
 import com.SouthernWall_404.Painter.API.Paint.Imply.SimpleBlockPaint;
 import com.SouthernWall_404.Painter.API.Paint.Imply.SlabBlockPaint;
+import com.SouthernWall_404.Painter.API.Paint.PaintContent;
 import com.SouthernWall_404.Painter.Common.Init.ModAttachments;
 import com.SouthernWall_404.Painter.Common.Network.ClientRequestPack;
 import com.SouthernWall_404.Painter.Common.Network.ModChannels;
@@ -93,7 +94,12 @@ public class PaintUtil {
 
         AbstractRender render = renders.get(blockPos);
         if (render instanceof AbstractPaint paint) {
-            paint.cyclePaint(direction);
+
+            if(paint instanceof SlabBlockPaint slabBlock)
+            {
+                slabBlock.cyclePaint(direction);
+            }
+            else paint.cyclePaint(direction);
         }
 
 

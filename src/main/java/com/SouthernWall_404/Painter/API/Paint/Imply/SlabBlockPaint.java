@@ -4,6 +4,7 @@ import com.SouthernWall_404.Painter.API.Paint.API.AbstractPaint;
 import com.SouthernWall_404.Painter.API.Paint.ModModelRender;
 import com.SouthernWall_404.Painter.API.Paint.PaintContent;
 import com.SouthernWall_404.Painter.API.Paint.Util.RenderUtil;
+import com.SouthernWall_404.Painter.Client.PaintRender;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.Minecraft;
@@ -63,10 +64,11 @@ public class SlabBlockPaint extends AbstractPaint {
         registerFlag(Direction.DOWN, DOWN);
     }
 
+
+    //TODO 添加对面旋转的兼容
     @Override
     public void cyclePaint(Direction direction) {
 
-        //TODO测试用例，记得改回来
         int key=getFlag(direction);
         SlabType defaultType=SlabType.TOP;
         SlabType current=slabTypes.getOrDefault(getFlag(direction),defaultType);
@@ -85,6 +87,8 @@ public class SlabBlockPaint extends AbstractPaint {
             default:
                 break;
         }
+
+        update();
 //        super.cyclePaint(direction);
     }
 
@@ -117,9 +121,6 @@ public class SlabBlockPaint extends AbstractPaint {
             result.add(resultQuad);
         }
 
-        //TODO 半砖中间仍有待处理
-
-        //TODO 需要处理对原本方块的兼容
 
         return result;
     }
