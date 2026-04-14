@@ -330,6 +330,9 @@ public class SlabBlockPaint extends AbstractPaint {
             }
         }
 
+
+
+        update();
         // 注意：这里不需要调用 update()，因为半砖的 quads 是实时生成的，无需预缓存
     }
 }

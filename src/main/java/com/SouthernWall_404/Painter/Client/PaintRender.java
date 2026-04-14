@@ -46,6 +46,7 @@ public class PaintRender {
 
 
 
+        //TODO这里以后记得处理一下世界退出处理
         if (renders.isEmpty())
         {
             if(isFirstRender)redraw();
@@ -89,6 +90,7 @@ public class PaintRender {
         Level level=mc.level;
         Player player=mc.player;
 
+        if(level==null)return;
         PaintChunkInfo chunkInfo=level.getData(ModAttachments.PAINT_CHUNK_INFO);
         renders=chunkInfo.getRenderNearby(player.getOnPos());
     }
