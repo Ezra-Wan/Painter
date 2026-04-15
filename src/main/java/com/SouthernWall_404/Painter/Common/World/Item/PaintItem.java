@@ -29,17 +29,14 @@ public class PaintItem extends BlockInteractItem {
     }
 
     @Override
-    public void dealRightClick(PlayerInteractEvent.RightClickBlock event) {
+    public void dealRightClick(PlayerInteractEvent.RightClickBlock event,boolean isInMainHand) {
         // 原 BlockEvent 中处理 PaintItem 右键的逻辑
-
+        if(handCheck(event,isInMainHand))return;
         event.setCanceled(true);
         var level = event.getLevel();
         var blockPos = event.getPos();
         var player = event.getEntity();
-        if (event.getHand()!=InteractionHand.MAIN_HAND)
-        {
-            return;
-        }
+
         // 检查选区
         SelectedZone selectedZone = player.getData(ModAttachments.SELECTED_ZONE);
         if (selectedZone != null && selectedZone.isSelecting()) {
@@ -48,14 +45,11 @@ public class PaintItem extends BlockInteractItem {
                         ToolContent.getMessage(ToolContent.parentString(ToolContent.FAILED_TO_PAINT, BlockRelativeEvent.OUT_OF_RANGE), Style.EMPTY.withColor(ChatFormatting.RED)),
                         true
                 );
-                event.setCanceled(true);
                 return;
             }
         }
-
         // 执行涂色
-        PaintUtil.dealWithPaintClick(level, blockPos, player, event.getFace());
-        event.setCanceled(true);
+        PaintUtil.dealWithPaintClick(level, blockPos, player, event.getFace(),isInMainHand);
         player.swing(InteractionHand.MAIN_HAND);
     }
 

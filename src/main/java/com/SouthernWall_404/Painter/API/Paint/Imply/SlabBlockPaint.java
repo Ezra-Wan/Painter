@@ -65,9 +65,11 @@ public class SlabBlockPaint extends AbstractPaint {
     }
 
 
-    //TODO 添加对面旋转的兼容
+    //TODO 面旋转似乎有一面无法正确渲染
+
+
     @Override
-    public void cyclePaint(Direction direction) {
+    public void cycleTextureUV(Direction direction) {
 
         int key=getFlag(direction);
         SlabType defaultType=SlabType.TOP;

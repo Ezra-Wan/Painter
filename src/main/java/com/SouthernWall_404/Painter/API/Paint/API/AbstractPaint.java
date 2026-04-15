@@ -54,9 +54,12 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>,Direc
 
         super.update();
     }
+    public void cycleTextureUV(Direction direction)
+    {
 
+    }
 
-    public void cyclePaint(Direction direction)
+    public void cycleTextureDir(Direction direction)
     {
         BlockState material=getMaterial(direction);
 
@@ -142,6 +145,7 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>,Direc
 
         return quadsForDirection;
     }
+
 
 
     @Override

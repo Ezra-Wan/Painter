@@ -25,11 +25,11 @@ public class WallUtil {
      * @param filter 过滤器，决定哪些方块可以被喷涂并继续扩散
      */
 
-    public static void actOnWall(BlockPos pos, Direction face, Player player, Level level, IFilter filter) {
-        actOnWall(pos,face,player,level,List.of(filter));
+    public static void actOnWall(BlockPos pos, Direction face, Player player, Level level, IFilter filter,boolean isInMainHand) {
+        actOnWall(pos,face,player,level,List.of(filter),isInMainHand);
     }
 
-    public static void actOnWall(BlockPos pos, Direction face, Player player, Level level, List<IFilter> filters) {
+    public static void actOnWall(BlockPos pos, Direction face, Player player, Level level, List<IFilter> filters,boolean isInMainHand) {
         // 队列用于 BFS
         Queue<BlockPos> queue = new LinkedList<>();
         // 记录已处理过的方块，避免重复
@@ -83,7 +83,7 @@ public class WallUtil {
 //                }
 //                //如果所有筛选项均满足
 
-                PaintUtil.dealWithPaintClick(level,current,player,face);//执行喷涂
+                PaintUtil.dealWithPaintClick(level,current,player,face,isInMainHand);//执行喷涂
 
                 // 向墙面内的四个方向扩散
                 for (Direction wallDir : wallDirs) {

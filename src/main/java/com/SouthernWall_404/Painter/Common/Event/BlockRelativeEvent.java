@@ -23,10 +23,16 @@ public class BlockRelativeEvent {
     public static void onBlockRightClicked(PlayerInteractEvent.RightClickBlock event) {
         Player player = event.getEntity();
         // 获取主手中的交互物品
-        BlockInteractItem interactItem = BlockInteractItem.getFromMainHand(player);
-        if (interactItem != null) {
+        BlockInteractItem mainHand = BlockInteractItem.getFromMainHand(player);
+        if (mainHand != null) {
             // 调用物品自身的右键处理方法
-            interactItem.dealRightClick(event);
+            mainHand.dealRightClick(event,true);
+        }
+
+        BlockInteractItem offHand = BlockInteractItem.getFromOffHand(player);
+        if (offHand != null) {
+            // 调用物品自身的右键处理方法
+            offHand.dealRightClick(event,false);
         }
     }
 

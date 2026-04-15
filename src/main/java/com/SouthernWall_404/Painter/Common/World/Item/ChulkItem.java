@@ -26,12 +26,9 @@ public class ChulkItem extends BlockInteractItem {
     }
 
     @Override
-    public void dealRightClick(PlayerInteractEvent.RightClickBlock event) {
+    public void dealRightClick(PlayerInteractEvent.RightClickBlock event,boolean isInMainHand) {
 
-        if(event.getHand()!=InteractionHand.MAIN_HAND)
-        {
-            return;
-        }
+        if(handCheck(event,isInMainHand))return;
         // 原 BlockEvent 中处理 ChulkItem 右键的逻辑
         var player = event.getEntity();
         var selectedZone = player.getData(ModAttachments.SELECTED_ZONE);

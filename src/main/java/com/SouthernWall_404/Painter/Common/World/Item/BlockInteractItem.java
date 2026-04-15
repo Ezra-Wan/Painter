@@ -17,7 +17,22 @@ public abstract class BlockInteractItem extends Item {
     //处理右键事件
     public abstract void dealLeftClick(PlayerInteractEvent.LeftClickBlock event);
 
-    public abstract void dealRightClick(PlayerInteractEvent.RightClickBlock event);
+    public abstract void dealRightClick(PlayerInteractEvent.RightClickBlock event,boolean isInMainHand);
+
+
+    public boolean handCheck(PlayerInteractEvent.RightClickBlock event,boolean isInMainHand)
+    {
+        if(event.getHand()==InteractionHand.MAIN_HAND&&!isInMainHand)
+        {
+            return false;
+        }
+        if(event.getHand()==InteractionHand.OFF_HAND&&isInMainHand)
+        {
+            return false;
+        }
+
+        return true;
+    }
 
     /**
      * 从玩家手中的主手物品中获取 BlockInteractItem 实例（如果物品是此类的实例）
@@ -33,5 +48,16 @@ public abstract class BlockInteractItem extends Item {
         }
         return null;
     }
+
+    @Nullable
+    public static BlockInteractItem getFromOffHand(Player player) {
+        ItemStack mainHandItem = player.getItemInHand(InteractionHand.OFF_HAND);
+        Item item = mainHandItem.getItem();
+        if (item instanceof BlockInteractItem blockInteractItem) {
+            return blockInteractItem;
+        }
+        return null;
+    }
+
 
 }
