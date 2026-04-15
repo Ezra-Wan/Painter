@@ -101,6 +101,8 @@ public class SlabBlockPaint extends AbstractPaint {
 
             Direction direction=getDirection(flag);
 
+
+            if(slabTypes.get(flag)==null) slabTypes.put(flag,SlabType.TOP);
             //            Block block= RenderUtil.getBlockFromID(paintPaths.get(flag));
             List<BakedQuad> quads = createSlabQuads(direction,material);
 
@@ -109,6 +111,7 @@ public class SlabBlockPaint extends AbstractPaint {
         }
     }
 
+    //TODO 添加默认上半面
     private List<BakedQuad> createSlabQuads(Direction direction,BlockState material)
     {
         List<BakedQuad> quads=RenderUtil.getQuads(material,direction);
