@@ -32,6 +32,12 @@ import java.util.BitSet;
 import java.util.List;
 import java.util.Map;
 
+
+/**
+ * Quad Vertice顺序 留档备用
+ * 顺序：左上，左下，右下，右上
+ */
+
 public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>,Direction>{
 
 
@@ -78,6 +84,8 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>,Direc
             setMaterial(direction,material.cycle(BlockStateProperties.HORIZONTAL_AXIS));
         else if (material.hasProperty(BlockStateProperties.LIT))
             setMaterial(direction,material.cycle(BlockStateProperties.LIT));
+
+        super.update();
     }
 
     public List<BakedQuad> getQuadsForDirection(BlockState state, Direction direction) {

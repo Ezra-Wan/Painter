@@ -58,7 +58,6 @@ public class PaintRender {
             AbstractRender render=entry.getValue();
             render.render(pos,event.getPoseStack(),bufferSource,0,0,event.getRenderTick());
         }
-        //TODO 测试用例，以后记得删
 //
 //        // 1. 获取 Block 的默认状态 (如果你需要特定状态，可以传入相应的 BlockState)
 //        BlockState state = Blocks.IRON_BLOCK.defaultBlockState();

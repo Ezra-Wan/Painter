@@ -64,10 +64,6 @@ public class SlabBlockPaint extends AbstractPaint {
         registerFlag(Direction.DOWN, DOWN);
     }
 
-
-    //TODO 面旋转似乎有一面无法正确渲染
-
-
     @Override
     public void cycleTextureUV(Direction direction) {
 
@@ -91,7 +87,6 @@ public class SlabBlockPaint extends AbstractPaint {
         }
 
         update();
-//        super.cyclePaint(direction);
     }
 
     @Override
@@ -115,12 +110,11 @@ public class SlabBlockPaint extends AbstractPaint {
 
     private List<BakedQuad> createSlabQuads(Direction direction,BlockState material)
     {
-        List<BakedQuad> quads=RenderUtil.getQuads(material,direction);
-
+        List<BakedQuad> quads=getQuadsForDirection(material,direction);
         List<BakedQuad> result=new ArrayList<>();
         for(BakedQuad quad:quads)
         {
-            BakedQuad resultQuad=createSlabQuad(quad.getSprite(),direction,quad.getTintIndex());
+            BakedQuad resultQuad=createSlabQuad(quad,direction,quad.getTintIndex());
 
             result.add(resultQuad);
         }
@@ -129,138 +123,101 @@ public class SlabBlockPaint extends AbstractPaint {
         return result;
     }
 
-//    @Deprecated
-//    private List<BakedQuad> createSlabQuads(Direction direction)
-//    {
-//        int flag=getFlag(direction);
-//
-//
-//
-//        List<BakedQuad> originQuads=objects.get(flag);
-//        List<BakedQuad> quads=new ArrayList<>();
-//
-//        for(BakedQuad originQuad:originQuads)
-//        {
-//            TextureAtlasSprite sprite=originQuad.getSprite();
-//
-//            BakedQuad quad=createSlabQuad(sprite,direction,originQuad.getTintIndex());
-//
-//            quads.add(quad);
-//        }
-//
-//        return quads;
-//    }
 
-    private BakedQuad createSlabQuad(TextureAtlasSprite sprite, Direction direction,int tintIndex) {
-//        boolean isTopSlab = origin.getValue(SlabBlock.TYPE) == SlabType.TOP;
+    private BakedQuad createSlabQuad(BakedQuad quad, Direction direction, int tintIndex) {
+        // 剔除不应该渲染的面
+        SlabType uvSlabType = slabTypes.getOrDefault(getFlag(direction), slabType);
+        TextureAtlasSprite sprite = quad.getSprite();
+        int[] original = quad.getVertices();
+        int[] newVertices = original.clone();
 
-        SlabType slabType=this.slabType;
-        SlabType uvSlabType=slabTypes.getOrDefault(getFlag(direction),slabType);
-        float yMin;
-        float yMax;
-//        float yMin = isTopSlab ? 0.5f : 0.0f;
-//        float yMax = isTopSlab ? 1.0f : 0.5f;
+        float v0 = sprite.getV0();
+        float v1 = sprite.getV1();
+        float vMid = (v0 + v1) / 2f;
 
-        switch (slabType){
-            case SlabType.TOP -> {
-                yMin=0.5f;
-                yMax=1.0f;
-                break;
-            }
-            case SlabType.BOTTOM -> {
-                yMin=0.0f;
-                yMax=0.5f;
-                break;
-            }
-            case SlabType.DOUBLE -> {
-                yMin=0.0f;
-                yMax=1.0f;
-                break;
-            }
-            default -> {
-                return null;
-            }
-        }
+        float u0=sprite.getU0();
+        float u1=sprite.getU1();
+        float uMid=(u0+u1)/2f;
+
+        float[][] originUV=new float[4][2];
 
 
-        float[][] positions;
+        for (int i = 0; i < 4; i++) {
+            int offset = i * 8;
 
-        //顺序：左上，左下，右下，右上
-        switch (direction) {
-            case DOWN -> positions = new float[][]{
-                    {0, yMin, 1}, {0, yMin, 0}, {1, yMin, 0}, {1, yMin, 1}
-            };
-            case UP -> positions = new float[][]{
-                    {0, yMax, 0}, {0, yMax, 1}, {1, yMax, 1}, {1, yMax, 0}
-            };
-            case NORTH -> positions = new float[][]{
-                    {1, yMax, 0},{1, yMin, 0},{0, yMin, 0},{0, yMax, 0}
-            };
-            case SOUTH -> positions = new float[][]{
-                    {0, yMax, 1}, {0, yMin, 1}, {1, yMin, 1}, {1, yMax, 1}
-            };
-            case WEST -> positions = new float[][]{
-                    {0, yMax, 0}, {0, yMin, 0}, {0, yMin, 1}, {0, yMax, 1}
+            // 读取原始数据
+            float x = Float.intBitsToFloat(original[offset]);
+            float y = Float.intBitsToFloat(original[offset + 1]);
+            float z = Float.intBitsToFloat(original[offset + 2]);
+            float u = Float.intBitsToFloat(original[offset + 4]);
+            float v = Float.intBitsToFloat(original[offset + 5]);
 
-            };
-            case EAST -> positions = new float[][]{
-                    {1, yMax, 1}, {1, yMin, 1}, {1, yMin, 0}, {1, yMax, 0}
-            };
-            default -> throw new IllegalArgumentException("Invalid direction: " + direction);
-        }
-
-        // UV 与顶点顺序一致（左下、右下、右上、左上）
-        float u0 = sprite.getU0(), u1 = sprite.getU1();
-        float v0 = sprite.getV0(), v1 = sprite.getV1();
-        if (direction.getAxis().isHorizontal()) {
+            // 调整 Y 坐标（半砖高度裁剪）
+            if (slabType == SlabType.TOP && y < 0.5f) y = 0.5f;
+            if (slabType == SlabType.BOTTOM && y > 0.5f) y = 0.5f;
 
 
-            switch (uvSlabType){
-                case SlabType.TOP -> {
-                    v1 = sprite.getV0() + (sprite.getV1() - sprite.getV0()) * 0.5f; // 下半纹理
-                    break;
-                }
-                case SlabType.BOTTOM -> {
-                    v0 = sprite.getV0() + (sprite.getV1() - sprite.getV0()) * 0.5f; // 上半纹理
-                    break;
-                }
-                case SlabType.DOUBLE -> {
-                    break;
-                }
-                default -> {
-                    return null;
-                }
-            }
+            originUV[i][0]=u;
+            originUV[i][1]=v;
+            // 调整 V 坐标（仅水平方向的面）
 
-//            if (!isTopSlab) {
-//                v0 = sprite.getV0() + (sprite.getV1() - sprite.getV0()) * 0.5f; // 上半纹理
-//            } else {
-//                v1 = sprite.getV0() + (sprite.getV1() - sprite.getV0()) * 0.5f; // 下半纹理
-//            }
-        }
-        float[][] uvs = {
-                {u0, v0}, {u0, v1}, {u1, v1}, {u1, v0}
-        };
-
-        // 打包法线
         int packedNormal = packNormal(direction.getNormal().getX(),
                 direction.getNormal().getY(),
                 direction.getNormal().getZ());
-        int[] vertexData = new int[32];
-        for (int i = 0; i < 4; i++) {
-            int offset = i * 8;
-            vertexData[offset]     = Float.floatToRawIntBits(positions[i][0]);
-            vertexData[offset + 1] = Float.floatToRawIntBits(positions[i][1]);
-            vertexData[offset + 2] = Float.floatToRawIntBits(positions[i][2]);
-            vertexData[offset + 3] = -1;   // 白色
-            vertexData[offset + 4] = Float.floatToRawIntBits(uvs[i][0]);
-            vertexData[offset + 5] = Float.floatToRawIntBits(uvs[i][1]);
-            vertexData[offset + 6] = 0;    // 光照（渲染时填充）
-            vertexData[offset + 7] = packedNormal;
+            // 写回新顶点（保留颜色、光照、法线）
+            newVertices[offset]     = Float.floatToRawIntBits(x);
+            newVertices[offset + 1] = Float.floatToRawIntBits(y);
+            newVertices[offset + 2] = Float.floatToRawIntBits(z);
+            newVertices[offset + 3] = -1;   // 白色
+
+            newVertices[offset + 6] = 0;    // 光照（渲染时填充）
+            newVertices[offset + 7] = packedNormal;
         }
 
-        return new BakedQuad(vertexData,tintIndex, direction, sprite, true);
+
+        //从底面的uv情况获取具体调整值
+
+        float leftDownU=originUV[1][0];
+        float rightDownU=originUV[2][0];
+
+        boolean isV=leftDownU==rightDownU?false:true;
+
+        for(int i=0;i<4;i++)
+        {
+
+            int offset = i * 8;
+            float u=originUV[i][0];
+            float v=originUV[i][1];
+
+
+            if (direction.getAxis().isHorizontal()) {
+                if(isV)
+                {
+                    switch (uvSlabType) {
+                        case TOP -> v = v0 + (v - v0) * 0.5f;
+                        case BOTTOM -> v = vMid + (v - v0)*0.5f;
+                        case DOUBLE -> {} // 不变
+                    }
+                }else
+                {
+                    switch (uvSlabType) {
+                        case TOP -> u = u0 + (u - u0) * 0.5f;
+                        case BOTTOM -> u = uMid + (u - u0)*0.5f;
+                        case DOUBLE -> {} // 不变
+                    }
+                }
+
+            }
+
+            newVertices[offset + 4] = Float.floatToRawIntBits(u);
+            newVertices[offset + 5] = Float.floatToRawIntBits(v);
+
+        }
+
+        return new BakedQuad(newVertices, tintIndex, direction, sprite, true);
     }
+
+
     // 辅助方法：将法线向量打包为 int（与 DefaultVertexFormat 一致）
     private static int packNormal(float x, float y, float z) {
         int nx = (int) (x * 127);
@@ -268,12 +225,6 @@ public class SlabBlockPaint extends AbstractPaint {
         int nz = (int) (z * 127);
         return (nx & 0xFF) | ((ny & 0xFF) << 8) | ((nz & 0xFF) << 16);
     }
-    private List<BakedQuad> getQuadsForSlabState(BlockState state, Direction dir, Level level, BlockPos pos) {
-        BakedModel model = Minecraft.getInstance().getModelManager().getBlockModelShaper().getBlockModel(state);
-        RandomSource random = RandomSource.create();
-        return model.getQuads(state, dir, random, ModelData.EMPTY, RenderUtil.getRenderType(state));
-    }
-
 
     // ======== 序列化/反序列化 ========
     @Override
