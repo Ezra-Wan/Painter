@@ -111,7 +111,6 @@ public class SlabBlockPaint extends AbstractPaint {
         }
     }
 
-    //TODO 添加默认上半面
     private List<BakedQuad> createSlabQuads(Direction direction,BlockState material)
     {
         List<BakedQuad> quads=RenderUtil.getQuads(material,direction);

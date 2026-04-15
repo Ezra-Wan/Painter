@@ -19,6 +19,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
+import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
@@ -28,6 +29,7 @@ import net.minecraft.world.level.block.state.properties.SlabType;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
+import net.neoforged.neoforge.common.Tags;
 
 import java.util.Map;
 
@@ -62,30 +64,31 @@ public class PaintUtil {
 
     public static void dealWithPaintClick(Level level, BlockPos blockPos, Player player, Direction direction) {
 
-        ItemStack handItemStack = player.getItemInHand(InteractionHand.OFF_HAND);
+        ItemStack handItemStack = player.getItemInHand(InteractionHand.OFF_HAND);//获取副手物品
 
-        Map<BlockPos,AbstractRender<?,?>> renders=getRenders(level,blockPos);
+        Map<BlockPos,AbstractRender<?,?>> renders=getRenders(level,blockPos);//获取本区块render
 
         if (hasPaint(renders,blockPos))//如果已经存在渲染
         {
-
-            //TODO 需要修正
-            if (handItemStack.isEmpty()) {
-                cycle( blockPos, renders, direction);
+            if (handItemStack.isEmpty()) {//副手为空
+                cycle( blockPos, renders, direction);//旋转
             } else {
-                if (handItemStack.getItem() instanceof BlockItem blockItem) {
-                    Block block = blockItem.getBlock();
-                    AbstractRender render = renders.get(blockPos);
+                if (handItemStack.getItem() instanceof BlockItem blockItem) {//副手为方块
+                    Block block = blockItem.getBlock();//获取方块
 
-                    if (render.getMaterial(direction).getBlock() == block) {
-                        cycle( blockPos, renders, direction);
-                    } else {
-                        paint(level, blockPos, player, direction);
+
+
+                    AbstractRender render = renders.get(blockPos);//获取已有render
+
+                    if (render.getMaterial(direction).getBlock() == block) {//若为相同方块
+                        cycle( blockPos, renders, direction);//旋转
+                    } else {//不为相同方块
+                        paint(level, blockPos, player, direction);//喷涂
                     }
                 }
             }
-        } else {
-            paint(level, blockPos, player, direction);
+        } else {//如果不存在渲染
+            paint(level, blockPos, player, direction);//喷涂
 
         }
     }
@@ -109,6 +112,11 @@ public class PaintUtil {
         ItemStack itemStack = player.getItemInHand(InteractionHand.OFF_HAND);//添加副手的方块
         if (itemStack.getItem() instanceof BlockItem blockItem) {
             Block block = blockItem.getBlock();
+
+            if(!block.defaultBlockState().isCollisionShapeFullBlock(level,blockPos)){
+                return;
+
+            }
             // 构造放置上下文
             InteractionHand hand = InteractionHand.OFF_HAND;
             BlockHitResult hitResult = new BlockHitResult(Vec3.atCenterOf(blockPos), direction, blockPos, false);
