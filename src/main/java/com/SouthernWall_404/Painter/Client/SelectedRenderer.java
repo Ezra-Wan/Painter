@@ -36,6 +36,8 @@ public class SelectedRenderer {
     private static final BlockPos START = new BlockPos(0, 128, 0);
     private static final BlockPos END = new BlockPos(1, 128, 0); // 从(0,128,0)到(10,128,0)的线
 
+
+    //TODO 添加新的渲染方法
     @SubscribeEvent
     public static void onRenderLevelStage(RenderLevelStageEvent event) {
         // 1. 选择一个合适的渲染阶段

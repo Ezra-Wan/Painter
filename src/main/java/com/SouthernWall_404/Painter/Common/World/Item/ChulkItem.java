@@ -1,5 +1,6 @@
 package com.SouthernWall_404.Painter.Common.World.Item;
 
+import com.SouthernWall_404.Painter.API.Tool.SelectedZone;
 import com.SouthernWall_404.Painter.API.Tool.ToolContent;
 import com.SouthernWall_404.Painter.Common.Content.ComponentContent;
 import com.SouthernWall_404.Painter.Common.Init.ModAttachments;
@@ -7,6 +8,7 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
@@ -28,19 +30,22 @@ public class ChulkItem extends BlockInteractItem {
     @Override
     public void dealRightClick(PlayerInteractEvent.RightClickBlock event,boolean isInMainHand) {
 
-        if(handCheck(event,isInMainHand))return;
-        // 原 BlockEvent 中处理 ChulkItem 右键的逻辑
-        var player = event.getEntity();
-        var selectedZone = player.getData(ModAttachments.SELECTED_ZONE);
+
+        event.setCanceled(true);//打断放置
+        if(!handCheck(event,isInMainHand))return;//防止副手bug
+
+        Player player = event.getEntity();
+        SelectedZone selectedZone = player.getData(ModAttachments.SELECTED_ZONE);//获取选区情况
         if (selectedZone != null) {
+            //清理选区
             if (player.isShiftKeyDown()) {
                 selectedZone.clear();
                 player.displayClientMessage(ToolContent.getMessage(ToolContent.CLEAR, Style.EMPTY.withColor(ChatFormatting.YELLOW)), true);
-                event.setCanceled(true);
                 return;
             }
 
-            String result = selectedZone.setB(event.getPos());
+
+            String result = selectedZone.setB(event.getPos());//设定B点，若不成功，则反馈
             Style style = Style.EMPTY;
             if (result == ToolContent.PASS) {
                 style = style.withColor(ChatFormatting.YELLOW);
@@ -56,7 +61,6 @@ public class ChulkItem extends BlockInteractItem {
                             .withStyle(style),
                     true);
         }
-        event.setCanceled(true);
         player.swing(InteractionHand.MAIN_HAND);
     }
 
@@ -66,9 +70,11 @@ public class ChulkItem extends BlockInteractItem {
         {
             return;
         }
-        // 原 BlockEvent 中处理 ChulkItem 左键的逻辑
-        var player = event.getEntity();
-        var selectedZone = player.getData(ModAttachments.SELECTED_ZONE);
+
+        Player player = event.getEntity();
+        SelectedZone selectedZone = player.getData(ModAttachments.SELECTED_ZONE);
+
+        //处理选区清理
         if (selectedZone != null) {
             if (player.isShiftKeyDown()) {
                 selectedZone.clear();

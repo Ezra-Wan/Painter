@@ -39,7 +39,6 @@ public class SelectedZone {
 
     public void addAPosition(BlockPos pos) {
         if(!contains.contains(pos)) contains.add(pos);
-        //TODO:添加对渲染可见性的检验
     }
 
     public void removeAPosition(BlockPos pos)
@@ -129,8 +128,6 @@ public class SelectedZone {
         }
 
         cacheSquad=new Squad(a,face);
-
-        //TODO:添加对已有选区的清除
     }
     public String setB(BlockPos b) {
 
