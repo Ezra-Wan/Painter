@@ -106,6 +106,7 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>,Direc
         for (BakedQuad quad : quads) {
             modRenderer.calculateShape(level, state, pos, quad.getVertices(), quad.getDirection(), shape, shapeFlags);
 
+            //TODO 这里有没有可能将光照数据直接移植过来？考虑本质上是覆盖层
             aoFace.calculate(level, state, pos, quad.getDirection(), shape, shapeFlags, quad.isShade());
             modRenderer.putQuadData(level, state, pos, consumer, poseStack.last(), quad,
                     aoFace.brightness[0], aoFace.brightness[1], aoFace.brightness[2], aoFace.brightness[3],

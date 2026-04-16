@@ -10,7 +10,7 @@ public class CustomRenderTypes {
         "pure_color",
         DefaultVertexFormat.POSITION_COLOR,       // 顶点格式：位置 + 颜色（无UV，无光照）
         VertexFormat.Mode.TRIANGLES,              // 使用三角形模式（兼容性好）
-        256, false, false,
+        256, false, true,
         RenderType.CompositeState.builder()
             .setShaderState(new RenderType.ShaderStateShard(GameRenderer::getPositionColorShader))
             .setTransparencyState(RenderType.TRANSLUCENT_TRANSPARENCY)   // 支持半透明

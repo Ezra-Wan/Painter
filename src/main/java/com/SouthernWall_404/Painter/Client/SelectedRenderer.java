@@ -14,6 +14,7 @@ import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Vec3i;
@@ -84,6 +85,7 @@ public class SelectedRenderer {
 
 
             renderFace(pos,face,camPos,buffer,poseStack);
+
 //            poseStack.pushPose();
 //            // 4. 获取VertexConsumer并开始渲染线条
 //
@@ -131,7 +133,7 @@ public class SelectedRenderer {
         }
 
 
-        bufferSource.endBatch(CustomRenderTypes.PURE_COLOR);
+
         List<Edge> edges=selectedZone.getCachedEdges();
 
         VertexConsumer lineBuffer=bufferSource.getBuffer(RenderType.LINES);
@@ -141,7 +143,7 @@ public class SelectedRenderer {
             renderEdge(edge,face,camPos,lineBuffer,poseStack);
 
         });
-
+        bufferSource.endBatch(CustomRenderTypes.PURE_COLOR);
 
         bufferSource.endBatch(RenderType.LINES);
 
@@ -180,12 +182,15 @@ public class SelectedRenderer {
 
 
 
+
+    //TODO 他妈的忘做渲染移除了
+    //TODO 还有，性能有待优化
     private static void vertexDeal(Matrix4f matrix4f,Direction face, VertexConsumer buffer) {
 //        boolean isTopSlab = origin.getValue(SlabBlock.TYPE) == SlabType.TOP;
 
 
         int color=0x19ebe5d1;
-        float offset=0.001f;
+        float offset=0.011f;
 
         float yMin=0;
         float yMax=1;
