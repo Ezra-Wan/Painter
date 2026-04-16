@@ -1,5 +1,6 @@
 package com.SouthernWall_404.Painter.Client;
 
+import com.SouthernWall_404.LaplaceAPI.RegulappleEngine.RenderHelper;
 import com.SouthernWall_404.Painter.API.Paint.Util.PaintUtil;
 import com.SouthernWall_404.Painter.API.Tool.SelectedZone;
 import com.SouthernWall_404.Painter.API.Tool.Wall.Edge;
@@ -192,36 +193,33 @@ public class SelectedRenderer {
         int color=0x19ebe5d1;
         float offset=0.011f;
 
-        float yMin=0;
-        float yMax=1;
-
         if(face==null)return;
 
         Vec3i normal=face.getNormal();
-        float[][] positions;
+        float[][] positions= RenderHelper.getSimpleQuadVertex(face);
 
-        switch (face) {
-            case DOWN -> positions =new float[][]{
-                    {0, yMin, 1}, {0, yMin, 0}, {1, yMin, 0}, {1, yMin, 1}
-            };
-            case UP -> positions = new float[][]{
-                    {0, yMax, 0}, {0, yMax, 1}, {1, yMax, 1}, {1, yMax, 0}
-            };
-            case NORTH -> positions = new float[][]{
-                    {1, yMax, 0},{1, yMin, 0},{0, yMin, 0},{0, yMax, 0}
-            };
-            case SOUTH -> positions = new float[][]{
-                    {0, yMax, 1}, {0, yMin, 1}, {1, yMin, 1}, {1, yMax, 1}
-            };
-            case WEST -> positions = new float[][]{
-                    {0, yMax, 0}, {0, yMin, 0}, {0, yMin, 1}, {0, yMax, 1}
-
-            };
-            case EAST -> positions = new float[][]{
-                    {1, yMax, 1}, {1, yMin, 1}, {1, yMin, 0}, {1, yMax, 0}
-            };
-            default -> throw new IllegalArgumentException("Invalid direction: " + face);
-        }
+//        switch (face) {
+//            case DOWN -> positions =new float[][]{
+//                    {0, yMin, 1}, {0, yMin, 0}, {1, yMin, 0}, {1, yMin, 1}
+//            };
+//            case UP -> positions = new float[][]{
+//                    {0, yMax, 0}, {0, yMax, 1}, {1, yMax, 1}, {1, yMax, 0}
+//            };
+//            case NORTH -> positions = new float[][]{
+//                    {1, yMax, 0},{1, yMin, 0},{0, yMin, 0},{0, yMax, 0}
+//            };
+//            case SOUTH -> positions = new float[][]{
+//                    {0, yMax, 1}, {0, yMin, 1}, {1, yMin, 1}, {1, yMax, 1}
+//            };
+//            case WEST -> positions = new float[][]{
+//                    {0, yMax, 0}, {0, yMin, 0}, {0, yMin, 1}, {0, yMax, 1}
+//
+//            };
+//            case EAST -> positions = new float[][]{
+//                    {1, yMax, 1}, {1, yMin, 1}, {1, yMin, 0}, {1, yMax, 0}
+//            };
+//            default -> throw new IllegalArgumentException("Invalid direction: " + face);
+//        }
 
 
 
