@@ -4,7 +4,6 @@ import net.minecraft.core.Direction;
 
 public class RenderHelper {
 
-
     public static float[][] getSimpleQuadVertex(Direction face)
     {
 
@@ -37,4 +36,8 @@ public class RenderHelper {
 
         return positions;
     }
+
+
+
+
 }

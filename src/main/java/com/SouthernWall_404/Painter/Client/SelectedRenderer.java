@@ -1,6 +1,9 @@
 package com.SouthernWall_404.Painter.Client;
 
+import com.SouthernWall_404.LaplaceAPI.RegulappleEngine.Line.Line;
+import com.SouthernWall_404.LaplaceAPI.RegulappleEngine.Line.LineRenderType;
 import com.SouthernWall_404.LaplaceAPI.RegulappleEngine.RenderHelper;
+import com.SouthernWall_404.LaplaceAPI.RegulappleEngine.Vector3f;
 import com.SouthernWall_404.Painter.API.Paint.Util.PaintUtil;
 import com.SouthernWall_404.Painter.API.Tool.SelectedZone;
 import com.SouthernWall_404.Painter.API.Tool.Wall.Edge;
@@ -75,8 +78,20 @@ public class SelectedRenderer {
         // 起点
         MultiBufferSource.BufferSource bufferSource = mc.renderBuffers().bufferSource();
 
+
+
+
         var buffer = bufferSource.getBuffer(CustomRenderTypes.PURE_COLOR);
         var poseStack = event.getPoseStack();
+
+        Line line=Line.builder(new Vector3f(0,-31,0),new Vector3f(0,-28,0))
+                .setColor(0xccebe5d1)
+                .setWidth(0.1f)
+                .build();
+        line.render(camPos,bufferSource.getBuffer(LineRenderType.PURE_COLOR_SOLID),poseStack);
+        bufferSource.endBatch(LineRenderType.PURE_COLOR_SOLID);
+
+
         for(BlockPos pos:poses)
         {
             if(!PaintUtil.isPaintable(level,pos))
@@ -85,7 +100,7 @@ public class SelectedRenderer {
             }
 
 
-            renderFace(pos,face,camPos,buffer,poseStack);
+            //            renderFace(pos,face,camPos,buffer,poseStack);
 
 //            poseStack.pushPose();
 //            // 4. 获取VertexConsumer并开始渲染线条

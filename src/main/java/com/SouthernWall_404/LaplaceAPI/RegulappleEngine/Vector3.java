@@ -202,7 +202,19 @@ public class Vector3 {
     }
     public Vector3 getV()
     {
-        return getOrthonormals().get(1);
+        Vector3 self=this;
+        self=self.normalize();
+
+        Vector3 vOrthonormal;
+        if(self.y==0)
+        {
+            vOrthonormal=new Vector3(-self.getX(),1,-self.getZ());
+        }else
+        {
+            vOrthonormal=new Vector3(-self.getX(),(self.getX()*self.getX()+self.getZ()*self.getZ())/self.getY(),-self.getZ());//同一竖直面向上的垂直向量
+
+        }
+        return vOrthonormal.normalize();
     }
 
 

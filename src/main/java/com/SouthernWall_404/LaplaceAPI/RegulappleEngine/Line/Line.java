@@ -1,0 +1,159 @@
+package com.SouthernWall_404.LaplaceAPI.RegulappleEngine.Line;
+
+import com.SouthernWall_404.LaplaceAPI.RegulappleEngine.Vector3f;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
+import net.minecraft.util.FastColor;
+import net.minecraft.world.phys.Vec3;
+import org.joml.Matrix4f;
+
+import java.util.ArrayList;
+import java.util.List;
+
+public class Line {
+
+    private final Vector3f start;
+    private final Vector3f end;
+    private final int color;
+    private final float uLength;
+    private final float vLength;
+
+
+    public Line(Vector3f start, Vector3f end, int color, float uLength,float vLength)
+    {
+        this.start = start;
+        this.end =end;
+
+        this.color=color;
+        this.uLength=uLength;
+        this.vLength=vLength;
+    }
+
+    public void render(Vec3 camPos, VertexConsumer buffer, PoseStack poseStack)
+    {
+        poseStack.pushPose();
+
+        poseStack.translate(start.getX() - camPos.x, start.getY() - camPos.y, start.getZ() - camPos.z);
+        Matrix4f startMatrix = poseStack.last().pose();
+        poseStack.popPose();
+
+        List<Vector3f> vertexes=getVertexes();
+        for(int[] faceVertex:vertexIndexes)
+        {
+            for(int index:faceVertex)
+            {
+                Vector3f vertex=vertexes.get(index-1);
+                buffer.addVertex(startMatrix,vertex.getX(),vertex.getY(),vertex.getZ()).setColor(color);
+
+            }
+
+        }
+
+
+    }
+
+    public static final int[][] vertexIndexes=new int[][]{
+            {8,4,5,4,5,1},//正面
+            {5,1,6,1,6,2},//右面
+            {6,2,7,2,7,3},//后面
+            {7,3,8,3,8,4},//左面
+            {4,3,1,3,1,2},//上面
+            {8,7,5,7,5,6}//下面
+
+    };
+
+    public List<Vector3f> getVertexes()
+    {
+        Vector3f line=end.subtract(start);
+        Vector3f vVec=line.getV();
+        Vector3f uVec=line.getU();
+
+        float centerU=uLength/2;
+        float centerV=vLength/2;
+
+        List<Vector3f> vertexes=new ArrayList<>();
+        /**
+         * 按卦限排
+         */
+
+        vertexes.add(line.add(vVec.multiply(centerV)).add(uVec.multiply(centerU)));
+        vertexes.add(line.add(vVec.multiply(-centerV)).add(uVec.multiply(centerU)));
+        vertexes.add(line.add(vVec.multiply(-centerV)).add(uVec.multiply(-centerU)));
+        vertexes.add(line.add(vVec.multiply(centerV)).add(uVec.multiply(-centerU)));
+
+        vertexes.add(Vector3f.zero().add(vVec.multiply(centerV)).add(uVec.multiply(centerU)));
+        vertexes.add(Vector3f.zero().add(vVec.multiply(-centerV)).add(uVec.multiply(centerU)));
+        vertexes.add(Vector3f.zero().add(vVec.multiply(-centerV)).add(uVec.multiply(-centerU)));
+        vertexes.add(Vector3f.zero().add(vVec.multiply(centerV)).add(uVec.multiply(-centerU)));
+
+        return vertexes;
+
+    }
+
+    public static Builder builder(Vector3f start,Vector3f end)
+    {
+        return new Builder(start,end);
+    }
+
+
+
+
+    public static class Builder
+    {
+
+        Vector3f start =Vector3f.zero();
+        Vector3f end =Vector3f.zero();
+
+        int color=0x00000000;
+        float u =0.1f;
+        float v =0.1f;
+
+        public Builder(Vector3f start, Vector3f end)
+        {
+            this.start = start;
+            this.end = end;
+        }
+
+        public Line build()
+        {
+            return new Line(start, end,color, u, v);
+        }
+
+        public Builder setColor(int color){
+            this.color=color;
+            return this;
+        }
+
+        public Builder setColor(int r,int g,int b,int a){
+            return setColor(FastColor.ARGB32.color(a, r, g, b));
+        }
+
+        public Builder setColor(int r,int g,int b)
+        {
+            return setColor(r,g,b,1);
+        }
+
+        public Builder setWidth(float width)
+        {
+            return setUV(width,width);
+        }
+
+        public Builder setUV(float u,float v)
+        {
+            this.u =u;
+            this.v =v;
+
+            return this;
+        }
+
+        public Builder setU(float u)
+        {
+            return setUV(u, this.v);
+        }
+        public Builder setV(float v)
+        {
+            return setUV(this.u, v);
+        }
+
+    }
+}
