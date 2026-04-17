@@ -1,6 +1,8 @@
-package com.SouthernWall_404.LaplaceAPI.RegulappleEngine.Line;
+package com.SouthernWall_404.LaplaceAPI.RegulappleEngine.OutLine;
 
-import com.SouthernWall_404.LaplaceAPI.RegulappleEngine.Vector3f;
+import com.SouthernWall_404.LaplaceAPI.Math37.Vector3f;
+import com.SouthernWall_404.LaplaceAPI.RegulappleEngine.Quad.Quad;
+import com.SouthernWall_404.LaplaceAPI.RegulappleEngine.QuadRender;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.util.FastColor;
@@ -19,7 +21,7 @@ public class Line {
     private final float vLength;
 
 
-    public Line(Vector3f start, Vector3f end, int color, float uLength,float vLength)
+    private Line(Vector3f start, Vector3f end, int color, float uLength,float vLength)
     {
         this.start = start;
         this.end =end;
@@ -29,6 +31,7 @@ public class Line {
         this.vLength=vLength;
     }
 
+    //TODO 记得加缓存优化
     public void render(Vec3 camPos, VertexConsumer buffer, PoseStack poseStack)
     {
         poseStack.pushPose();
@@ -38,27 +41,31 @@ public class Line {
         poseStack.popPose();
 
         List<Vector3f> vertexes=getVertexes();
+
+
         for(int[] faceVertex:vertexIndexes)
         {
+            Quad.Builder builder=Quad.builder();
             for(int index:faceVertex)
             {
                 Vector3f vertex=vertexes.get(index-1);
-                buffer.addVertex(startMatrix,vertex.getX(),vertex.getY(),vertex.getZ()).setColor(color);
+
+                builder.addVertex(vertex);
 
             }
+            Quad quad=builder.setColor(color).build();
 
+            QuadRender.renderQuad(quad,start,camPos,poseStack,buffer);
         }
-
-
     }
 
     public static final int[][] vertexIndexes=new int[][]{
-            {8,4,5,4,5,1},//正面
-            {5,1,6,1,6,2},//右面
-            {6,2,7,2,7,3},//后面
-            {7,3,8,3,8,4},//左面
-            {4,3,1,3,1,2},//上面
-            {8,7,5,7,5,6}//下面
+            {8,4,5,1},//正面
+            {5,1,6,2},//右面
+            {6,2,7,3},//后面
+            {7,3,8,4},//左面
+            {4,3,1,2},//上面
+            {8,7,5,6}//下面
 
     };
 

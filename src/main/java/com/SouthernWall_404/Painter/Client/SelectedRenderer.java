@@ -1,9 +1,9 @@
 package com.SouthernWall_404.Painter.Client;
 
-import com.SouthernWall_404.LaplaceAPI.RegulappleEngine.Line.Line;
-import com.SouthernWall_404.LaplaceAPI.RegulappleEngine.Line.LineRenderType;
+import com.SouthernWall_404.LaplaceAPI.RegulappleEngine.OutLine.Line;
+import com.SouthernWall_404.LaplaceAPI.RegulappleEngine.OutLine.LineRenderType;
 import com.SouthernWall_404.LaplaceAPI.RegulappleEngine.RenderHelper;
-import com.SouthernWall_404.LaplaceAPI.RegulappleEngine.Vector3f;
+import com.SouthernWall_404.LaplaceAPI.Math37.Vector3f;
 import com.SouthernWall_404.Painter.API.Paint.Util.PaintUtil;
 import com.SouthernWall_404.Painter.API.Tool.SelectedZone;
 import com.SouthernWall_404.Painter.API.Tool.Wall.Edge;
@@ -18,7 +18,6 @@ import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Vec3i;
@@ -84,9 +83,10 @@ public class SelectedRenderer {
         var buffer = bufferSource.getBuffer(CustomRenderTypes.PURE_COLOR);
         var poseStack = event.getPoseStack();
 
-        Line line=Line.builder(new Vector3f(0,-31,0),new Vector3f(0,-28,0))
+        //TODO 记得移除
+        Line line=Line.builder(new Vector3f(0,-31,0),new Vector3f(1,-30,1))
                 .setColor(0xccebe5d1)
-                .setWidth(0.1f)
+                .setWidth(0.05f)
                 .build();
         line.render(camPos,bufferSource.getBuffer(LineRenderType.PURE_COLOR_SOLID),poseStack);
         bufferSource.endBatch(LineRenderType.PURE_COLOR_SOLID);

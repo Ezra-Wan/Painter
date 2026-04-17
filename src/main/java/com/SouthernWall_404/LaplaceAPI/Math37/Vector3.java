@@ -1,4 +1,4 @@
-package com.SouthernWall_404.LaplaceAPI.RegulappleEngine;
+package com.SouthernWall_404.LaplaceAPI.Math37;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;

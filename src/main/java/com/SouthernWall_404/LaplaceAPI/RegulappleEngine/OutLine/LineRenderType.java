@@ -1,6 +1,5 @@
-package com.SouthernWall_404.LaplaceAPI.RegulappleEngine.Line;
+package com.SouthernWall_404.LaplaceAPI.RegulappleEngine.OutLine;
 
-import com.SouthernWall_404.LaplaceAPI.Laplace;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import net.minecraft.client.renderer.GameRenderer;
