@@ -1,10 +1,8 @@
 package com.SouthernWall_404.LaplaceAPI.RegulappleEngine.Quad;
 
 import com.SouthernWall_404.LaplaceAPI.Math37.Vector3f;
-import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.util.FastColor;
-import net.minecraft.world.phys.Vec3;
 import org.joml.Matrix4f;
 
 import java.util.ArrayList;
@@ -29,20 +27,7 @@ public class Quad {
     }
 
 
-    public void staticRender(Vec3 camPos, PoseStack poseStack,VertexConsumer buffer)
-    {
-        Vector3f leftDown=vertexes.get(1);
-        poseStack.pushPose();
-
-        poseStack.translate(leftDown.getX()-camPos.x,leftDown.getY()-camPos.y,leftDown.getZ()-camPos.z);
-        Matrix4f matrix4f=poseStack.last().pose();
-        poseStack.popPose();
-
-        dynamicRender(matrix4f,buffer);
-
-    }
-
-    public void dynamicRender(Matrix4f matrix4f, VertexConsumer buffer)
+    public void render(Matrix4f matrix4f, VertexConsumer buffer)
     {
         for(int index:vertexIndex)
         {

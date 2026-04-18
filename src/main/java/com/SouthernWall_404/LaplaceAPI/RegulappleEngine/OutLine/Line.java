@@ -7,10 +7,11 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.util.FastColor;
 import net.minecraft.world.phys.Vec3;
-import org.joml.Matrix4f;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class Line {
 
@@ -19,30 +20,24 @@ public class Line {
     private final int color;
     private final float uLength;
     private final float vLength;
+    private final Set<Quad> quads =new HashSet<>();
 
 
-    private Line(Vector3f start, Vector3f end, int color, float uLength,float vLength)
-    {
+    private Line(Vector3f start, Vector3f end, int color, float uLength, float vLength) {
         this.start = start;
-        this.end =end;
+        this.end = end;
 
-        this.color=color;
-        this.uLength=uLength;
-        this.vLength=vLength;
+        this.color = color;
+        this.uLength = uLength;
+        this.vLength = vLength;
+
+        update();
     }
 
-    //TODO 记得加缓存优化
-    public void render(Vec3 camPos, VertexConsumer buffer, PoseStack poseStack)
+
+    public void update()
     {
-        poseStack.pushPose();
-
-        poseStack.translate(start.getX() - camPos.x, start.getY() - camPos.y, start.getZ() - camPos.z);
-        Matrix4f startMatrix = poseStack.last().pose();
-        poseStack.popPose();
-
-        List<Vector3f> vertexes=getVertexes();
-
-
+        List<Vector3f> vertexes = getVertexes();
         for(int[] faceVertex:vertexIndexes)
         {
             Quad.Builder builder=Quad.builder();
@@ -54,9 +49,19 @@ public class Line {
 
             }
             Quad quad=builder.setColor(color).build();
+            quads.add(quad);
 
-            QuadRender.renderQuad(quad,start,camPos,poseStack,buffer);
         }
+    }
+
+    public void render(Vec3 camPos, VertexConsumer buffer, PoseStack poseStack) {
+
+        for (Quad quad : quads)
+        {
+            QuadRender.renderQuad(quad,start,camPos,poseStack,buffer);
+
+        }
+
     }
 
     public static final int[][] vertexIndexes=new int[][]{
