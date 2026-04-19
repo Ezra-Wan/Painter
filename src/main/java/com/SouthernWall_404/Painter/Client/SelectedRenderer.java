@@ -1,12 +1,7 @@
 package com.SouthernWall_404.Painter.Client;
 
-import com.SouthernWall_404.LaplaceAPI.RegulappleEngine.OutLine.Line;
 import com.SouthernWall_404.LaplaceAPI.RegulappleEngine.OutLine.LineRenderType;
 import com.SouthernWall_404.LaplaceAPI.RegulappleEngine.Quad.Quad;
-import com.SouthernWall_404.LaplaceAPI.RegulappleEngine.QuadRender;
-import com.SouthernWall_404.LaplaceAPI.RegulappleEngine.RenderHelper;
-import com.SouthernWall_404.LaplaceAPI.Math37.Vector3f;
-import com.SouthernWall_404.Painter.API.Paint.Util.PaintUtil;
 import com.SouthernWall_404.Painter.API.Tool.SelectedZone;
 import com.SouthernWall_404.Painter.API.Tool.Wall.Edge;
 import com.SouthernWall_404.Painter.Common.Init.ModAttachments;
@@ -19,10 +14,7 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderType;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
-import net.minecraft.core.Vec3i;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -40,9 +32,6 @@ import java.util.Map;
 @EventBusSubscriber(modid = Painter.MODID, value = Dist.CLIENT, bus = EventBusSubscriber.Bus.GAME)
 public class SelectedRenderer {
 
-    private static final BlockPos START = new BlockPos(0, 128, 0);
-    private static final BlockPos END = new BlockPos(1, 128, 0); // 从(0,128,0)到(10,128,0)的线
-
     @SubscribeEvent
     public static void onRenderLevelStage(RenderLevelStageEvent event) {
         // 1. 选择一个合适的渲染阶段
@@ -57,38 +46,24 @@ public class SelectedRenderer {
 
         if (player == null || level == null) return;
 
-        ItemStack itemStack=player.getItemInHand(InteractionHand.MAIN_HAND);
+        ItemStack itemStack=player.getItemInHand(InteractionHand.MAIN_HAND);//主手若为渲染物品
         if(itemStack.getItem()instanceof PaintItem||
-                itemStack.getItem()instanceof ChulkItem||itemStack.getItem() instanceof PaintBucketItem)
+                itemStack.getItem()instanceof ChulkItem||itemStack.getItem() instanceof PaintBucketItem)//TODO 这里代码太拉跨了，有空改
         {
 
         }else return;
 
         SelectedZone selectedZone=player.getData(ModAttachments.SELECTED_ZONE);
-        List<BlockPos> poses=selectedZone.getContains();
 
-        // 2. 获取相机位置用于坐标转换
+        //获取相机位置用于坐标转换
         Camera camera = mc.gameRenderer.getMainCamera();
         Vec3 camPos = camera.getPosition();
 
-
-
-
-        // 起点
         MultiBufferSource.BufferSource bufferSource = mc.renderBuffers().bufferSource();
         PoseStack poseStack = event.getPoseStack();
 
 
-        for(BlockPos pos:poses)
-        {
-            if(!PaintUtil.isPaintable(level,pos))
-            {
-                continue;
-            }
-        }
-
-
-
+        //渲染边框
         List<Edge> edges=selectedZone.getCachedEdges();
 
         VertexConsumer lineBuffer=bufferSource.getBuffer(LineRenderType.PURE_COLOR_SOLID);
@@ -99,6 +74,10 @@ public class SelectedRenderer {
 
         });
 
+        bufferSource.endBatch(LineRenderType.PURE_COLOR_SOLID);//提交边框渲染
+
+
+        //渲染覆盖面
         VertexConsumer faceBuffer=bufferSource.getBuffer(LineRenderType.PURE_COLOR);
         Map<BlockPos,Quad> quads=selectedZone.getCachedQuads();
         quads.forEach(
@@ -107,9 +86,8 @@ public class SelectedRenderer {
                 }
         );
 
+        bufferSource.endBatch(LineRenderType.PURE_COLOR);//提交覆盖渲染
 
-        bufferSource.endBatch(LineRenderType.PURE_COLOR_SOLID);
-        bufferSource.endBatch(LineRenderType.PURE_COLOR);
 
     }
 
