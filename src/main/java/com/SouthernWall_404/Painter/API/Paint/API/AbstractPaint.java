@@ -169,10 +169,13 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>,Direc
 
     public abstract void createQuads();
 
+    public static float[] shape = new float[ModModelRender.DIRECTIONS.length * 2];
 
+    private static BitSet shapeFlags = new BitSet(3);
     @Override
     public void render(BlockPos blockPos, PoseStack poseStack, MultiBufferSource.BufferSource bufferSource, int packedLight, int packedOverlay, float partialTick) {
 
+        Level level=Minecraft.getInstance().level;
         for(Map.Entry<Integer,List<BakedQuad>> entry:objects.entrySet())//遍历所有缓存的quad
         {
             List<BakedQuad> quads=entry.getValue();
@@ -190,7 +193,12 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>,Direc
             for(BakedQuad quad:quads)
             {
 
-                BakedQuadRender.renderWithAO(quad,state,vec3,poseStack,RenderType.CUTOUT,bufferSource,new ModModelRender.AmbientOcclusionFace());
+                ModModelRender.AmbientOcclusionFace aoFace=new ModModelRender.AmbientOcclusionFace();
+                aoFace.calculate(level, state, blockPos.relative(quad.getDirection()), quad.getDirection(), shape, shapeFlags, true);
+
+                BakedQuadRender.renderInOfferredAO(quad,state,vec3,poseStack,RenderType.CUTOUT,bufferSource,aoFace);
+
+
             }
 
         }

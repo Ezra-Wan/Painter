@@ -11,6 +11,7 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
@@ -29,9 +30,22 @@ public class BakedQuadRender {
 
     private static BitSet shapeFlags = new BitSet(3);
 
+    @OnlyIn(Dist.CLIENT)
+    public static void renderInDefaultAO(BakedQuad quad, BlockState state, Vec3 renderVec, PoseStack poseStack, RenderType renderType, MultiBufferSource bufferSource)
+    {
+        Minecraft mc=Minecraft.getInstance();
+        Level level=mc.level;
+        BlockPos pos=CommonUtil.vec32Pos(renderVec);
+        Direction direction=quad.getDirection();
+
+        ModModelRender.AmbientOcclusionFace aoFace=new ModModelRender.AmbientOcclusionFace();
+        aoFace.calculate(level,state,pos.relative(direction),direction,shape,shapeFlags,true);
+
+        renderInOfferredAO(quad,state,renderVec,poseStack,renderType,bufferSource,aoFace);
+    }
 
     /**
-     * 渲染单个Quad
+     * 渲染单个Quad,需要提供AO
      * @param quad 需要渲染的Quad
      * @param state 需要渲染的BlockState
      * @param renderVec 需要渲染的位置
@@ -40,7 +54,7 @@ public class BakedQuadRender {
      * @param bufferSource VertexConsumer类来源，提供以便在外界进行渲染提交
      */
     @OnlyIn(Dist.CLIENT)
-    public static void renderWithAO(BakedQuad quad, BlockState state, Vec3 renderVec, PoseStack poseStack, RenderType renderType, MultiBufferSource bufferSource, ModModelRender.AmbientOcclusionFace aoFace)
+    public static void renderInOfferredAO(BakedQuad quad, BlockState state, Vec3 renderVec, PoseStack poseStack, RenderType renderType, MultiBufferSource bufferSource, ModModelRender.AmbientOcclusionFace aoFace)
     {
 
         Minecraft mc=Minecraft.getInstance();
@@ -79,9 +93,12 @@ public class BakedQuadRender {
 
 
 
-        aoFace.calculate(level, state, pos.relative(quad.getDirection()), quad.getDirection(), shape, shapeFlags, true);
         buffer.putBulkData(poseStack.last(),quad, aoFace.brightness, f,f1,f2,1f, aoFace.lightmap, 0,true);
 
         poseStack.popPose();
+
+        //TODO 记得加渲染剔除
     }
+
+
 }
