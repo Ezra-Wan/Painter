@@ -31,7 +31,7 @@ public class BakedQuadRender {
     private static BitSet shapeFlags = new BitSet(3);
 
     @OnlyIn(Dist.CLIENT)
-    public static void renderInDefaultAO(BakedQuad quad, BlockState state, Vec3 renderVec, PoseStack poseStack, RenderType renderType, MultiBufferSource bufferSource)
+    public static void renderInDefaultAO(BakedQuad quad, BlockState state, Vec3 renderVec, PoseStack poseStack,VertexConsumer buffer)
     {
         Minecraft mc=Minecraft.getInstance();
         Level level=mc.level;
@@ -41,7 +41,7 @@ public class BakedQuadRender {
         ModModelRender.AmbientOcclusionFace aoFace=new ModModelRender.AmbientOcclusionFace();
         aoFace.calculate(level,state,pos.relative(direction),direction,shape,shapeFlags,true);
 
-        renderInOfferredAO(quad,state,renderVec,poseStack,renderType,bufferSource,aoFace);
+        renderInOfferredAO(quad,state,renderVec,poseStack,buffer,aoFace);
     }
 
     /**
@@ -50,11 +50,9 @@ public class BakedQuadRender {
      * @param state 需要渲染的BlockState
      * @param renderVec 需要渲染的位置
      * @param poseStack 矩阵，外部传入
-     * @param renderType 具体渲染类型
-     * @param bufferSource VertexConsumer类来源，提供以便在外界进行渲染提交
      */
     @OnlyIn(Dist.CLIENT)
-    public static void renderInOfferredAO(BakedQuad quad, BlockState state, Vec3 renderVec, PoseStack poseStack, RenderType renderType, MultiBufferSource bufferSource, ModModelRender.AmbientOcclusionFace aoFace)
+    public static void renderInOfferredAO(BakedQuad quad, BlockState state, Vec3 renderVec, PoseStack poseStack, VertexConsumer buffer, ModModelRender.AmbientOcclusionFace aoFace)
     {
 
         Minecraft mc=Minecraft.getInstance();
@@ -62,7 +60,6 @@ public class BakedQuadRender {
 
         BlockColors blockColors=mc.getBlockColors();
 
-        VertexConsumer buffer = bufferSource.getBuffer(renderType);
 
 //        VertexConsumer buffer=mc
         Camera camera=mc.gameRenderer.getMainCamera();

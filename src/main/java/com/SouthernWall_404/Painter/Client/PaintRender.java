@@ -4,21 +4,17 @@ package com.SouthernWall_404.Painter.Client;
 import com.SouthernWall_404.Painter.API.Paint.API.AbstractRender;
 import com.SouthernWall_404.Painter.API.Paint.Attachment.PaintChunkInfo;
 import com.SouthernWall_404.Painter.API.Paint.Attachment.PaintInfo;
-import com.SouthernWall_404.Painter.API.Paint.ModModelRender;
 import com.SouthernWall_404.Painter.API.Paint.Util.CommonUtil;
 import com.SouthernWall_404.Painter.Common.Init.ModAttachments;
 import com.SouthernWall_404.Painter.Painter;
-import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.ModelBlockRenderer;
-import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.api.distmarker.Dist;
@@ -32,7 +28,7 @@ import java.util.*;
 
 public class PaintRender {
 
-    private static Map<BlockPos,AbstractRender<?,?>> renders=new HashMap<>();
+    private static Map<BlockPos,AbstractRender<?,?>> renders=new HashMap<>();//总渲染内容缓存
     private static boolean isFirstRender=true;
     @SubscribeEvent
     public static void onRenderLevelStage(RenderLevelStageEvent event) {
@@ -47,17 +43,19 @@ public class PaintRender {
 
 
         //TODO这里以后记得处理一下世界退出处理
-        if (renders.isEmpty())
-        {
-            if(isFirstRender)redraw();
-//            System.out.println("Client's Renders Empty");
-        }
+//        if (renders.isEmpty())
+//        {
+//            if(isFirstRender)redraw();
+////            System.out.println("Client's Renders Empty");
+//        }
         for(Map.Entry<BlockPos,AbstractRender<?,?>> entry:renders.entrySet())
         {
             BlockPos pos=entry.getKey();
             AbstractRender render=entry.getValue();
-            render.render(pos,event.getPoseStack(),bufferSource,0,0,event.getRenderTick());
+            render.render(pos,event.getPoseStack(), 0,0,event.getRenderTick(),bufferSource.getBuffer(RenderType.cutout()));
         }
+
+        bufferSource.endBatch(RenderType.cutout());
 //
 //        // 1. 获取 Block 的默认状态 (如果你需要特定状态，可以传入相应的 BlockState)
 //        BlockState state = Blocks.IRON_BLOCK.defaultBlockState();
@@ -85,6 +83,7 @@ public class PaintRender {
 
     public static void redraw()
     {
+
         Minecraft mc=Minecraft.getInstance();
         Level level=mc.level;
         Player player=mc.player;
@@ -133,4 +132,9 @@ public class PaintRender {
         }
         return result;
     }
+
+
+    //TODO 解决闪烁问题
+
+    //TODO 他妈的忘做渲染移除了
 }

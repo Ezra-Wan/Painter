@@ -1,14 +1,11 @@
 package com.SouthernWall_404.Painter.API.Paint.API;
 
-import com.SouthernWall_404.LaplaceAPI.RegulappleEngine.Quad.Quad;
 import com.SouthernWall_404.Painter.API.Paint.ModModelRender;
-import com.SouthernWall_404.Painter.API.Paint.Util.PaintUtil;
 import com.SouthernWall_404.Painter.API.Paint.Util.RenderUtil;
 import com.SouthernWall_404.LaplaceAPI.RegulappleEngine.BakedQuadRender;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
@@ -173,9 +170,9 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>,Direc
         ModModelRender.AmbientOcclusionFace aoFace=new ModModelRender.AmbientOcclusionFace();
     }
     @Override
-    public void render(BlockPos blockPos, PoseStack poseStack, MultiBufferSource.BufferSource bufferSource, int packedLight, int packedOverlay, float partialTick) {
+    public void render(BlockPos blockPos, PoseStack poseStack, int packedLight, int packedOverlay, float partialTick, VertexConsumer buffer) {
 
-        if(tick>=20)//TODO 考虑加个配置项
+        if(tick>=120)//TODO 考虑加个配置项
         {
             refreshAO(blockPos);
         }else
@@ -205,12 +202,11 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>,Direc
             Vec3 vec3=new Vec3(blockPos.getX()+offset*normal.getX(),blockPos.getY()+offset*normal.getY(),blockPos.getZ()+offset*normal.getZ());
             for(BakedQuad quad:quads)
             {
-                if(aoFaces.containsKey(flag)) BakedQuadRender.renderInOfferredAO(quad,material,vec3,poseStack,RenderType.CUTOUT,bufferSource,aoFaces.get(flag));
-                else BakedQuadRender.renderInDefaultAO(quad,material,vec3,poseStack,RenderType.CUTOUT,bufferSource);
+                if(aoFaces.containsKey(flag)) BakedQuadRender.renderInOfferredAO(quad,material,vec3,poseStack,buffer,aoFaces.get(flag));
+                else BakedQuadRender.renderInDefaultAO(quad,material,vec3,poseStack,buffer);
             }
 
         }
-        bufferSource.endBatch(RenderType.CUTOUT);
 
     }
 

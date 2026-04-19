@@ -103,6 +103,5 @@ public class SelectedRenderer {
         quad.render(pos,camPos,buffer,poseStack);
     }
 
-    //TODO 他妈的忘做渲染移除了
-    //TODO 还有，性能有待优化
+
 }
