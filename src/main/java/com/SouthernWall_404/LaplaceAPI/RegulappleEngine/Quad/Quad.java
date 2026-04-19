@@ -13,7 +13,7 @@ public class Quad {
     private List<Vector3f> vertexes;//顶点信息，左上 左下 右下 右上\
 
     private int color;
-    private int[] vertexIndex=new int[]{0,1,2,1,2,3};
+    private int[] vertexIndex=new int[]{0,1,2,0,2,3};
 
     private Quad(List<Vector3f> vertexes,int color)
     {
