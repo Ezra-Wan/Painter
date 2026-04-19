@@ -1,5 +1,6 @@
 package com.SouthernWall_404.Painter.API.Tool.Wall;
 
+import com.SouthernWall_404.LaplaceAPI.Math37.Vector3f;
 import com.SouthernWall_404.Painter.API.Paint.Util.CommonUtil;
 import com.SouthernWall_404.Painter.API.Tool.ToolContent;
 import net.minecraft.core.BlockPos;
@@ -263,7 +264,10 @@ public class Squad {
                         displayEnd=displayEnd.relative(face);
                     }//面定位正轴补偿
 
-                    Edge edge=new Edge(CommonUtil.pos2Vec3(displayStart),CommonUtil.pos2Vec3(displayEnd));
+                    Edge edge=new Edge(
+                            new Vector3f(displayStart),
+                            new Vector3f(displayEnd)
+                    );
                     result.add(edge);
                 }
 
@@ -287,7 +291,10 @@ public class Squad {
                         displayStart=displayStart.relative(face);
                         displayEnd=displayEnd.relative(face);
                     }
-                    Edge edge=new Edge(CommonUtil.pos2Vec3(displayStart),CommonUtil.pos2Vec3(displayEnd));
+                    Edge edge=new Edge(
+                            new Vector3f(displayStart),
+                            new Vector3f(displayEnd)
+                    );
                     result.add(edge);
                 }
 
