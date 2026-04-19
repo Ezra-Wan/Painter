@@ -252,22 +252,8 @@ public class Squad {
                 {
                     BlockPos displayStart=start;
                     BlockPos displayEnd=current.relative(posDirection);
-                    if(CommonUtil.isPositiveAxis(edgeDirection))
-                    {
-                        displayStart=displayStart.relative(edgeDirection);
-                        displayEnd=displayEnd.relative(edgeDirection);
-                    }//轴定位正轴补偿
 
-                    if(CommonUtil.isPositiveAxis(face))
-                    {
-                        displayStart=displayStart.relative(face);
-                        displayEnd=displayEnd.relative(face);
-                    }//面定位正轴补偿
-
-                    Edge edge=new Edge(
-                            new Vector3f(displayStart),
-                            new Vector3f(displayEnd)
-                    );
+                    Edge edge=buildEdge(edgeDirection,posDirection,displayStart,displayEnd);
                     result.add(edge);
                 }
 
@@ -280,21 +266,7 @@ public class Squad {
                 {
                     BlockPos displayStart=start;
                     BlockPos displayEnd=current;
-                    if(CommonUtil.isPositiveAxis(edgeDirection))
-                    {
-                        displayStart=displayStart.relative(edgeDirection);
-                        displayEnd=displayEnd.relative(edgeDirection);
-
-                    }
-                    if(CommonUtil.isPositiveAxis(face))
-                    {
-                        displayStart=displayStart.relative(face);
-                        displayEnd=displayEnd.relative(face);
-                    }
-                    Edge edge=new Edge(
-                            new Vector3f(displayStart),
-                            new Vector3f(displayEnd)
-                    );
+                    Edge edge=buildEdge(edgeDirection,posDirection,displayStart,displayEnd);
                     result.add(edge);
                 }
 
@@ -307,8 +279,26 @@ public class Squad {
         return result;
     }
 
+    private Edge buildEdge(Direction edgeDirection,Direction posDirection,BlockPos displayStart,BlockPos displayEnd){
+        if(CommonUtil.isPositiveAxis(edgeDirection))
+        {
+            displayStart=displayStart.relative(edgeDirection);
+            displayEnd=displayEnd.relative(edgeDirection);
+        }//轴定位正轴补偿
 
+        if(CommonUtil.isPositiveAxis(face))
+        {
+            displayStart=displayStart.relative(face);
+            displayEnd=displayEnd.relative(face);
+        }//面定位正轴补偿
 
+        Edge edge=new Edge(
+                new Vector3f(displayStart).add(new Vector3f(posDirection),-0.025f),
+                new Vector3f(displayEnd).add(new Vector3f(posDirection),0.025f)
+        );
+
+        return edge;
+    }
 
     /**
      *

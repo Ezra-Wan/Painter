@@ -113,6 +113,10 @@ public class Vector3f {
 
     // ==================== 向量运算（返回新对象） ====================
 
+    public Vector3f add(Vector3f other,float multiply)
+    {
+        return add(other.multiply(multiply));
+    }
     public Vector3f add(Vector3f other) {
         return new Vector3f(this.x + other.x, this.y + other.y, this.z + other.z);
     }

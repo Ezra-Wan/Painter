@@ -84,7 +84,7 @@ public class SelectedRenderer {
         var poseStack = event.getPoseStack();
 
         //TODO 记得移除
-        Line line=Line.builder(new Vector3f(0,-31,0),new Vector3f(1,-30,1))
+        Line line=Line.builder(new Vector3f(0,-30,0),new Vector3f(1,-30,0))
                 .setColor(0xccebe5d1)
                 .setWidth(0.05f)
                 .build();
@@ -152,33 +152,35 @@ public class SelectedRenderer {
 
         List<Edge> edges=selectedZone.getCachedEdges();
 
-        VertexConsumer lineBuffer=bufferSource.getBuffer(RenderType.LINES);
+        VertexConsumer lineBuffer=bufferSource.getBuffer(LineRenderType.PURE_COLOR_SOLID);
 
         edges.forEach((edge)->{
 
-            renderEdge(edge,face,camPos,lineBuffer,poseStack);
+            renderEdge(edge,camPos,lineBuffer,poseStack);
 
         });
         bufferSource.endBatch(CustomRenderTypes.PURE_COLOR);
+        bufferSource.endBatch(LineRenderType.PURE_COLOR_SOLID);
 
         bufferSource.endBatch(RenderType.LINES);
 
     }
 
-    public static void renderEdge(Edge edge, Direction face, Vec3 camPos, VertexConsumer buffer, PoseStack poseStack)
+    public static void renderEdge(Edge edge, Vec3 camPos, VertexConsumer buffer, PoseStack poseStack)
     {
-        poseStack.pushPose();
-        // 4. 获取VertexConsumer并开始渲染线条
-
-        // 3. 设置PoseStack，将世界坐标转换为相机相对坐标
-
-        poseStack.translate(edge.A.x - camPos.x, edge.A. y- camPos.y, edge.A.z - camPos.z);
-        Matrix4f matrix = poseStack.last().pose();
-
-        edge.render(poseStack, buffer,  face);
-
-
-        poseStack.popPose();
+        edge.render(camPos,buffer,poseStack);
+//        poseStack.pushPose();
+//        // 4. 获取VertexConsumer并开始渲染线条
+//
+//        // 3. 设置PoseStack，将世界坐标转换为相机相对坐标
+//
+//        poseStack.translate(edge.A.x - camPos.x, edge.A. y- camPos.y, edge.A.z - camPos.z);
+//        Matrix4f matrix = poseStack.last().pose();
+//
+//        edge.render(poseStack, buffer,  face);
+//
+//
+//        poseStack.popPose();
     }
     public static void renderFace(BlockPos pos, Direction face, Vec3 camPos, VertexConsumer buffer, PoseStack poseStack)
     {
