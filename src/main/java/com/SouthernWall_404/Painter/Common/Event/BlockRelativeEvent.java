@@ -19,6 +19,7 @@ public class BlockRelativeEvent {
     //========放置失败的原因注册字段========
     public static final String OUT_OF_RANGE = "out_of_range";
 
+    //新区块的数据获取有待优化
     @SubscribeEvent
     public static void onBlockRightClicked(PlayerInteractEvent.RightClickBlock event) {
         Player player = event.getEntity();

@@ -7,23 +7,28 @@ import com.SouthernWall_404.Painter.API.Paint.Attachment.PaintInfo;
 import com.SouthernWall_404.Painter.API.Paint.Util.CommonUtil;
 import com.SouthernWall_404.Painter.Common.Init.ModAttachments;
 import com.SouthernWall_404.Painter.Painter;
+import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.ModelBlockRenderer;
+import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.chunk.LevelChunk;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
 
 import java.util.*;
 
+@OnlyIn(Dist.CLIENT)
 @EventBusSubscriber(modid = Painter.MODID, value = Dist.CLIENT, bus = EventBusSubscriber.Bus.GAME)
 
 public class PaintRender {
@@ -39,45 +44,28 @@ public class PaintRender {
         ModelBlockRenderer.enableCaching();
         MultiBufferSource.BufferSource bufferSource=Minecraft.getInstance().renderBuffers().bufferSource();
 
+        Frustum frustum =event.getFrustum();
+        if (frustum == null) {
+            return; // 视锥体不可用时不渲染
+        }
 
 
-
-        //TODO这里以后记得处理一下世界退出处理
-//        if (renders.isEmpty())
-//        {
-//            if(isFirstRender)redraw();
-////            System.out.println("Client's Renders Empty");
-//        }
         for(Map.Entry<BlockPos,AbstractRender<?,?>> entry:renders.entrySet())
         {
             BlockPos pos=entry.getKey();
             AbstractRender render=entry.getValue();
+
+
+            // 视锥剔除：检查方块位置的包围盒是否可见
+            AABB aabb = new AABB(pos.getX(), pos.getY(), pos.getZ(), pos.getX() + 1, pos.getY() + 1, pos.getZ() + 1);
+            if (!frustum.isVisible(aabb)) {
+                continue; // 不可见，跳过渲染
+            }
+
             render.render(pos,event.getPoseStack(), 0,0,event.getRenderTick(),bufferSource.getBuffer(RenderType.cutout()));
         }
 
         bufferSource.endBatch(RenderType.cutout());
-//
-//        // 1. 获取 Block 的默认状态 (如果你需要特定状态，可以传入相应的 BlockState)
-//        BlockState state = Blocks.IRON_BLOCK.defaultBlockState();
-//
-//        // 2. 获取 ModelManager 并得到这个 BlockState 对应的 BakedModel
-//        //    注意：这段代码必须在客户端执行，因为 ModelManager 只在客户端存在。
-//        BakedModel model =
-//                Minecraft.getInstance().getModelManager().getBlockModelShaper().getBlockModel(state);
-//        RandomSource random = RandomSource.create();
-//        List<BakedQuad> testQuad=model.getQuads(state, Direction.NORTH,random, ModelData.EMPTY, RenderType.CUTOUT);
-//
-//        MultiBufferSource.BufferSource bufferSource=Minecraft.getInstance().renderBuffers().bufferSource();
-//
-//        ModModelRender.AmbientOcclusionFace aoFace = new ModModelRender.AmbientOcclusionFace();
-//
-//        PoseStack poseStack=event.getPoseStack();
-//        BlockPos pos=new BlockPos(0,128,0);
-//        BakedQuad quad=testQuad.get(0);
-//
-//        BakedQuadRender.renderWithAO(quad,state,pos,poseStack,RenderType.CUTOUT,bufferSource,aoFace);
-//
-//        bufferSource.endBatch(RenderType.CUTOUT);
 
     }
 
@@ -93,48 +81,5 @@ public class PaintRender {
         renders=chunkInfo.getRenderNearby(player.getOnPos());
     }
 
-    /**
-     * 遍历玩家周围radius范围，获取所有的Render
-     * @return
-     */
-    private static Map<BlockPos,AbstractRender<?,?>> getRenderNearby()
-    {
-
-        Map<BlockPos,AbstractRender<?,?>> result=new HashMap<>();
-
-        Minecraft mc=Minecraft.getInstance();
-        Player player=mc.player;
-        Level level=mc.level;
-        Vec3 vec3=player.position();
-        BlockPos origin= CommonUtil.vec32Pos(vec3);
-
-        int radius=Minecraft.getInstance().options.getEffectiveRenderDistance()*16;
-
-
-        LevelChunk originChunk=level.getChunkAt(origin);
-
-        ChunkPos originChunkPos=originChunk.getPos();
-
-        for(int i=-radius;i<=radius;i++)
-
-        {
-            for(int j=-radius;j<=radius;j++)
-
-            {
-                ChunkPos currentChunkPos=new ChunkPos(originChunkPos.x+i,originChunkPos.z+j);
-                LevelChunk chunk=level.getChunk(currentChunkPos.x,currentChunkPos.z);
-                PaintInfo paintInfo=chunk.getData(ModAttachments.PAINT_INFO);
-
-                result.putAll(paintInfo.getRenders());
-
-            }
-
-        }
-        return result;
-    }
-
-
     //TODO 解决闪烁问题
-
-    //TODO 他妈的忘做渲染移除了
 }

@@ -1,5 +1,6 @@
 package com.SouthernWall_404.Painter.API.Paint.Util;
 
+import com.SouthernWall_404.LaplaceAPI.Math37.Vector3f;
 import it.unimi.dsi.fastutil.objects.Object2ByteLinkedOpenHashMap;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderType;
@@ -9,6 +10,7 @@ import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
@@ -105,6 +107,22 @@ private static final ThreadLocal<Object2ByteLinkedOpenHashMap<Block.BlockStatePa
 
     @Deprecated
     public static boolean shouldRenderFace(BlockGetter level, BlockPos pos,BlockState state, Direction face ) {
+
+        if(Minecraft.getInstance()!=null)
+        {
+            Minecraft mc=Minecraft.getInstance();
+            int distance=mc.options.renderDistance().get()*16;
+            Player player=mc.player;
+
+            Vector3f eyePos=new Vector3f(player.getEyePosition());
+            Vector3f blockPos=new Vector3f(pos);
+
+            if(eyePos.distanceTo(blockPos)>distance)
+            {
+                return false;
+            }
+
+        }
 
         BlockPos neighborPos=pos.relative(face);//获取对应方向的位置
         BlockState neighborState = level.getBlockState(neighborPos);//获取对应方向相邻方块
