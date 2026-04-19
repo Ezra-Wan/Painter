@@ -175,8 +175,6 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>,Direc
         if(tick>=120)//TODO 考虑加个配置项
         {
             refreshAO(blockPos);
-        }else
-        {
             tick=0;
         }
 
