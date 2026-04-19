@@ -21,6 +21,16 @@ public class Vector3f {
         this(vec3i.getX(), vec3i.getY(), vec3i.getZ());
     }
 
+    public Vector3f(BlockPos pos,float[] list)
+    {
+        this(pos.getX()+list[0], pos.getY()+list[1], pos.getZ()+list[2]);
+    }
+
+    public Vector3f(float[] list)
+    {
+        this(list[0],list[1],list[2]);
+    }
+
     public Vector3f(Direction direction)
     {
         this(direction.getNormal());

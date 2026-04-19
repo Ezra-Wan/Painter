@@ -1,5 +1,8 @@
 package com.SouthernWall_404.Painter.API.Tool;
 
+import com.SouthernWall_404.LaplaceAPI.Math37.Vector3f;
+import com.SouthernWall_404.LaplaceAPI.RegulappleEngine.Quad.Quad;
+import com.SouthernWall_404.LaplaceAPI.RegulappleEngine.RenderHelper;
 import com.SouthernWall_404.Painter.API.Tool.Wall.Edge;
 import com.SouthernWall_404.Painter.API.Tool.Wall.Squad;
 import net.minecraft.core.BlockPos;
@@ -7,9 +10,13 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.Vec3i;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class SelectedZone {
+
+    //TODO 可以考虑把Contains优化掉
 
     private List<BlockPos> contains = new ArrayList<>();
     private Direction face;
@@ -17,7 +24,9 @@ public class SelectedZone {
     private List<Squad> squads=new ArrayList<>();
     private Squad cacheSquad;
 
+    //========渲染缓存========
     private List<Edge> cachedEdges=new ArrayList<>();
+    private Map<BlockPos,Quad> cachedQuads=new HashMap<>();
 
 
     //待移除
@@ -28,6 +37,9 @@ public class SelectedZone {
 
     }
 
+    public Map<BlockPos, Quad> getCachedQuads() {
+        return cachedQuads;
+    }
 
     public Direction getFace() {
         return face;
@@ -36,9 +48,22 @@ public class SelectedZone {
     public List<BlockPos> getContains() {
         return contains;
     }
-
+    private final static float offset=0.011f;
     public void addAPosition(BlockPos pos) {
-        if(!contains.contains(pos)) contains.add(pos);
+        if(!contains.contains(pos)){
+            float[][] positions= RenderHelper.getSimpleQuadVertex(face);
+            contains.add(pos);
+            cachedQuads.put(
+                    pos,
+                    Quad.builder()
+                            .setColor(0x4cebe5d1)//TODO考虑允许配置项
+                            .addVertex(new Vector3f(positions[0]).add(new Vector3f(face),offset))
+                            .addVertex(new Vector3f(positions[1]).add(new Vector3f(face),offset))
+                            .addVertex(new Vector3f(positions[2]).add(new Vector3f(face),offset))
+                            .addVertex(new Vector3f(positions[3]).add(new Vector3f(face),offset))
+                            .build()
+            );
+        }
     }
 
     public void removeAPosition(BlockPos pos)
@@ -97,6 +122,8 @@ public class SelectedZone {
 
         }
 
+
+        //生成缓存边
         cachedEdges.clear();
         for(Squad squad:squads)
         {
@@ -146,44 +173,6 @@ public class SelectedZone {
             return result;
         }
         return result;
-//        String result = isValid(b);
-//        if (!ToolContent.PASS.equals(result)) {
-//            return result;
-//        }
-//
-//        // 法向量（轴向单位向量）
-//        Vec3i n = face.getNormal();
-//        // 获取两个垂直于 n 的基向量
-//        Vec3i u = getPerpendicularU(n);
-//        Vec3i v = getPerpendicularV(n);
-//
-//        // 平面上的恒定坐标值（即 A 在法向量上的投影）
-//        int constCoord = dot(A, n);
-//
-//        // A 和 b 在 (u, v) 坐标系下的坐标
-//        int a_u = dot(A, u);
-//        int a_v = dot(A, v);
-//        int b_u = dot(b, u);
-//        int b_v = dot(b, v);
-//
-//        int minU = Math.min(a_u, b_u);
-//        int maxU = Math.max(a_u, b_u);
-//        int minV = Math.min(a_v, b_v);
-//        int maxV = Math.max(a_v, b_v);
-//
-//        // 遍历矩形区域
-//        for (int du = minU; du <= maxU; du++) {
-//            for (int dv = minV; dv <= maxV; dv++) {
-//                BlockPos pos = new BlockPos(
-//                        constCoord * n.getX() + du * u.getX() + dv * v.getX(),
-//                        constCoord * n.getY() + du * u.getY() + dv * v.getY(),
-//                        constCoord * n.getZ() + du * u.getZ() + dv * v.getZ()
-//                );
-//                addAPosition(pos);
-//            }
-//        }
-//
-//        return ToolContent.PASS;
     }
 
     // 点积
@@ -218,6 +207,7 @@ public class SelectedZone {
         squads.clear();
         cacheSquad=null;
         cachedEdges.clear();
+        cachedQuads.clear();
 
 
     }

@@ -2,6 +2,8 @@ package com.SouthernWall_404.Painter.Client;
 
 import com.SouthernWall_404.LaplaceAPI.RegulappleEngine.OutLine.Line;
 import com.SouthernWall_404.LaplaceAPI.RegulappleEngine.OutLine.LineRenderType;
+import com.SouthernWall_404.LaplaceAPI.RegulappleEngine.Quad.Quad;
+import com.SouthernWall_404.LaplaceAPI.RegulappleEngine.QuadRender;
 import com.SouthernWall_404.LaplaceAPI.RegulappleEngine.RenderHelper;
 import com.SouthernWall_404.LaplaceAPI.Math37.Vector3f;
 import com.SouthernWall_404.Painter.API.Paint.Util.PaintUtil;
@@ -33,6 +35,7 @@ import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
 import org.joml.Matrix4f;
 
 import java.util.List;
+import java.util.Map;
 
 @EventBusSubscriber(modid = Painter.MODID, value = Dist.CLIENT, bus = EventBusSubscriber.Bus.GAME)
 public class SelectedRenderer {
@@ -40,8 +43,6 @@ public class SelectedRenderer {
     private static final BlockPos START = new BlockPos(0, 128, 0);
     private static final BlockPos END = new BlockPos(1, 128, 0); // 从(0,128,0)到(10,128,0)的线
 
-
-    //TODO 添加新的渲染方法
     @SubscribeEvent
     public static void onRenderLevelStage(RenderLevelStageEvent event) {
         // 1. 选择一个合适的渲染阶段
@@ -65,7 +66,6 @@ public class SelectedRenderer {
 
         SelectedZone selectedZone=player.getData(ModAttachments.SELECTED_ZONE);
         List<BlockPos> poses=selectedZone.getContains();
-        Direction face=selectedZone.getFace();
 
         // 2. 获取相机位置用于坐标转换
         Camera camera = mc.gameRenderer.getMainCamera();
@@ -76,20 +76,7 @@ public class SelectedRenderer {
 
         // 起点
         MultiBufferSource.BufferSource bufferSource = mc.renderBuffers().bufferSource();
-
-
-
-
-        var buffer = bufferSource.getBuffer(CustomRenderTypes.PURE_COLOR);
-        var poseStack = event.getPoseStack();
-
-        //TODO 记得移除
-        Line line=Line.builder(new Vector3f(0,-30,0),new Vector3f(1,-30,0))
-                .setColor(0xccebe5d1)
-                .setWidth(0.05f)
-                .build();
-        line.render(camPos,bufferSource.getBuffer(LineRenderType.PURE_COLOR_SOLID),poseStack);
-        bufferSource.endBatch(LineRenderType.PURE_COLOR_SOLID);
+        PoseStack poseStack = event.getPoseStack();
 
 
         for(BlockPos pos:poses)
@@ -98,54 +85,6 @@ public class SelectedRenderer {
             {
                 continue;
             }
-
-
-            //            renderFace(pos,face,camPos,buffer,poseStack);
-
-//            poseStack.pushPose();
-//            // 4. 获取VertexConsumer并开始渲染线条
-//
-//            // 3. 设置PoseStack，将世界坐标转换为相机相对坐标
-//
-//            poseStack.translate(pos.getX() - camPos.x, pos.getY() - camPos.y, pos.getZ() - camPos.z);
-//            Matrix4f matrix = poseStack.last().pose();
-//
-//
-//
-//            Vec3i normal=Direction.NORTH.getNormal();
-//            buffer.addVertex(matrix, 0, 0, -0.001f)
-//                    .setColor(235, 229, 209, 64)
-//                    .setNormal(normal.getX(),normal.getY(),normal.getZ());
-////                    .setUv(0,0).setUv2(0,0);
-//            // 终点
-//            buffer.addVertex(matrix, 0, 1, -0.001f)
-//                    .setColor(235, 229, 209, 64)
-//                    .setNormal(normal.getX(),normal.getY(),normal.getZ());
-////                    .setUv(0,1)
-////                    .setUv2(0,1);
-//            buffer.addVertex(matrix, 1, 1, -0.001f)
-//                    .setColor(235, 229, 209, 64)
-//                    .setNormal(normal.getX(),normal.getY(),normal.getZ());
-////                    .setUv(1,0).setUv2(1,0);
-//
-//
-//            buffer.addVertex(matrix, 0, 0, -0.001f)
-//                    .setColor(235, 229, 209, 64)
-//                    .setNormal(normal.getX(),normal.getY(),normal.getZ());
-////                    .setUv(0,1).setUv2(0,1);
-//            buffer.addVertex(matrix, 1, 1, -0.001f)
-//                    .setColor(235, 229, 209, 64)
-//                    .setNormal(normal.getX(),normal.getY(),normal.getZ());
-////                    .setUv(1,0).setUv2(1,0);
-////            buffer.addVertex(matrix, 1, 0, 0)
-////                    .setColor(235, 229, 209, 128)
-////                    .setNormal(normal.getX(),normal.getY(),normal.getZ());
-//            buffer.addVertex(matrix, 1, 0, -0.001f)
-//                    .setColor(235, 229, 209, 64).setNormal(normal.getX(),normal.getY(),normal.getZ());
-//
-//            // 5. 提交渲染
-//
-//            poseStack.popPose();
         }
 
 
@@ -159,106 +98,36 @@ public class SelectedRenderer {
             renderEdge(edge,camPos,lineBuffer,poseStack);
 
         });
-        bufferSource.endBatch(CustomRenderTypes.PURE_COLOR);
-        bufferSource.endBatch(LineRenderType.PURE_COLOR_SOLID);
 
-        bufferSource.endBatch(RenderType.LINES);
+        VertexConsumer faceBuffer=bufferSource.getBuffer(LineRenderType.PURE_COLOR);
+        Map<BlockPos,Quad> quads=selectedZone.getCachedQuads();
+        quads.forEach(
+                (blockPos,quad)->{
+                    renderFace(quad,camPos,blockPos,faceBuffer,poseStack);
+                }
+        );
+
+
+        bufferSource.endBatch(LineRenderType.PURE_COLOR_SOLID);
+        bufferSource.endBatch(LineRenderType.PURE_COLOR);
 
     }
 
     public static void renderEdge(Edge edge, Vec3 camPos, VertexConsumer buffer, PoseStack poseStack)
     {
         edge.render(camPos,buffer,poseStack);
-//        poseStack.pushPose();
-//        // 4. 获取VertexConsumer并开始渲染线条
-//
-//        // 3. 设置PoseStack，将世界坐标转换为相机相对坐标
-//
-//        poseStack.translate(edge.A.x - camPos.x, edge.A. y- camPos.y, edge.A.z - camPos.z);
-//        Matrix4f matrix = poseStack.last().pose();
-//
-//        edge.render(poseStack, buffer,  face);
-//
-//
-//        poseStack.popPose();
     }
-    public static void renderFace(BlockPos pos, Direction face, Vec3 camPos, VertexConsumer buffer, PoseStack poseStack)
+
+    public static void renderFace(Quad quad,Vec3 camPos,BlockPos pos, VertexConsumer buffer, PoseStack poseStack)
     {
         poseStack.pushPose();
-        // 4. 获取VertexConsumer并开始渲染线条
-
-        // 3. 设置PoseStack，将世界坐标转换为相机相对坐标
-
-        poseStack.translate(pos.getX() - camPos.x, pos.getY() - camPos.y, pos.getZ() - camPos.z);
-        Matrix4f matrix = poseStack.last().pose();
-
-        vertexDeal(matrix,face,buffer);
-
-
+        poseStack.translate(pos.getX()-camPos.x,pos.getY()-camPos.y,pos.getZ()-camPos.z);
+        Matrix4f matrix4f=poseStack.last().pose();
         poseStack.popPose();
+
+        quad.render(matrix4f,buffer);
     }
-
-
-
 
     //TODO 他妈的忘做渲染移除了
     //TODO 还有，性能有待优化
-    private static void vertexDeal(Matrix4f matrix4f,Direction face, VertexConsumer buffer) {
-//        boolean isTopSlab = origin.getValue(SlabBlock.TYPE) == SlabType.TOP;
-
-
-        int color=0x19ebe5d1;
-        float offset=0.011f;
-
-        if(face==null)return;
-
-        Vec3i normal=face.getNormal();
-        float[][] positions= RenderHelper.getSimpleQuadVertex(face);
-
-//        switch (face) {
-//            case DOWN -> positions =new float[][]{
-//                    {0, yMin, 1}, {0, yMin, 0}, {1, yMin, 0}, {1, yMin, 1}
-//            };
-//            case UP -> positions = new float[][]{
-//                    {0, yMax, 0}, {0, yMax, 1}, {1, yMax, 1}, {1, yMax, 0}
-//            };
-//            case NORTH -> positions = new float[][]{
-//                    {1, yMax, 0},{1, yMin, 0},{0, yMin, 0},{0, yMax, 0}
-//            };
-//            case SOUTH -> positions = new float[][]{
-//                    {0, yMax, 1}, {0, yMin, 1}, {1, yMin, 1}, {1, yMax, 1}
-//            };
-//            case WEST -> positions = new float[][]{
-//                    {0, yMax, 0}, {0, yMin, 0}, {0, yMin, 1}, {0, yMax, 1}
-//
-//            };
-//            case EAST -> positions = new float[][]{
-//                    {1, yMax, 1}, {1, yMin, 1}, {1, yMin, 0}, {1, yMax, 0}
-//            };
-//            default -> throw new IllegalArgumentException("Invalid direction: " + face);
-//        }
-
-
-
-        buffer.addVertex(matrix4f,positions[0][0]+normal.getX()*offset,positions[0][1]+normal.getY()*offset,positions[0][2]+normal.getZ()*offset)
-                .setNormal(normal.getX(),normal.getY(),normal.getZ())
-                .setColor(color);
-        buffer.addVertex(matrix4f,positions[3][0]+normal.getX()*offset,positions[3][1]+normal.getY()*offset,positions[3][2]+normal.getZ()*offset)
-                .setNormal(normal.getX(),normal.getY(),normal.getZ())
-                .setColor(color);
-        buffer.addVertex(matrix4f,positions[2][0]+normal.getX()*offset,positions[2][1]+normal.getY()*offset,positions[2][2]+normal.getZ()*offset)
-                .setNormal(normal.getX(),normal.getY(),normal.getZ())
-                .setColor(color);
-
-
-        buffer.addVertex(matrix4f,positions[0][0]+normal.getX()*offset,positions[0][1]+normal.getY()*offset,positions[0][2]+normal.getZ()*offset)
-                .setNormal(normal.getX(),normal.getY(),normal.getZ())
-                .setColor(color);
-        buffer.addVertex(matrix4f,positions[1][0]+normal.getX()*offset,positions[1][1]+normal.getY()*offset,positions[1][2]+normal.getZ()*offset)
-                .setNormal(normal.getX(),normal.getY(),normal.getZ())
-                .setColor(color);
-        buffer.addVertex(matrix4f,positions[2][0]+normal.getX()*offset,positions[2][1]+normal.getY()*offset,positions[2][2]+normal.getZ()*offset)
-                .setNormal(normal.getX(),normal.getY(),normal.getZ())
-                .setColor(color);
-    }
 }
