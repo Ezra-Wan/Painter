@@ -1,5 +1,6 @@
 package com.SouthernWall_404.Painter.API.Paint.API;
 
+import com.SouthernWall_404.LaplaceAPI.RegulappleEngine.Quad.Quad;
 import com.SouthernWall_404.Painter.API.Paint.ModModelRender;
 import com.SouthernWall_404.Painter.API.Paint.Util.RenderUtil;
 import com.SouthernWall_404.LaplaceAPI.RegulappleEngine.BakedQuadRender;
@@ -29,6 +30,7 @@ import net.neoforged.api.distmarker.OnlyIn;
 import net.neoforged.neoforge.client.model.data.ModelData;
 
 import java.util.BitSet;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -40,7 +42,12 @@ import java.util.Map;
 
 public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>,Direction>{
 
+    public static float[] shape = new float[ModModelRender.DIRECTIONS.length * 2];
 
+    private static BitSet shapeFlags = new BitSet(3);
+
+    private int tick=0;
+    private Map<Integer, ModModelRender.AmbientOcclusionFace> aoFaces=new HashMap<>();
     //========构造方法=========
     public AbstractPaint(String type) {
         super(type);
@@ -93,26 +100,6 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>,Direc
         RandomSource random = RandomSource.create();
         RenderType renderType = RenderUtil.getRenderType(state);
         return model.getQuads(state, direction, random, ModelData.EMPTY, renderType);
-    }
-
-    protected void renderQuadsWithAO(Level level, BlockState state, BlockPos pos, List<BakedQuad> quads,
-                                   VertexConsumer consumer, ModModelRender modRenderer,
-                                   float[] shape, BitSet shapeFlags, ModModelRender.AmbientOcclusionFace aoFace,
-                                   PoseStack poseStack, int packedOverlay) {
-        if(state==null)
-        {
-            return;
-        }
-        for (BakedQuad quad : quads) {
-            modRenderer.calculateShape(level, state, pos, quad.getVertices(), quad.getDirection(), shape, shapeFlags);
-
-            //TODO 这里有没有可能将光照数据直接移植过来？考虑本质上是覆盖层
-            aoFace.calculate(level, state, pos, quad.getDirection(), shape, shapeFlags, quad.isShade());
-            modRenderer.putQuadData(level, state, pos, consumer, poseStack.last(), quad,
-                    aoFace.brightness[0], aoFace.brightness[1], aoFace.brightness[2], aoFace.brightness[3],
-                    aoFace.lightmap[0], aoFace.lightmap[1], aoFace.lightmap[2], aoFace.lightmap[3],
-                    packedOverlay);
-        }
     }
 
     /**
@@ -169,13 +156,32 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>,Direc
 
     public abstract void createQuads();
 
-    public static float[] shape = new float[ModModelRender.DIRECTIONS.length * 2];
+    public void refreshAO(BlockPos blockPos)
+    {
+        Level level=Minecraft.getInstance().level;
+        for(Map.Entry<Integer, BlockState> entry:materials.entrySet()){
+            int flag=entry.getKey();
+            BlockState state=materials.get(flag);
+            Direction direction=getDirection(flag);
 
-    private static BitSet shapeFlags = new BitSet(3);
+            ModModelRender.AmbientOcclusionFace aoFace=new ModModelRender.AmbientOcclusionFace();
+            aoFace.calculate(level, state, blockPos.relative(direction), direction, shape, shapeFlags, true);
+
+            aoFaces.put(flag,aoFace);
+        }
+        ModModelRender.AmbientOcclusionFace aoFace=new ModModelRender.AmbientOcclusionFace();
+    }
     @Override
     public void render(BlockPos blockPos, PoseStack poseStack, MultiBufferSource.BufferSource bufferSource, int packedLight, int packedOverlay, float partialTick) {
 
-        Level level=Minecraft.getInstance().level;
+        if(tick>=20)//TODO 考虑加个配置项
+        {
+            refreshAO(blockPos);
+        }else
+        {
+            tick=0;
+        }
+
         for(Map.Entry<Integer,List<BakedQuad>> entry:objects.entrySet())//遍历所有缓存的quad
         {
             List<BakedQuad> quads=entry.getValue();
@@ -192,13 +198,8 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>,Direc
             Vec3 vec3=new Vec3(blockPos.getX()+offset*normal.getX(),blockPos.getY()+offset*normal.getY(),blockPos.getZ()+offset*normal.getZ());
             for(BakedQuad quad:quads)
             {
-
-                ModModelRender.AmbientOcclusionFace aoFace=new ModModelRender.AmbientOcclusionFace();
-                aoFace.calculate(level, state, blockPos.relative(quad.getDirection()), quad.getDirection(), shape, shapeFlags, true);
-
-                BakedQuadRender.renderInOfferredAO(quad,state,vec3,poseStack,RenderType.CUTOUT,bufferSource,aoFace);
-
-
+                if(aoFaces.containsKey(flag)) BakedQuadRender.renderInOfferredAO(quad,state,vec3,poseStack,RenderType.CUTOUT,bufferSource,aoFaces.get(flag));
+                else BakedQuadRender.renderInDefaultAO(quad,state,vec3,poseStack,RenderType.CUTOUT,bufferSource);
             }
 
         }
