@@ -7,48 +7,36 @@ import com.SouthernWall_404.Painter.API.Tool.Wall.Edge;
 import com.SouthernWall_404.Painter.API.Tool.Wall.Squad;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.Vec3i;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class SelectedZone {
 
-    //TODO 可以考虑把Contains优化掉
-
-    private List<BlockPos> contains = new ArrayList<>();
     private Direction face;
 
-    private List<Squad> squads=new ArrayList<>();
+    private Set<Squad> squads=new HashSet<>();
     private Squad cacheSquad;
 
     //========渲染缓存========
-    private List<Edge> cachedEdges=new ArrayList<>();
-    private Map<BlockPos,Quad> cachedQuads=new HashMap<>();
+    private Set<Edge> edges =new HashSet<>();
+    private Map<BlockPos,Quad> quads =new HashMap<>();
 
     public SelectedZone(){
 
     }
 
-    public Map<BlockPos, Quad> getCachedQuads() {
-        return cachedQuads;
+    public Map<BlockPos, Quad> getQuads() {
+        return quads;
     }
 
     public Direction getFace() {
         return face;
     }
-
-    public List<BlockPos> getContains() {
-        return contains;
-    }
     private final static float offset=0.011f;
     public void addAPosition(BlockPos pos) {
-        if(!contains.contains(pos)){
+        if(!quads.containsKey(pos)){
             float[][] positions= RenderHelper.getSimpleQuadVertex(face);
-            contains.add(pos);
-            cachedQuads.put(
+            quads.put(
                     pos,
                     Quad.builder()
                             .setColor(0x4cebe5d1)//TODO考虑允许配置项
@@ -61,63 +49,43 @@ public class SelectedZone {
         }
     }
 
-    //TODO 可能需要修改
-    public void removeAPosition(BlockPos pos)
-    {
-        if(contains.contains(pos)) {
-            contains.remove(pos);
-        }
-    }
-
     public boolean isSelecting()
     {
-        if(!contains.isEmpty()&&face!=null)
+        if(!quads.isEmpty()&&face!=null)
         {
             return true;
         }
         return false;
     }
 
-    public List<Edge> getCachedEdges() {
-        return cachedEdges;
+
+    public Set<Edge> getEdges() {
+        return edges;
     }
 
     public boolean isInSurface(BlockPos pos, Direction direction)
     {
-        return direction==face&& contains.contains(pos);
+        return direction==face&& quads.containsKey(pos);
     }
 
     public void update()
     {
-        for(Squad squad:squads)
-        {
+        edges.clear();
+        squads.forEach((squad -> {
             List<BlockPos> squadContains=squad.getContians();
 
             squadContains.forEach(
                     (blockpos)->{
-                        if(!contains.contains(blockpos))
-                        {
-                            addAPosition(blockpos);
-                        }
+                        addAPosition(blockpos);//将位置缓存
                     }
             );
+        }));
 
-
-        }
-
-
-        //生成缓存边
-        cachedEdges.clear();
-        for(Squad squad:squads)
-        {
-            cachedEdges.addAll(squad.getEdges(contains));
-        }
-
-        cachedEdges.isEmpty();
+        squads.forEach((squad)->{
+            edges.addAll(squad.getEdges(quads));//更新边框
+        });
 
     }
-
-
     public void addSquad(Squad squad)
     {
         squads.add(squad);
@@ -160,18 +128,17 @@ public class SelectedZone {
 
     public boolean contains(BlockPos pos)
     {
-        return contains.contains(pos);
+        return quads.containsKey(pos);
     }
 
     public void clear()
     {
 //        A=null;
         face=null;
-        contains.clear();
         squads.clear();
         cacheSquad=null;
-        cachedEdges.clear();
-        cachedQuads.clear();
+        edges.clear();
+        quads.clear();
 
 
     }

@@ -24,10 +24,9 @@ import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
-import org.joml.Matrix4f;
 
-import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 @EventBusSubscriber(modid = Painter.MODID, value = Dist.CLIENT, bus = EventBusSubscriber.Bus.GAME)
 public class SelectedRenderer {
@@ -64,7 +63,7 @@ public class SelectedRenderer {
 
 
         //渲染边框
-        List<Edge> edges=selectedZone.getCachedEdges();
+        Set<Edge> edges=selectedZone.getEdges();
 
         VertexConsumer lineBuffer=bufferSource.getBuffer(LineRenderType.PURE_COLOR_SOLID);
 
@@ -79,7 +78,7 @@ public class SelectedRenderer {
 
         //渲染覆盖面
         VertexConsumer faceBuffer=bufferSource.getBuffer(LineRenderType.PURE_COLOR);
-        Map<BlockPos,Quad> quads=selectedZone.getCachedQuads();
+        Map<BlockPos,Quad> quads=selectedZone.getQuads();
         quads.forEach(
                 (blockPos,quad)->{
                     renderFace(quad,camPos,blockPos,faceBuffer,poseStack);

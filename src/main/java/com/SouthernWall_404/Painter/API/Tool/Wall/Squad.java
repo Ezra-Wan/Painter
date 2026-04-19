@@ -1,6 +1,7 @@
 package com.SouthernWall_404.Painter.API.Tool.Wall;
 
 import com.SouthernWall_404.LaplaceAPI.Math37.Vector3f;
+import com.SouthernWall_404.LaplaceAPI.RegulappleEngine.Quad.Quad;
 import com.SouthernWall_404.Painter.API.Paint.Util.CommonUtil;
 import com.SouthernWall_404.Painter.API.Tool.ToolContent;
 import net.minecraft.core.BlockPos;
@@ -10,6 +11,7 @@ import net.minecraft.world.phys.Vec3;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class Squad {
 
@@ -199,7 +201,7 @@ public class Squad {
      * @param edgeDirection
      * @return
      */
-    public List<Edge> getDirectionEdge(List<BlockPos> cover,Direction edgeDirection)
+    public List<Edge> getDirectionEdge(Map<BlockPos, Quad> cover, Direction edgeDirection)
     {
 
         List<Edge> result=new ArrayList<>();
@@ -244,7 +246,7 @@ public class Squad {
 
             BlockPos relative=current.relative(edgeDirection);//获取跨边缘的另一个方块的情况
 
-            if(cover.contains(relative)!=cover.contains(current))//如果只有一个被包含，即可以判定为边框的情况
+            if(cover.containsKey(relative)!=cover.containsKey(current))//如果只有一个被包含，即可以判定为边框的情况
             {
                 //则其为边内
 
@@ -305,7 +307,7 @@ public class Squad {
      * @param cover
      * @return
      */
-    public List<Edge> getEdges(List<BlockPos> cover)
+    public List<Edge> getEdges(Map<BlockPos,Quad> cover)
     {
         List<Edge> result=new ArrayList<>();
 
