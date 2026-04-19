@@ -29,6 +29,7 @@ public class WallUtil {
         actOnWall(pos,face,player,level,List.of(filter),isInMainHand);
     }
 
+    //TODO 需要使整体喷涂的墙面呈现同一方向
     public static void actOnWall(BlockPos pos, Direction face, Player player, Level level, List<IFilter> filters,boolean isInMainHand) {
         // 队列用于 BFS
         Queue<BlockPos> queue = new LinkedList<>();

@@ -28,11 +28,6 @@ public class SelectedZone {
     private List<Edge> cachedEdges=new ArrayList<>();
     private Map<BlockPos,Quad> cachedQuads=new HashMap<>();
 
-
-    //待移除
-    private BlockPos A;
-
-
     public SelectedZone(){
 
     }
@@ -66,9 +61,12 @@ public class SelectedZone {
         }
     }
 
+    //TODO 可能需要修改
     public void removeAPosition(BlockPos pos)
     {
-        if(contains.contains(pos)) contains.remove(pos);
+        if(contains.contains(pos)) {
+            contains.remove(pos);
+        }
     }
 
     public boolean isSelecting()
@@ -87,21 +85,6 @@ public class SelectedZone {
     public boolean isInSurface(BlockPos pos, Direction direction)
     {
         return direction==face&& contains.contains(pos);
-    }
-
-    public String isValid(BlockPos b)
-    {
-        if(this.face==null||this.A==null)
-        {
-            return ToolContent.EMPTY_POSA;
-        }
-        Direction.Axis axis=face.getAxis();
-        if(this.A.get(axis)==b.get(axis))//若为同层
-        {
-            return ToolContent.PASS;
-        }else {//不为同层
-            return ToolContent.NOT_IN_SURFACE;
-        }
     }
 
     public void update()
@@ -175,25 +158,6 @@ public class SelectedZone {
         return result;
     }
 
-    // 点积
-    private int dot(BlockPos p, Vec3i vec) {
-        return p.getX() * vec.getX() + p.getY() * vec.getY() + p.getZ() * vec.getZ();
-    }
-
-    // 根据法向量 n 返回第一个垂直基向量
-    private Vec3i getPerpendicularU(Vec3i n) {
-        if (n.getX() != 0) return new Vec3i(0, 1, 0);
-        if (n.getY() != 0) return new Vec3i(1, 0, 0);
-        return new Vec3i(1, 0, 0); // n.getZ() != 0
-    }
-
-    // 第二个垂直基向量（保证与 n 和 u 都垂直）
-    private Vec3i getPerpendicularV(Vec3i n) {
-        if (n.getX() != 0) return new Vec3i(0, 0, 1);
-        if (n.getY() != 0) return new Vec3i(0, 0, 1);
-        return new Vec3i(0, 1, 0); // n.getZ() != 0
-    }
-
     public boolean contains(BlockPos pos)
     {
         return contains.contains(pos);
@@ -201,7 +165,7 @@ public class SelectedZone {
 
     public void clear()
     {
-        A=null;
+//        A=null;
         face=null;
         contains.clear();
         squads.clear();

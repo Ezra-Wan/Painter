@@ -66,7 +66,7 @@ public abstract class AbstractRender<T,F extends Object> implements IRender<T> {
     @OnlyIn(Dist.CLIENT)
     protected void update(){
         PaintRender.redraw();
-    }
+    }//TODO 考虑尝试，实现新式的自动uv替换
 
     //========业务方法========
 
