@@ -2,6 +2,7 @@ package com.SouthernWall_404.Painter.API.Paint.API;
 
 import com.SouthernWall_404.LaplaceAPI.RegulappleEngine.Quad.Quad;
 import com.SouthernWall_404.Painter.API.Paint.ModModelRender;
+import com.SouthernWall_404.Painter.API.Paint.Util.PaintUtil;
 import com.SouthernWall_404.Painter.API.Paint.Util.RenderUtil;
 import com.SouthernWall_404.LaplaceAPI.RegulappleEngine.BakedQuadRender;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -182,24 +183,30 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>,Direc
             tick=0;
         }
 
+        Minecraft mc=Minecraft.getInstance();
+        Level level=mc.level;
         for(Map.Entry<Integer,List<BakedQuad>> entry:objects.entrySet())//遍历所有缓存的quad
         {
+
+
             List<BakedQuad> quads=entry.getValue();
             int flag=entry.getKey();
             double offset=0.001;
 
-            BlockState state=materials.get(flag);
-
-
+            BlockState material=materials.get(flag);
             Direction direction=getDirection(flag);
+
+
+            if(!RenderUtil.shouldRenderFace(level,blockPos,material,direction))continue;
+
             Vec3i normal=direction.getNormal();
 
 
             Vec3 vec3=new Vec3(blockPos.getX()+offset*normal.getX(),blockPos.getY()+offset*normal.getY(),blockPos.getZ()+offset*normal.getZ());
             for(BakedQuad quad:quads)
             {
-                if(aoFaces.containsKey(flag)) BakedQuadRender.renderInOfferredAO(quad,state,vec3,poseStack,RenderType.CUTOUT,bufferSource,aoFaces.get(flag));
-                else BakedQuadRender.renderInDefaultAO(quad,state,vec3,poseStack,RenderType.CUTOUT,bufferSource);
+                if(aoFaces.containsKey(flag)) BakedQuadRender.renderInOfferredAO(quad,material,vec3,poseStack,RenderType.CUTOUT,bufferSource,aoFaces.get(flag));
+                else BakedQuadRender.renderInDefaultAO(quad,material,vec3,poseStack,RenderType.CUTOUT,bufferSource);
             }
 
         }

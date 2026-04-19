@@ -96,8 +96,6 @@ public class BakedQuadRender {
         buffer.putBulkData(poseStack.last(),quad, aoFace.brightness, f,f1,f2,1f, aoFace.lightmap, 0,true);
 
         poseStack.popPose();
-
-        //TODO 记得加渲染剔除
     }
 
 
