@@ -21,6 +21,11 @@ public class Vector3f {
         this(vec3i.getX(), vec3i.getY(), vec3i.getZ());
     }
 
+    public Vector3f(Direction direction)
+    {
+        this(direction.getNormal());
+    }
+
     public Vector3f(Vec3 vec3) {
         this((float) vec3.x, (float) vec3.y, (float) vec3.z);
     }
@@ -173,24 +178,12 @@ public class Vector3f {
         return new Vector3f(x / len, y / len, z / len);
     }
 
-    public List<Vector3f> getOrthonormals() {
+    public List<Vector3f> getUV() {
         List<Vector3f> result = new ArrayList<>();
 
         Vector3f self = this.normalize();
 
-        Vector3f vOrthonormal;
-        if (self.y == 0) {
-            vOrthonormal = new Vector3f(-self.x, 1, -self.z);
-        } else  if (self.x==0&&self.z==0)
-        {
-            vOrthonormal = new Vector3f(1, 0, 0);
-        }else {
-            vOrthonormal = new Vector3f(
-                    -self.x,
-                    (self.x * self.x + self.z * self.z) / self.y,
-                    -self.z
-            );
-        }
+        Vector3f vOrthonormal=getV();
         vOrthonormal = vOrthonormal.normalize();
         result.add(vOrthonormal);
 
@@ -201,7 +194,7 @@ public class Vector3f {
     }
 
     public Vector3f getU() {
-        return getOrthonormals().get(1);
+        return getUV().get(1);
     }
 
     public Vector3f getV() {
@@ -209,7 +202,7 @@ public class Vector3f {
 
         Vector3f vOrthonormal;
         if (self.y == 0) {
-            vOrthonormal = new Vector3f(-self.x, 1, -self.z);
+            vOrthonormal = new Vector3f(self.z, 1, -self.x);
         }else  if (self.x==0&&self.z==0)
         {
             vOrthonormal = new Vector3f(1, 0, 0);
