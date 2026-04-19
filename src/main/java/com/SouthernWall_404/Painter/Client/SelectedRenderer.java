@@ -98,12 +98,9 @@ public class SelectedRenderer {
 
     public static void renderFace(Quad quad,Vec3 camPos,BlockPos pos, VertexConsumer buffer, PoseStack poseStack)
     {
-        poseStack.pushPose();
-        poseStack.translate(pos.getX()-camPos.x,pos.getY()-camPos.y,pos.getZ()-camPos.z);
-        Matrix4f matrix4f=poseStack.last().pose();
-        poseStack.popPose();
 
-        quad.render(matrix4f,buffer);
+
+        quad.render(pos,camPos,buffer,poseStack);
     }
 
     //TODO 他妈的忘做渲染移除了
