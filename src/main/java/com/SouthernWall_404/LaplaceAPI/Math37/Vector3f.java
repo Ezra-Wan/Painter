@@ -202,7 +202,7 @@ public class Vector3f {
 
         Vector3f vOrthonormal;
         if (self.y == 0) {
-            vOrthonormal = new Vector3f(self.z, 1, -self.x);
+            vOrthonormal = new Vector3f(0, 1, 0);
         }else  if (self.x==0&&self.z==0)
         {
             vOrthonormal = new Vector3f(1, 0, 0);
