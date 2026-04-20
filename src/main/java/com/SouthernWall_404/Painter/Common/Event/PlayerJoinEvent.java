@@ -26,11 +26,13 @@ public class PlayerJoinEvent {
         if(!level.isClientSide) {
             Sync.syncLevelAttachment(level,ModAttachments.PAINT_CHUNK_INFO.get(),player);
 
-            PaintChunkInfo paintChunkInfo=level.getData(ModAttachments.PAINT_CHUNK_INFO);
-            for(ChunkPos pos:paintChunkInfo.getPaintPoses())
-            {
-                PaintUtil.syncToClient(pos,player);
-            }
+//            PaintChunkInfo paintChunkInfo=level.getData(ModAttachments.PAINT_CHUNK_INFO);
+//
+//            Sync.syncLevelAttachment(level,ModAttachments.PAINT_CHUNK_INFO.get(),player);
+//            for(ChunkPos pos:paintChunkInfo.getPaintPoses())
+//            {
+//                PaintUtil.syncToClient(pos,player);
+//            }
         }
     }
 
@@ -70,6 +72,7 @@ public class PlayerJoinEvent {
 
         if (paintInfo.getRenders().isEmpty()) {
             // 需要向服务器请求
+            //TODO 使用新版网络
             ModChannels.sendToServer(new ClientRequestPack(1, pos));
         }
     }

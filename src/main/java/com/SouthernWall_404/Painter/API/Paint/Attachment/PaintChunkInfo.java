@@ -74,6 +74,16 @@ public class PaintChunkInfo implements ICompoundSerializer {
         return Collections.unmodifiableSet(paintPoses);
     }
 
+//    public Set<ChunkPos> getPaintPosesNearby(BlockPos pos) {
+//        ChunkPos playerPos=new ChunkPos(pos);
+//        Set<ChunkPos> chunkNearby=new HashSet<>();//TODO 按需发包
+//        paintPoses.forEach((chunkpos)->{
+//
+//
+//        });
+//        return Collections.unmodifiableSet(paintPoses);
+//    }
+
     public void setChanged() {
         isChanged = true;
     }

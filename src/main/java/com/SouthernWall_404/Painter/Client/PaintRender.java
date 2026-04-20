@@ -35,8 +35,9 @@ public class PaintRender {
 
     private static Map<BlockPos,AbstractRender<?,?>> renders=new HashMap<>();//总渲染内容缓存
     private static boolean isFirstRender=true;
+
     @SubscribeEvent
-    public static void onRenderLevelStage(RenderLevelStageEvent event) {
+    public static void onRenderLevelStage(RenderLevelStageEvent event) {//TODO添加原版面拦截
         if (event.getStage() != RenderLevelStageEvent.Stage.AFTER_TRANSLUCENT_BLOCKS) {
             return;
         }

@@ -169,6 +169,7 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>,Direc
         }
         ModModelRender.AmbientOcclusionFace aoFace=new ModModelRender.AmbientOcclusionFace();
     }
+    //TODO 应当可以只在临近方块发生变化时计算aoFace
     @Override
     public void render(BlockPos blockPos, PoseStack poseStack, int packedLight, int packedOverlay, float partialTick, VertexConsumer buffer) {
 
@@ -176,7 +177,7 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>,Direc
         {
             refreshAO(blockPos);
             tick=0;
-        }
+        }//TODO 考虑此类物品多以墙面为单位，其实可以考虑通用ao的可能性
 
         Minecraft mc=Minecraft.getInstance();
         Level level=mc.level;
@@ -201,7 +202,9 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>,Direc
             for(BakedQuad quad:quads)
             {
                 if(aoFaces.containsKey(flag)) BakedQuadRender.renderInOfferredAO(quad,material,vec3,poseStack,buffer,aoFaces.get(flag));
-                else BakedQuadRender.renderInDefaultAO(quad,material,vec3,poseStack,buffer);
+                else {
+                    BakedQuadRender.renderInDefaultAO(quad,material,vec3,poseStack,buffer);//TODO 这里会一直用默认AO，改一下
+                }
             }
 
         }

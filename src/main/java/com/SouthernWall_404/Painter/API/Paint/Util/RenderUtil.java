@@ -108,6 +108,7 @@ private static final ThreadLocal<Object2ByteLinkedOpenHashMap<Block.BlockStatePa
     @Deprecated
     public static boolean shouldRenderFace(BlockGetter level, BlockPos pos,BlockState state, Direction face ) {
 
+        //TODO 试试从Block.shouldRender重构
         if(Minecraft.getInstance()!=null)
         {
             Minecraft mc=Minecraft.getInstance();
