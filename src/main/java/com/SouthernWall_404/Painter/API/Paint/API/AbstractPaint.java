@@ -173,12 +173,12 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>,Direc
     @Override
     public void render(BlockPos blockPos, PoseStack poseStack, int packedLight, int packedOverlay, float partialTick, VertexConsumer buffer) {
 
-        if(tick>=200)//TODO 考虑加个配置项
-        {
-            refreshAO(blockPos);
-            tick=0;
-        }//TODO 考虑此类物品多以墙面为单位，其实可以考虑通用ao的可能性
-        tick++;
+//        if(tick>=200)//TODO 考虑加个配置项
+//        {
+//            refreshAO(blockPos);
+//            tick=0;
+//        }//TODO 考虑此类物品多以墙面为单位，其实可以考虑通用ao的可能性
+//        tick++;
 
         Minecraft mc=Minecraft.getInstance();
         Level level=mc.level;

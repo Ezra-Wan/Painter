@@ -1,6 +1,7 @@
 package com.SouthernWall_404.Painter.API.Paint.Attachment;
 
 import com.SouthernWall_404.LaplaceAPI.VertinCore.ICompoundSerializer;
+import com.SouthernWall_404.Painter.API.Paint.API.AbstractPaint;
 import com.SouthernWall_404.Painter.API.Paint.API.AbstractRender;
 import com.SouthernWall_404.Painter.API.Paint.PaintContent;
 import com.SouthernWall_404.Painter.API.Paint.Util.PaintUtil;
@@ -14,6 +15,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
@@ -24,6 +26,9 @@ import java.util.Map;
 
 public class PaintInfo implements ICompoundSerializer {
 
+    //========不需要持久化的数据========
+    private int tick=0;
+    //========需要持久化的数据=========
     private final Map<BlockPos, AbstractRender<?, ?>> renders = new HashMap<>();
 
     // 提供无参构造，供附件自动创建
@@ -50,6 +55,39 @@ public class PaintInfo implements ICompoundSerializer {
         {
             PaintRender.redraw();
         }
+    }
+
+    public void tick(ChunkPos pos) {
+        int minX = pos.getMinBlockX();   // pos.x * 16
+        int minZ = pos.getMinBlockZ();   // pos.z * 16
+        int maxX = pos.getMaxBlockX();   // minX + 15
+        int maxZ = pos.getMaxBlockZ();
+
+        //TODO 考虑修改分块配置项
+        int amount = 2;          // 4x4 分块
+        int step = 16 / amount;  // 每个分块边长 4
+
+        if (Minecraft.getInstance() != null) {
+            int sectionX = tick / amount;
+            int sectionZ = tick % amount;
+
+            int startX = minX + sectionX * step;
+            int startZ = minZ + sectionZ * step;
+            int endX = (sectionX == amount - 1) ? maxX : startX + step - 1;
+            int endZ = (sectionZ == amount - 1) ? maxZ : startZ + step - 1;
+
+            renders.forEach((blockPos, render) -> {
+                if (render instanceof AbstractPaint paint) {
+                    int x = blockPos.getX();
+                    int z = blockPos.getZ();
+                    if (x >= startX && x <= endX && z >= startZ && z <= endZ) {
+                        paint.refreshAO(blockPos);
+                    }
+                }
+            });
+        }
+
+        tick = (tick + 1) % (amount*amount);  // 0~15 循环
     }
 
     /**

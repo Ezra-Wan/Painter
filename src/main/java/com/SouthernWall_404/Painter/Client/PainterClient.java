@@ -1,10 +1,19 @@
 package com.SouthernWall_404.Painter.Client;
 
+import com.SouthernWall_404.Painter.API.Paint.Attachment.PaintChunkInfo;
+import com.SouthernWall_404.Painter.API.Paint.Attachment.PaintInfo;
+import com.SouthernWall_404.Painter.Common.Init.ModAttachments;
 import com.SouthernWall_404.Painter.Common.Init.ModBlockEntities;
 import com.SouthernWall_404.Painter.Painter;
+import net.minecraft.client.Minecraft;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.chunk.LevelChunk;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 
 // 确保只在客户端侧执行
@@ -17,4 +26,6 @@ public class PainterClient {
         // 第一个参数是你的 BlockEntityType，第二个参数是渲染器的提供者
 
     }
+
+
 }
