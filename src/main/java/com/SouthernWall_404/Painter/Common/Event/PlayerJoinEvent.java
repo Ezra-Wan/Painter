@@ -73,6 +73,7 @@ public class PlayerJoinEvent {
         if (paintInfo.getRenders().isEmpty()) {
             // 需要向服务器请求
             //TODO 使用新版网络
+            //TODO 优化区块加载卡顿
             ModChannels.sendToServer(new ClientRequestPack(1, pos));
         }
     }

@@ -30,6 +30,7 @@ public class WallUtil {
     }
 
     //TODO 需要使整体喷涂的墙面呈现同一方向
+    //TODO 优化油漆桶的算法和选区的算法
     public static void actOnWall(BlockPos pos, Direction face, Player player, Level level, List<IFilter> filters,boolean isInMainHand) {
         // 队列用于 BFS
         Queue<BlockPos> queue = new LinkedList<>();

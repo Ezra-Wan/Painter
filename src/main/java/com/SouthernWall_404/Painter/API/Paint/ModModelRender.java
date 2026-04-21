@@ -159,7 +159,6 @@ public class ModModelRender {
         }
 
     }
-    //TODO 也许我可以直接用原版的这个方法进行渲染？
     public void putQuadData(BlockAndTintGetter level, BlockState state, BlockPos pos, VertexConsumer consumer, PoseStack.Pose pose, BakedQuad quad, float brightness0, float brightness1, float brightness2, float brightness3, int lightmap0, int lightmap1, int lightmap2, int lightmap3, int packedOverlay) {
         float f;
         float f1;

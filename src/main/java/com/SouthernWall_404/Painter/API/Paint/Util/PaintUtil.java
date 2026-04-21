@@ -123,7 +123,7 @@ public class PaintUtil {
 
     }
 
-    //TODO 优化油漆桶的算法和选区的算法
+
     public static void paint(Level level, BlockPos blockPos, Player player, Direction direction) {
         ItemStack itemStack = player.getItemInHand(InteractionHand.OFF_HAND);//添加副手的方块
         if (itemStack.getItem() instanceof BlockItem blockItem) {
