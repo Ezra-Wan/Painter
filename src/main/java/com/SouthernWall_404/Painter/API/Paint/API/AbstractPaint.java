@@ -188,7 +188,7 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>,Direc
 
             List<BakedQuad> quads=entry.getValue();
             int flag=entry.getKey();
-            double offset=0.001;
+            double offset=0.01;//考虑添加配置项
 
             BlockState material=materials.get(flag);
             Direction direction=getDirection(flag);

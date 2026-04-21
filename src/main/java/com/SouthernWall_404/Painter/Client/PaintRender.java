@@ -37,7 +37,7 @@ public class PaintRender {
     private static boolean isFirstRender=true;
 
     @SubscribeEvent
-    public static void onRenderLevelStage(RenderLevelStageEvent event) {//TODO添加原版面拦截
+    public static void onRenderLevelStage(RenderLevelStageEvent event) {
         if (event.getStage() != RenderLevelStageEvent.Stage.AFTER_TRANSLUCENT_BLOCKS) {
             return;
         }
@@ -81,6 +81,4 @@ public class PaintRender {
         PaintChunkInfo chunkInfo=level.getData(ModAttachments.PAINT_CHUNK_INFO);
         renders=chunkInfo.getRenderNearby(player.getOnPos());
     }
-
-    //TODO 解决闪烁问题
 }
