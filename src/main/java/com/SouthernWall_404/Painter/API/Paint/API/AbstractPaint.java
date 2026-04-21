@@ -1,6 +1,7 @@
 package com.SouthernWall_404.Painter.API.Paint.API;
 
 import com.SouthernWall_404.Painter.API.Paint.ModModelRender;
+import com.SouthernWall_404.Painter.API.Paint.PaintContent;
 import com.SouthernWall_404.Painter.API.Paint.Util.RenderUtil;
 import com.SouthernWall_404.LaplaceAPI.RegulappleEngine.BakedQuadRender;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -186,9 +187,9 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>,Direc
 
             BlockState material=materials.get(flag);
             Direction direction=getDirection(flag);
+            BlockState origin=level.getBlockState(blockPos);
 
-
-            if(!RenderUtil.shouldRenderFace(level,blockPos,material,direction))continue;
+            if(!RenderUtil.shouldRenderFace(level,blockPos,origin,direction))continue;
 
             Vec3i normal=direction.getNormal();
 
@@ -206,6 +207,11 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>,Direc
 
         }
 
+    }
+
+    public Direction getSpecialDirectionForCheck(Direction direction)
+    {
+        return direction;
     }
 
 
