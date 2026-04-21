@@ -13,6 +13,7 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.SlabBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.neoforge.client.model.data.ModelData;
 
@@ -108,7 +109,13 @@ private static final ThreadLocal<Object2ByteLinkedOpenHashMap<Block.BlockStatePa
     @Deprecated
     public static boolean shouldRenderFace(BlockGetter level, BlockPos pos,BlockState state, Direction face ) {
 
+
+
         //TODO 试试从Block.shouldRender重构
+
+        BlockState origin=level.getBlockState(pos);
+
+        //远距剔除
         if(Minecraft.getInstance()!=null)
         {
             Minecraft mc=Minecraft.getInstance();
@@ -124,35 +131,39 @@ private static final ThreadLocal<Object2ByteLinkedOpenHashMap<Block.BlockStatePa
             }
 
         }
-
-        BlockPos neighborPos=pos.relative(face);//获取对应方向的位置
-        BlockState neighborState = level.getBlockState(neighborPos);//获取对应方向相邻方块
-
-
-        // 邻居是空气 → 必须渲染
-        if (neighborState.isAir()) {
-            return true;
-        }
-
-        // 获取当前方块的渲染类型（用于判断是否为透明类）
-        RenderType renderType = getRenderType(level,pos);
-        boolean isTransparent = renderType == RenderType.cutout() ||
-                renderType == RenderType.cutoutMipped() ||
-                renderType == RenderType.translucent();
-
-        // 如果邻居与当前方块类型相同，且当前方块为透明类 → 隐藏内部面
-        if (isTransparent && neighborState.getBlock() == state.getBlock()) {
-            return false;
-        }
-
-        // 如果邻居是不透明完整方块（使用原版 isSolid 近似判断）
-        // 注意：isSolid() 对于玻璃等返回 false，所以需要结合上一步
-        if (neighborState.isSolid()) {
-            return false;
-        }
-
-        // 默认渲染（包括邻居为半透明、流体等情况）
-        return true;
+        // 计算相邻方块位置
+        BlockPos neighborPos = pos.relative(face);
+        // 调用原版标准面渲染判定逻辑
+        boolean shouldRender=Block.shouldRenderFace(state, level, pos, face, neighborPos);
+        return shouldRender;
+//        BlockPos neighborPos=pos.relative(face);//获取对应方向的位置
+//        BlockState neighborState = level.getBlockState(neighborPos);//获取对应方向相邻方块
+//
+//
+//        // 邻居是空气 → 必须渲染
+//        if (neighborState.isAir()) {
+//            return true;
+//        }
+//
+//        // 获取当前方块的渲染类型（用于判断是否为透明类）
+//        RenderType renderType = getRenderType(level,pos);
+//        boolean isTransparent = renderType == RenderType.cutout() ||
+//                renderType == RenderType.cutoutMipped() ||
+//                renderType == RenderType.translucent();
+//
+//        // 如果邻居与当前方块类型相同，且当前方块为透明类 → 隐藏内部面
+//        if (isTransparent && neighborState.getBlock() == state.getBlock()) {
+//            return false;
+//        }
+//
+//        // 如果邻居是不透明完整方块（使用原版 isSolid 近似判断）
+//        // 注意：isSolid() 对于玻璃等返回 false，所以需要结合上一步
+//        if (neighborState.isSolid()) {
+//            return false;
+//        }
+//
+//        // 默认渲染（包括邻居为半透明、流体等情况）
+//        return true;
     }
 }
 
