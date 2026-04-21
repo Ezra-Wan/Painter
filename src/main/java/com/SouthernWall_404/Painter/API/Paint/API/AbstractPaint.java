@@ -1,7 +1,6 @@
 package com.SouthernWall_404.Painter.API.Paint.API;
 
-import com.SouthernWall_404.Painter.API.Paint.ModModelRender;
-import com.SouthernWall_404.Painter.API.Paint.PaintContent;
+import com.SouthernWall_404.LaplaceAPI.RegulappleEngine.ModelRender;
 import com.SouthernWall_404.Painter.API.Paint.Util.RenderUtil;
 import com.SouthernWall_404.LaplaceAPI.RegulappleEngine.BakedQuadRender;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -41,12 +40,12 @@ import java.util.Map;
 
 public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>,Direction>{
 
-    public static float[] shape = new float[ModModelRender.DIRECTIONS.length * 2];
+    public static float[] shape = new float[ModelRender.DIRECTIONS.length * 2];
 
     private static BitSet shapeFlags = new BitSet(3);
 
     private int tick=0;
-    private Map<Integer, ModModelRender.AmbientOcclusionFace> aoFaces=new HashMap<>();
+    private Map<Integer, ModelRender.AmbientOcclusionFace> aoFaces=new HashMap<>();
     //========构造方法=========
     public AbstractPaint(String type) {
         super(type);
@@ -163,12 +162,12 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>,Direc
             BlockState state=materials.get(flag);
             Direction direction=getDirection(flag);
 
-            ModModelRender.AmbientOcclusionFace aoFace=new ModModelRender.AmbientOcclusionFace();
+            ModelRender.AmbientOcclusionFace aoFace=new ModelRender.AmbientOcclusionFace();
             aoFace.calculate(level, state, blockPos.relative(direction), direction, shape, shapeFlags, true);
 
             aoFaces.put(flag,aoFace);
         }
-        ModModelRender.AmbientOcclusionFace aoFace=new ModModelRender.AmbientOcclusionFace();
+        ModelRender.AmbientOcclusionFace aoFace=new ModelRender.AmbientOcclusionFace();
     }
 
     @Override

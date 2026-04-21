@@ -2,12 +2,10 @@ package com.SouthernWall_404.Painter.API.Tool.Wall;
 
 import com.SouthernWall_404.LaplaceAPI.Math37.Vector3f;
 import com.SouthernWall_404.LaplaceAPI.RegulappleEngine.Quad.Quad;
-import com.SouthernWall_404.Painter.API.Paint.Util.CommonUtil;
+import com.SouthernWall_404.LaplaceAPI.UlrichLib.CommonUtil;
 import com.SouthernWall_404.Painter.API.Tool.ToolContent;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.phys.Vec3;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -1,31 +1,14 @@
 package com.SouthernWall_404.Painter.API.Paint.Imply;
 
 import com.SouthernWall_404.Painter.API.Paint.API.AbstractPaint;
-import com.SouthernWall_404.Painter.API.Paint.ModModelRender;
 import com.SouthernWall_404.Painter.API.Paint.PaintContent;
-import com.SouthernWall_404.Painter.API.Paint.Util.RenderUtil;
-import com.SouthernWall_404.Painter.Client.PaintRender;
-import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.VertexConsumer;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.color.block.BlockColors;
-import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.client.resources.model.BakedModel;
-import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.util.RandomSource;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.SlabBlock;
-import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.SlabType;
-import net.minecraft.world.phys.Vec3;
-import net.neoforged.neoforge.client.model.data.ModelData;
 import org.jetbrains.annotations.UnknownNullability;
 
 import java.util.*;
