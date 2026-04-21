@@ -32,7 +32,7 @@ public class SelectedZone {
     public Direction getFace() {
         return face;
     }
-    private final static float offset=0.011f;
+    private final static float offset=0.02f;
     public void addAPosition(BlockPos pos) {
         if(!quads.containsKey(pos)){
             float[][] positions= RenderHelper.getSimpleQuadVertex(face);
