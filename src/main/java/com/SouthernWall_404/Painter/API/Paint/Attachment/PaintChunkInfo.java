@@ -1,7 +1,7 @@
 package com.SouthernWall_404.Painter.API.Paint.Attachment;
 
+import com.SouthernWall_404.LaplaceAPI.VertinCore.IAttachment;
 import com.SouthernWall_404.LaplaceAPI.xNetwork.API.Sync;
-import com.SouthernWall_404.LaplaceAPI.VertinCore.ICompoundSerializer;
 import com.SouthernWall_404.Painter.API.Paint.API.AbstractRender;
 import com.SouthernWall_404.Painter.Common.Init.ModAttachments;
 import net.minecraft.client.Minecraft;
@@ -15,7 +15,7 @@ import org.jetbrains.annotations.UnknownNullability;
 
 import java.util.*;
 
-public class PaintChunkInfo implements ICompoundSerializer {
+public class PaintChunkInfo implements IAttachment {
 
     //========需要持久化的数据========
     private Set<ChunkPos> paintPoses=new HashSet<>();//记录存有Paint的LevelChunk

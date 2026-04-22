@@ -1,6 +1,7 @@
 package com.SouthernWall_404.Painter.API.Paint.Attachment;
 
-import com.SouthernWall_404.LaplaceAPI.VertinCore.ICompoundSerializer;
+
+import com.SouthernWall_404.LaplaceAPI.VertinCore.IAttachment;
 import com.SouthernWall_404.Painter.API.Paint.API.AbstractPaint;
 import com.SouthernWall_404.Painter.API.Paint.API.AbstractRender;
 import com.SouthernWall_404.Painter.API.Paint.PaintContent;
@@ -24,7 +25,7 @@ import org.jetbrains.annotations.UnknownNullability;
 import java.util.HashMap;
 import java.util.Map;
 
-public class PaintInfo implements ICompoundSerializer {
+public class PaintInfo implements IAttachment {
 
     //========不需要持久化的数据========
     private int tick=0;
