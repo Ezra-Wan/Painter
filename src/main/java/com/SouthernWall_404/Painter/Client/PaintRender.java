@@ -5,6 +5,7 @@ import com.SouthernWall_404.Painter.API.Paint.API.AbstractRender;
 import com.SouthernWall_404.Painter.API.Paint.Attachment.PaintChunkInfo;
 import com.SouthernWall_404.Painter.Common.Init.ModAttachments;
 import com.SouthernWall_404.Painter.Painter;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
@@ -44,7 +45,7 @@ public class PaintRender {
             return; // 视锥体不可用时不渲染
         }
 
-
+        VertexConsumer buffer=bufferSource.getBuffer(RenderType.cutout());
         for(Map.Entry<BlockPos,AbstractRender<?,?>> entry:renders.entrySet())
         {
             BlockPos pos=entry.getKey();
@@ -57,7 +58,7 @@ public class PaintRender {
                 continue; // 不可见，跳过渲染
             }
 
-            render.render(pos,event.getPoseStack(), 0,0,event.getRenderTick(),bufferSource.getBuffer(RenderType.cutout()));
+            render.render(pos,event.getPoseStack(), 0,0,event.getRenderTick(),buffer);
         }
 
         bufferSource.endBatch(RenderType.cutout());
