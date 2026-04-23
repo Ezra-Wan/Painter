@@ -16,7 +16,9 @@ import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.SlabBlock;
+import net.minecraft.world.level.block.TrapDoorBlock;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.SlabType;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.phys.BlockHitResult;
@@ -96,6 +98,27 @@ public final class PaintOperationHelper {
 
         chunk.setUnsaved(true);
     }
+
+
+
+    public static BlockState cycleInDirection(BlockState material){
+        if (material.hasProperty(TrapDoorBlock.HALF) && material.getOptionalValue(TrapDoorBlock.OPEN).orElse(false))
+            return material.cycle(TrapDoorBlock.HALF);
+        else if (material.hasProperty(BlockStateProperties.FACING))
+            return  material.cycle(BlockStateProperties.FACING);
+        else if (material.hasProperty(BlockStateProperties.HORIZONTAL_FACING))
+            return  material.setValue(BlockStateProperties.HORIZONTAL_FACING,
+                    material.getValue(BlockStateProperties.HORIZONTAL_FACING).getClockWise());
+        else if (material.hasProperty(BlockStateProperties.AXIS))
+            return material.cycle(BlockStateProperties.AXIS);
+        else if (material.hasProperty(BlockStateProperties.HORIZONTAL_AXIS))
+            return  material.cycle(BlockStateProperties.HORIZONTAL_AXIS);
+        else if (material.hasProperty(BlockStateProperties.LIT))
+            return  material.cycle(BlockStateProperties.LIT);
+        else
+            return material;
+    }
+
     public static void cycleTextureUV(AbstractPaint paint, Direction direction) {
         if(paint instanceof SlabBlockPaint slabBlock)//若为SlabBlockPaint
         {
