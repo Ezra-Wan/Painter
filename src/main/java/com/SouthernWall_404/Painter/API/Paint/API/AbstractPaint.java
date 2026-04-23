@@ -159,7 +159,6 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>, Dire
             BlockState material = materials.get(flag);
             Direction direction = getDirection(flag);
 
-//            if (!RenderUtil.shouldRenderFace(level, blockPos, origin, direction)) continue;//TODO 这一部分尝试缓存
 
             if (!visibles.getOrDefault(flag,false))continue;
 
