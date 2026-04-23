@@ -31,6 +31,13 @@ public final class PaintAttachmentHelper {
         return info == null ? null : info.getPaints().get(pos);
     }
 
+    public static AbstractPaint getPaint(Level level,BlockPos pos)
+    {
+        AbstractRender render=getRender(level,pos);
+        if(render instanceof AbstractPaint paint)return paint;
+        return null;
+    }
+
     public static void putRender(Level level, BlockPos pos, AbstractPaint paint) {
         PaintInfo info = getPaintInfo(level, pos);
         if (info != null) {
