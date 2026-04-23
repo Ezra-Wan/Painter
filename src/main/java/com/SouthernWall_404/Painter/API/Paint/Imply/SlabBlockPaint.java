@@ -107,6 +107,8 @@ public class SlabBlockPaint extends AbstractPaint {
     }
     //TODO 需要处理无方向面的渲染bug
 
+    //TODO 似乎有UV方面的bug
+
     @Override
     public Direction getSpecialDirectionForCheck(Direction direction) {
         if(direction==Direction.UP&&slabType==SlabType.BOTTOM) return null;

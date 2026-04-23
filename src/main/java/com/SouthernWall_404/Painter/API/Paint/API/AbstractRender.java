@@ -28,8 +28,6 @@ public abstract class AbstractRender<T,F extends Object> implements IRender<T> {
 
     protected Map<Integer, BlockState> materials = new HashMap<>();
 
-    protected Map<Block,F> placeRecord=new HashMap<>();//每类material的默认放置方向
-
 
     //========构造方法========
 
@@ -79,9 +77,6 @@ public abstract class AbstractRender<T,F extends Object> implements IRender<T> {
         if(hasBlockFlag!=-1)
         {
             blockState= materials.get(hasBlockFlag);
-        }
-        else {
-            placeRecord.put(blockState.getBlock(),f);//存储此类方块的初始放置方向
         }
         setMaterial(f,blockState);
 
@@ -180,19 +175,6 @@ public abstract class AbstractRender<T,F extends Object> implements IRender<T> {
             materialsList.add(entryTag);
         }
         tag.put("materials", materialsList);
-
-        // 序列化 placeRecord (Map<Block, F>)
-        ListTag placeList = new ListTag();
-        for (Map.Entry<Block, F> entry : placeRecord.entrySet()) {
-            CompoundTag entryTag = new CompoundTag();
-            ResourceLocation blockKey = BuiltInRegistries.BLOCK.getKey(entry.getKey());
-            entryTag.putString("block", blockKey.toString());
-            // 通过子类方法序列化 F
-            serializeF(entry.getValue(), entryTag, "f");
-            placeList.add(entryTag);
-        }
-        tag.put("placeRecord", placeList);
-
         return tag;
     }
 
@@ -215,17 +197,6 @@ public abstract class AbstractRender<T,F extends Object> implements IRender<T> {
             DataResult<BlockState> stateResult = BlockState.CODEC.parse(provider.createSerializationContext(NbtOps.INSTANCE), stateTag);
             BlockState state = stateResult.getOrThrow();
             materials.put(flag, state);
-        }
-
-        // 反序列化 placeRecord
-        this.placeRecord.clear();
-        ListTag placeList = tag.getList("placeRecord", Tag.TAG_COMPOUND);
-        for (int i = 0; i < placeList.size(); i++) {
-            CompoundTag entryTag = placeList.getCompound(i);
-            ResourceLocation blockKey = ResourceLocation.parse(entryTag.getString("block"));
-            Block block = BuiltInRegistries.BLOCK.get(blockKey);
-            F f = deserializeF(entryTag, "f");
-            placeRecord.put(block, f);
         }
 
         // 重建 flags (由子类 initFlags 定义)

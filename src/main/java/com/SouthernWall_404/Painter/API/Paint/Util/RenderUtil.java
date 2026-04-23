@@ -25,9 +25,6 @@ import java.util.List;
 
 @OnlyIn(Dist.CLIENT)
 public class RenderUtil {
-
-
-
     /**
      * 获取方块状态对应的渲染类型
      * @param state 方块状态
