@@ -1,10 +1,10 @@
 package com.SouthernWall_404.Painter.Common.World.Item;
 
+import com.SouthernWall_404.Painter.API.Paint.Util.Paint.PaintUtil;
 import com.SouthernWall_404.Painter.API.Tool.SelectedZone;
 import com.SouthernWall_404.Painter.API.Tool.Wall.Filters.EmptyFilter;
 import com.SouthernWall_404.Painter.API.Tool.Wall.Filters.SelectFilter;
 import com.SouthernWall_404.Painter.API.Tool.Wall.IFilter;
-import com.SouthernWall_404.Painter.API.Tool.Wall.WallUtil;
 import com.SouthernWall_404.Painter.Common.Content.ComponentContent;
 import com.SouthernWall_404.Painter.Common.Init.ModAttachments;
 import net.minecraft.ChatFormatting;
@@ -49,7 +49,7 @@ public class PaintBucketItem extends BlockInteractItem {
             if (selectedZone.isSelecting()) {
                 filters.add(new SelectFilter());
             }
-            WallUtil.actOnWall(blockPos, event.getFace(), player, level, filters,isInMainHand);
+            PaintUtil.dealBucketClick(blockPos, event.getFace(), player, level, filters,isInMainHand);
         }
 
         event.setCanceled(true);

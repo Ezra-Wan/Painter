@@ -70,7 +70,6 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>, Dire
         super.update();
     }
 
-    //TODO 没存储旋转
     public void cycleTextureUV(Direction direction) {
         // 预留
     }
