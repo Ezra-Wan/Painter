@@ -21,6 +21,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.UnknownNullability;
 
+import javax.annotation.Nullable;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -29,27 +30,40 @@ public class PaintInfo implements IAttachment {
     //========不需要持久化的数据========
     private int tick=0;
     //========需要持久化的数据=========
-    private final Map<BlockPos, AbstractRender<?, ?>> renders = new HashMap<>();
+    private final Map<BlockPos, AbstractPaint> paints = new HashMap<>();
 
     // 提供无参构造，供附件自动创建
     public PaintInfo() {}
 
-    public Map<BlockPos, AbstractRender<?, ?>> getRenders() {
-        return renders;
+    /**
+     * 获取原始 AbstractPaint 映射（类型安全）
+     */
+    public Map<BlockPos, AbstractPaint> getPaints() {
+        return paints;
     }
 
-    public void putRender(Level level,BlockPos pos, AbstractRender<?, ?> render) {
-        renders.put(pos, render);
+    /**
+     * 获取 AbstractRender 视图（兼容旧代码）
+     */
+    public Map<BlockPos, AbstractRender<?, ?>> getRenders() {
+        // 复制一份，避免外部修改原 Map，同时满足泛型要求
+        Map<BlockPos, AbstractRender<?, ?>> copy = new HashMap<>();
+        for (Map.Entry<BlockPos, AbstractPaint> entry : paints.entrySet()) {
+            copy.put(entry.getKey(), entry.getValue());
+        }
+        return copy;
+    }
+
+    public void putPaints(Level level, BlockPos pos, AbstractPaint paint) {
+        paints.put(pos, paint);
         PaintChunkInfo chunkInfo=level.getData(ModAttachments.PAINT_CHUNK_INFO);
         chunkInfo.addChunk(level.getChunkAt(pos).getPos());
-
-
 
     }
 
     public void removeRender(BlockPos pos) {
 
-        renders.remove(pos);
+        paints.remove(pos);
 
         if(Minecraft.getInstance()!=null)
         {
@@ -76,7 +90,7 @@ public class PaintInfo implements IAttachment {
             int endX = (sectionX == amount - 1) ? maxX : startX + step - 1;
             int endZ = (sectionZ == amount - 1) ? maxZ : startZ + step - 1;
 
-            renders.forEach((blockPos, render) -> {
+            paints.forEach((blockPos, render) -> {
                 if (render instanceof AbstractPaint paint) {
                     int x = blockPos.getX();
                     int z = blockPos.getZ();
@@ -106,33 +120,31 @@ public class PaintInfo implements IAttachment {
 
 
     @Override
-    public @UnknownNullability CompoundTag serializeNBT(HolderLookup.Provider provider) {
+    public CompoundTag serializeNBT(HolderLookup.Provider provider) {
         CompoundTag result = new CompoundTag();
         ListTag rendersList = new ListTag();
 
-        for (Map.Entry<BlockPos, AbstractRender<?, ?>> entry : renders.entrySet()) {
+        for (Map.Entry<BlockPos, AbstractPaint> entry : paints.entrySet()) {
             CompoundTag entryTag = new CompoundTag();
             BlockPos pos = entry.getKey();
-            // 手动序列化 BlockPos
             CompoundTag posTag = new CompoundTag();
             posTag.putInt("x", pos.getX());
             posTag.putInt("y", pos.getY());
             posTag.putInt("z", pos.getZ());
             entryTag.put("pos", posTag);
 
-            AbstractRender<?, ?> render = entry.getValue();
-            entryTag.putString("type", render.getType());
-            entryTag.put("data", render.serializeNBT(provider));
+            AbstractPaint paint = entry.getValue();
+            entryTag.putString("type", paint.getType());
+            entryTag.put("data", paint.serializeNBT(provider));
             rendersList.add(entryTag);
         }
         result.put("renders", rendersList);
-
         return result;
     }
 
     @Override
     public void deserializeNBT(HolderLookup.Provider provider, CompoundTag tag) {
-        renders.clear();
+        paints.clear();
         ListTag rendersList = tag.getList("renders", Tag.TAG_COMPOUND);
 
         for (int i = 0; i < rendersList.size(); i++) {
@@ -142,26 +154,26 @@ public class PaintInfo implements IAttachment {
             String type = entryTag.getString("type");
             CompoundTag data = entryTag.getCompound("data");
 
-            AbstractRender<?, ?> render = createRenderByType(type, provider, data);
-            if (render != null) {
-                renders.put(pos, render);
+            AbstractPaint paint = createPaintByType(type, provider, data);
+            if (paint != null) {
+                paints.put(pos, paint);
             }
         }
     }
 
-
     /**
-     * 使用 PaintContent 工厂创建渲染器实例
+     * 根据类型创建 AbstractPaint 实例，并反序列化数据
      */
-    private AbstractRender<?, ?> createRenderByType(String type, HolderLookup.Provider provider, CompoundTag data) {
-        // 直接通过无参构造创建实例（需要子类提供无参构造）
-        BlockState blockState= Blocks.AIR.defaultBlockState();
-        AbstractRender<?, ?> render = PaintContent.getRender(type).apply(blockState);
-
-        if (render == null) {
+    @Nullable
+    private AbstractPaint createPaintByType(String type, HolderLookup.Provider provider, CompoundTag data) {
+        // 通过工厂创建实例（假设工厂能返回 AbstractPaint 子类）
+        BlockState dummyState = Blocks.AIR.defaultBlockState();
+        AbstractRender<?, ?> render = PaintContent.getRender(type).apply(dummyState);
+        if (!(render instanceof AbstractPaint paint)) {
+            // 类型不匹配，记录错误并返回 null
             return null;
         }
-        render.deserializeNBT(provider, data);
-        return render;
+        paint.deserializeNBT(provider, data);
+        return paint;
     }
 }

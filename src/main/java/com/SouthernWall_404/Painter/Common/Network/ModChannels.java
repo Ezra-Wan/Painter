@@ -30,11 +30,11 @@ public class ModChannels {
                 ClientRequestPack::handle
         );
 
-        registrar.commonToServer(
-                PaintSyncC2SPacket.TYPE,
-                PaintSyncC2SPacket.STREAM_CODEC,
-                PaintSyncC2SPacket::handle
-        );
+//        registrar.commonToServer(
+//                PaintSyncC2SPacket.TYPE,
+//                PaintSyncC2SPacket.STREAM_CODEC,
+//                PaintSyncC2SPacket::handle
+//        );
         // ========== S2C 包 ==========
 
         registrar.playToClient(

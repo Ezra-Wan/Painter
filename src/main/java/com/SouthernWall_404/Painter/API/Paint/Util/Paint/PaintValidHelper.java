@@ -1,5 +1,6 @@
 package com.SouthernWall_404.Painter.API.Paint.Util.Paint;
 
+import com.SouthernWall_404.Painter.API.Paint.API.AbstractPaint;
 import com.SouthernWall_404.Painter.API.Paint.API.AbstractRender;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.Level;
@@ -13,13 +14,13 @@ public class PaintValidHelper {
     public static boolean hasPaint(Level level,BlockPos blockPos)
     {
 
-        if(PaintAttachmentHelper.getPaintInfo(level,blockPos).getRenders().containsKey(blockPos))return true;
+        if(PaintAttachmentHelper.getPaintInfo(level,blockPos).getPaints().containsKey(blockPos))return true;
 
         return false;
 
     }
 
-    public static boolean hasPaint(Map<BlockPos, AbstractRender<?,?>> renders, BlockPos blockPos)
+    public static boolean hasPaint(Map<BlockPos, AbstractPaint> renders, BlockPos blockPos)
     {
 
         if(renders.containsKey(blockPos))return true;

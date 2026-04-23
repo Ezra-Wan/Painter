@@ -61,7 +61,7 @@ public class PaintChunkInfo implements IAttachment {
                 if(chunk!=null)
                 {
                     PaintInfo paintInfo=chunk.getData(ModAttachments.PAINT_INFO);
-                    result.putAll(paintInfo.getRenders());
+                    result.putAll(paintInfo.getPaints());
                 }
             }
         }

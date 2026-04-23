@@ -1,3 +1,4 @@
+// AbstractPaint.java
 package com.SouthernWall_404.Painter.API.Paint.API;
 
 import com.SouthernWall_404.LaplaceAPI.RegulappleEngine.ModelRender;
@@ -5,6 +6,7 @@ import com.SouthernWall_404.Painter.API.Paint.Util.RenderUtil;
 import com.SouthernWall_404.LaplaceAPI.RegulappleEngine.BakedQuadRender;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
+import com.mojang.serialization.DataResult;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.model.BakedQuad;
@@ -13,7 +15,11 @@ import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Vec3i;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.NbtOps;
+import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.inventory.InventoryMenu;
@@ -32,64 +38,58 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-
 /**
  * Quad Vertice顺序 留档备用
  * 顺序：左上，左下，右下，右上
  */
+public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>, Direction> {
 
-public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>,Direction>{
-
+    //========不需要持久化的数据========
     public static float[] shape = new float[ModelRender.DIRECTIONS.length * 2];
-
     private static BitSet shapeFlags = new BitSet(3);
+    private int tick = 0;
+    private Map<Integer, ModelRender.AmbientOcclusionFace> aoFaces = new HashMap<>();
 
-    private int tick=0;
-    private Map<Integer, ModelRender.AmbientOcclusionFace> aoFaces=new HashMap<>();
-    //========构造方法=========
+    //========需要持久化的数据========
+    protected Map<Integer, BlockState> materials = new HashMap<>();
+
+    //========构造方法========
     public AbstractPaint(String type) {
         super(type);
+        update();
     }
 
     //========内部方法========
     @OnlyIn(Dist.CLIENT)
     @Override
     protected void update() {
-
-        if(Minecraft.getInstance()==null)
-        {
+        if (Minecraft.getInstance() == null) {
             return;
         }
-
         createQuads();
-
         super.update();
     }
-    public void cycleTextureUV(Direction direction)
-    {
 
+    //TODO 没存储旋转
+    public void cycleTextureUV(Direction direction) {
+        // 预留
     }
 
-    public void cycleTextureDir(Direction direction)
-    {
-        BlockState material=getMaterial(direction);
-
-        if (material.hasProperty(TrapDoorBlock.HALF) && material.getOptionalValue(TrapDoorBlock.OPEN)
-                .orElse(false))
-            setMaterial(direction,material.cycle(TrapDoorBlock.HALF));
+    public void cycleTextureDir(Direction direction) {
+        BlockState material = getMaterial(direction);
+        if (material.hasProperty(TrapDoorBlock.HALF) && material.getOptionalValue(TrapDoorBlock.OPEN).orElse(false))
+            setMaterial(direction, material.cycle(TrapDoorBlock.HALF));
         else if (material.hasProperty(BlockStateProperties.FACING))
-            setMaterial(direction,material.cycle(BlockStateProperties.FACING));
+            setMaterial(direction, material.cycle(BlockStateProperties.FACING));
         else if (material.hasProperty(BlockStateProperties.HORIZONTAL_FACING))
-            setMaterial(direction,material.setValue(BlockStateProperties.HORIZONTAL_FACING,
-                    material.getValue(BlockStateProperties.HORIZONTAL_FACING)
-                            .getClockWise()));
+            setMaterial(direction, material.setValue(BlockStateProperties.HORIZONTAL_FACING,
+                    material.getValue(BlockStateProperties.HORIZONTAL_FACING).getClockWise()));
         else if (material.hasProperty(BlockStateProperties.AXIS))
-            setMaterial(direction,material.cycle(BlockStateProperties.AXIS));
+            setMaterial(direction, material.cycle(BlockStateProperties.AXIS));
         else if (material.hasProperty(BlockStateProperties.HORIZONTAL_AXIS))
-            setMaterial(direction,material.cycle(BlockStateProperties.HORIZONTAL_AXIS));
+            setMaterial(direction, material.cycle(BlockStateProperties.HORIZONTAL_AXIS));
         else if (material.hasProperty(BlockStateProperties.LIT))
-            setMaterial(direction,material.cycle(BlockStateProperties.LIT));
-
+            setMaterial(direction, material.cycle(BlockStateProperties.LIT));
         super.update();
     }
 
@@ -100,130 +100,109 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>,Direc
         return model.getQuads(state, direction, random, ModelData.EMPTY, renderType);
     }
 
-    /**
-     * 
-     * @param flag
-     * @return
-     */
-    public Direction getDirection(int flag)
-    {
-        for(Map.Entry<Direction,Integer> entry:flags.entrySet())
-        {
-            int current=entry.getValue();
-            if(current==flag)
-            {
+    public Direction getDirection(int flag) {
+        for (Map.Entry<Direction, Integer> entry : flags.entrySet()) {
+            if (entry.getValue() == flag) {
                 return entry.getKey();
             }
-
-
         }
         return Direction.NORTH;
     }
 
-    public List<BakedQuad> getQuadsForDirection(Block block, Direction direction) {
-        // 1. 获取 Block 的默认状态 (如果你需要特定状态，可以传入相应的 BlockState)
-        BlockState state = block.defaultBlockState();
-
-        // 2. 获取 ModelManager 并得到这个 BlockState 对应的 BakedModel
-        //    注意：这段代码必须在客户端执行，因为 ModelManager 只在客户端存在。
-        BakedModel model =
-                Minecraft.getInstance().getModelManager().getBlockModelShaper().getBlockModel(state);
-        // 3. 创建一个 RandomSource 实例，用于需要随机化的模型（如有些方块的多重变体）
-        //    通常情况下，如果你不需要随机化，可以使用 RandomSource.create(0) 或类似方法。
-        RandomSource random = RandomSource.create();
-
-        // 4. 调用 getQuads 方法，传入我们想要的方向
-        //    这样就能拿到该方向上的所有 Quad
-        RenderType renderType = RenderUtil.getRenderType(state);
-        List<BakedQuad> quadsForDirection = model.getQuads(state, direction, random, ModelData.EMPTY,renderType);
-
-        return quadsForDirection;
-    }
-
-
-
-    @Override
-    protected void serializeF(Direction direction, CompoundTag tag, String key) {
-        tag.putString(key, direction.getName());
-    }
-
-    @Override
-    protected Direction deserializeF(CompoundTag tag, String key) {
-        return Direction.byName(tag.getString(key));
-    }
-
     public abstract void createQuads();
 
-    public void refreshAO(BlockPos blockPos)
-    {
-        Level level=Minecraft.getInstance().level;
-        for(Map.Entry<Integer, BlockState> entry:materials.entrySet()){
-            int flag=entry.getKey();
-            BlockState state=materials.get(flag);
-            Direction direction=getDirection(flag);
-
-            ModelRender.AmbientOcclusionFace aoFace=new ModelRender.AmbientOcclusionFace();
+    public void refreshAO(BlockPos blockPos) {
+        Level level = Minecraft.getInstance().level;
+        for (Map.Entry<Integer, BlockState> entry : materials.entrySet()) {
+            int flag = entry.getKey();
+            BlockState state = materials.get(flag);
+            Direction direction = getDirection(flag);
+            ModelRender.AmbientOcclusionFace aoFace = new ModelRender.AmbientOcclusionFace();
             aoFace.calculate(level, state, blockPos.relative(direction), direction, shape, shapeFlags, true);
-
-            aoFaces.put(flag,aoFace);
+            aoFaces.put(flag, aoFace);
         }
-        ModelRender.AmbientOcclusionFace aoFace=new ModelRender.AmbientOcclusionFace();
     }
 
     @Override
     public void render(BlockPos blockPos, PoseStack poseStack, int packedLight, int packedOverlay, float partialTick, VertexConsumer buffer) {
-
-
-        Minecraft mc=Minecraft.getInstance();
-        Level level=mc.level;
-        for(Map.Entry<Integer,List<BakedQuad>> entry:objects.entrySet())//遍历所有缓存的quad
-        {
-
-
-            List<BakedQuad> quads=entry.getValue();
-            int flag=entry.getKey();
-            double offset=0.01;//考虑添加配置项
-
-            BlockState material=materials.get(flag);
-            Direction direction=getDirection(flag);
-            BlockState origin=level.getBlockState(blockPos);
-
-            if(!RenderUtil.shouldRenderFace(level,blockPos,origin,direction))continue;
-
-            Vec3i normal=direction.getNormal();
-
-
-            Vec3 vec3=new Vec3(blockPos.getX()+offset*normal.getX(),blockPos.getY()+offset*normal.getY(),blockPos.getZ()+offset*normal.getZ());
-            for(BakedQuad quad:quads)
-            {
-                if(aoFaces.containsKey(flag)) BakedQuadRender.renderInOfferredAO(quad,material,vec3,poseStack,buffer,aoFaces.get(flag));
-                else {
+        Minecraft mc = Minecraft.getInstance();
+        Level level = mc.level;
+        for (Map.Entry<Integer, List<BakedQuad>> entry : objects.entrySet()) {
+            List<BakedQuad> quads = entry.getValue();
+            int flag = entry.getKey();
+            double offset = 0.01; // 考虑添加配置项
+            BlockState material = materials.get(flag);
+            Direction direction = getDirection(flag);
+            BlockState origin = level.getBlockState(blockPos);
+            if (!RenderUtil.shouldRenderFace(level, blockPos, origin, direction)) continue;
+            Vec3i normal = direction.getNormal();
+            Vec3 vec3 = new Vec3(blockPos.getX() + offset * normal.getX(),
+                    blockPos.getY() + offset * normal.getY(),
+                    blockPos.getZ() + offset * normal.getZ());
+            for (BakedQuad quad : quads) {
+                if (aoFaces.containsKey(flag)) {
+                    BakedQuadRender.renderInOfferredAO(quad, material, vec3, poseStack, buffer, aoFaces.get(flag));
+                } else {
                     refreshAO(blockPos);
-                    if(aoFaces.containsKey(flag)) BakedQuadRender.renderInOfferredAO(quad,material,vec3,poseStack,buffer,aoFaces.get(flag));
-
+                    if (aoFaces.containsKey(flag))
+                        BakedQuadRender.renderInOfferredAO(quad, material, vec3, poseStack, buffer, aoFaces.get(flag));
                 }
             }
-
         }
-
     }
 
-    public Direction getSpecialDirectionForCheck(Direction direction)
-    {
-        return direction;
+    public void setMaterial(Direction f, BlockState blockState) {
+        int flag = getFlag(f);
+        materials.put(flag, blockState);
+        update();
     }
 
-
-    //========业务方法========
-
-
-    public static TextureAtlasSprite getTexture(ResourceLocation key)
-    {
-        return  Minecraft.getInstance()
-                .getTextureAtlas(InventoryMenu.BLOCK_ATLAS)
-                .apply(key);
+    public BlockState getMaterial(Direction f) {
+        int flag = getFlag(f);
+        return materials.getOrDefault(flag, net.minecraft.world.level.block.Blocks.AIR.defaultBlockState());
     }
 
+    private int hasBlockInPaint(BlockState toCheck) {
+        for (Map.Entry<Integer, BlockState> entry : materials.entrySet()) {
+            BlockState blockState = entry.getValue();
+            if (blockState != null && blockState.getBlock() == toCheck.getBlock()) {
+                return entry.getKey();
+            }
+        }
+        return -1;
+    }
+    //========覆盖序列化方法，处理 materials========
+    @Override
+    public CompoundTag serializeNBT(HolderLookup.Provider provider) {
+        CompoundTag tag = super.serializeNBT(provider);
+        // 序列化 materials
+        ListTag materialsList = new ListTag();
+        for (Map.Entry<Integer, BlockState> entry : materials.entrySet()) {
+            CompoundTag entryTag = new CompoundTag();
+            entryTag.putInt("flag", entry.getKey());
+            DataResult<Tag> stateResult = BlockState.CODEC.encode(entry.getValue(),
+                    provider.createSerializationContext(NbtOps.INSTANCE), new CompoundTag());
+            entryTag.put("state", stateResult.getOrThrow());
+            materialsList.add(entryTag);
+        }
+        tag.put("materials", materialsList);
+        return tag;
+    }
 
-
+    @Override
+    public void deserializeNBT(HolderLookup.Provider provider, CompoundTag tag) {
+        super.deserializeNBT(provider, tag);
+        this.materials.clear();
+        ListTag materialsList = tag.getList("materials", Tag.TAG_COMPOUND);
+        for (int i = 0; i < materialsList.size(); i++) {
+            CompoundTag entryTag = materialsList.getCompound(i);
+            int flag = entryTag.getInt("flag");
+            Tag stateTag = entryTag.get("state");
+            DataResult<BlockState> stateResult = BlockState.CODEC.parse(
+                    provider.createSerializationContext(NbtOps.INSTANCE), stateTag);
+            BlockState state = stateResult.getOrThrow();
+            materials.put(flag, state);
+        }
+        update();
+    }
 }

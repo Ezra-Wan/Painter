@@ -72,7 +72,7 @@ public class PlayerJoinEvent {
 
         PaintInfo paintInfo = chunk.getData(ModAttachments.PAINT_INFO);
 
-        if (paintInfo.getRenders().isEmpty()) {
+        if (paintInfo.getPaints().isEmpty()) {
             // 需要向服务器请求
             //TODO 使用新版网络
             //TODO 优化区块加载卡顿

@@ -10,6 +10,7 @@ import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.chunk.LevelChunk;
 
 import java.util.Map;
 
@@ -19,12 +20,14 @@ public class PaintUtil {
 
     public static void dealBrushClick(Level level, BlockPos blockPos, Player player, Direction direction, boolean isInMainHand) {
 
-        Map<BlockPos,AbstractRender<?,?>> renders=PaintAttachmentHelper.getPaintInfo(level,blockPos).getRenders();//获取本区块render
+
+        LevelChunk chunk=level.getChunkAt(blockPos);
+        Map<BlockPos,AbstractPaint> paints=PaintAttachmentHelper.getPaintInfo(chunk).getPaints();//获取本区块render
 
 
-        AbstractRender render=renders.get(blockPos);
+        AbstractPaint paint=paints.get(blockPos);
 
-        if (render!=null&&render instanceof AbstractPaint paint)//如果已经存在渲染
+        if (paint!=null)//如果已经存在渲染
         {
             if(isInMainHand)//如果刷子/油漆桶在主手
             {
@@ -37,7 +40,7 @@ public class PaintUtil {
                     if (handItemStack.getItem() instanceof BlockItem blockItem) {//副手为方块
                         Block block = blockItem.getBlock();//获取方块
 
-                        if (render.getMaterial(direction).getBlock() == block) {//若为相同方块
+                        if (paint.getMaterial(direction).getBlock() == block) {//若为相同方块
                             PaintOperationHelper.cycleTextureDir( paint, direction);//旋转
                         } else {//不为相同方块
                             PaintOperationHelper.paint(level, blockPos, player, direction);//喷涂
@@ -47,14 +50,13 @@ public class PaintUtil {
 
             }else//如果刷子/油漆桶在副手
             {
-                if (PaintValidHelper.hasPaint(renders,blockPos))//如果已经存在渲染
+                if (PaintValidHelper.hasPaint(paints,blockPos))//如果已经存在渲染
                     PaintOperationHelper.cycleTextureUV(paint, direction);//旋转
             }
         } else {//如果不存在渲染
             PaintOperationHelper.paint(level, blockPos, player, direction);//喷涂
-
         }
-
+        chunk.setUnsaved(true);
 
     }
 }

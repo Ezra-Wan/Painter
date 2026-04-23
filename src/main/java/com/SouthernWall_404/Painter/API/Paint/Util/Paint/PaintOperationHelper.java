@@ -57,13 +57,16 @@ public final class PaintOperationHelper {
         LevelChunk chunk = level.getChunkAt(blockPos);
         PaintInfo paintInfo = chunk.getData(ModAttachments.PAINT_INFO);
 
-        Map<BlockPos, AbstractRender<?, ?>> renders=paintInfo.getRenders();
-        if(renders.containsKey(blockPos))
+        Map<BlockPos,AbstractPaint> paints=paintInfo.getPaints();
+        if(paints.containsKey(blockPos))
         {
 
-            AbstractRender render=renders.get(blockPos);
+            AbstractPaint paint=paints.get(blockPos);
 
-            render.putMaterial(direction,material);
+            paint.setMaterial(direction,material);
+
+            paintInfo.putPaints(level,blockPos, paint);
+            chunk.setUnsaved(true);
 
 
         }else {
@@ -77,15 +80,15 @@ public final class PaintOperationHelper {
             if(origin.getBlock() instanceof SlabBlock)
             {
                 SlabType slabType=origin.getValue(SlabBlock.TYPE);
-                AbstractRender render=new SlabBlockPaint(slabType);
-                render.putMaterial(direction, material);
-                paintInfo.putRender(level,blockPos, render);
+                AbstractPaint paint=new SlabBlockPaint(slabType);
+                paint.setMaterial(direction, material);
+                paintInfo.putPaints(level,blockPos, paint);
             }
             if(origin.isCollisionShapeFullBlock(level,blockPos))
             {
-                AbstractRender render=new SimpleBlockPaint();
-                render.putMaterial(direction, material);
-                paintInfo.putRender(level,blockPos, render);
+                AbstractPaint paint=new SimpleBlockPaint();
+                paint.setMaterial(direction, material);
+                paintInfo.putPaints(level,blockPos, paint);
             }
             //        AbstractRender render = new SimpleBlockPaint();//默认普通方块
         }

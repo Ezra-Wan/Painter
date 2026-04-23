@@ -1,5 +1,6 @@
 package com.SouthernWall_404.Painter.API.Paint.Util.Paint;
 
+import com.SouthernWall_404.Painter.API.Paint.API.AbstractPaint;
 import com.SouthernWall_404.Painter.API.Paint.API.AbstractRender;
 import com.SouthernWall_404.Painter.API.Paint.Attachment.PaintInfo;
 import com.SouthernWall_404.Painter.Common.Init.ModAttachments;
@@ -15,19 +16,25 @@ public final class PaintAttachmentHelper {
     @Nullable
     public static PaintInfo getPaintInfo(Level level, BlockPos pos) {
         LevelChunk chunk = level.getChunkAt(pos);
-        return chunk.getData(ModAttachments.PAINT_INFO);
+        return getPaintInfo(chunk);
     }
+
+    public static PaintInfo getPaintInfo(LevelChunk chunk) {
+        return chunk.getData(ModAttachments.PAINT_INFO);
+
+    }
+
 
     @Nullable
     public static AbstractRender<?, ?> getRender(Level level, BlockPos pos) {
         PaintInfo info = getPaintInfo(level, pos);
-        return info == null ? null : info.getRenders().get(pos);
+        return info == null ? null : info.getPaints().get(pos);
     }
 
-    public static void putRender(Level level, BlockPos pos, AbstractRender<?, ?> render) {
+    public static void putRender(Level level, BlockPos pos, AbstractPaint paint) {
         PaintInfo info = getPaintInfo(level, pos);
         if (info != null) {
-            info.putRender(level, pos, render);
+            info.putPaints(level, pos, paint);
             level.getChunkAt(pos).setUnsaved(true);
         }
     }
