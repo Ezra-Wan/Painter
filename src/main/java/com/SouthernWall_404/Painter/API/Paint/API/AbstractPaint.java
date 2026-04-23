@@ -185,7 +185,7 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>, Dire
 
     public BlockState getMaterial(Direction f) {
         int flag = getFlag(f);
-        return materials.getOrDefault(flag, net.minecraft.world.level.block.Blocks.AIR.defaultBlockState());
+        return materials.get(flag);
     }
 
     private int hasBlockInPaint(BlockState toCheck) {
