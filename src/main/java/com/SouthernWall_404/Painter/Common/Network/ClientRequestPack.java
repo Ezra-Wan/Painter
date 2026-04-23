@@ -1,7 +1,6 @@
 package com.SouthernWall_404.Painter.Common.Network;
 
-import com.SouthernWall_404.Painter.API.Paint.Util.PaintSyncHelper;
-import com.SouthernWall_404.Painter.API.Paint.Util.PaintUtil;
+import com.SouthernWall_404.Painter.API.Paint.Util.Paint.PaintSyncHelper;
 import com.SouthernWall_404.Painter.Painter;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;

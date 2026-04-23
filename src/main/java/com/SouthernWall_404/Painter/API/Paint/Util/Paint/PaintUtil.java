@@ -1,7 +1,8 @@
-package com.SouthernWall_404.Painter.API.Paint.Util;
+package com.SouthernWall_404.Painter.API.Paint.Util.Paint;
 
 import com.SouthernWall_404.Painter.API.Paint.API.AbstractPaint;
 import com.SouthernWall_404.Painter.API.Paint.API.AbstractRender;
+import com.SouthernWall_404.Painter.API.Paint.Util.PaintValidHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.InteractionHand;

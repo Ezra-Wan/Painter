@@ -3,7 +3,6 @@ package com.SouthernWall_404.Painter.Common.Event;
 import com.SouthernWall_404.LaplaceAPI.xNetwork.API.Sync;
 import com.SouthernWall_404.Painter.API.Paint.Attachment.PaintChunkInfo;
 import com.SouthernWall_404.Painter.API.Paint.Attachment.PaintInfo;
-import com.SouthernWall_404.Painter.API.Paint.Util.PaintUtil;
 import com.SouthernWall_404.Painter.Common.Init.ModAttachments;
 import com.SouthernWall_404.Painter.Common.Network.ClientRequestPack;
 import com.SouthernWall_404.Painter.Common.Network.ModChannels;

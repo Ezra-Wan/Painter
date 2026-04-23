@@ -1,6 +1,5 @@
 package com.SouthernWall_404.Painter.API.Tool.Wall.Filters;
 
-import com.SouthernWall_404.Painter.API.Paint.Util.PaintUtil;
 import com.SouthernWall_404.Painter.API.Paint.Util.PaintValidHelper;
 import com.SouthernWall_404.Painter.API.Paint.Util.RenderUtil;
 import com.SouthernWall_404.Painter.API.Tool.Wall.IFilter;

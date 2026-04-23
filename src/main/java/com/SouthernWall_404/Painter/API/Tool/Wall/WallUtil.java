@@ -1,6 +1,6 @@
 package com.SouthernWall_404.Painter.API.Tool.Wall;
 
-import com.SouthernWall_404.Painter.API.Paint.Util.PaintUtil;
+import com.SouthernWall_404.Painter.API.Paint.Util.Paint.PaintUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.entity.player.Player;

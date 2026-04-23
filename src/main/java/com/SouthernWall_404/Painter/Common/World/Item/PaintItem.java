@@ -1,6 +1,6 @@
 package com.SouthernWall_404.Painter.Common.World.Item;
 
-import com.SouthernWall_404.Painter.API.Paint.Util.PaintUtil;
+import com.SouthernWall_404.Painter.API.Paint.Util.Paint.PaintUtil;
 import com.SouthernWall_404.Painter.API.Tool.SelectedZone;
 import com.SouthernWall_404.Painter.API.Tool.ToolContent;
 import com.SouthernWall_404.Painter.Common.Content.ComponentContent;
