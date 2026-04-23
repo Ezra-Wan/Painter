@@ -55,7 +55,7 @@ public class PaintInfo implements IAttachment {
     }
 
     public void putPaints(Level level, BlockPos pos, AbstractPaint paint) {
-        paints.put(pos, paint);
+        paints.put(pos, paint);//TODO 以后可以改一下，直接从paint获取内容
         PaintChunkInfo chunkInfo=level.getData(ModAttachments.PAINT_CHUNK_INFO);
         chunkInfo.addChunk(level.getChunkAt(pos).getPos());
 
@@ -154,7 +154,7 @@ public class PaintInfo implements IAttachment {
             String type = entryTag.getString("type");
             CompoundTag data = entryTag.getCompound("data");
 
-            AbstractPaint paint = createPaintByType(type, provider, data);
+            AbstractPaint paint = createPaintByType(type, provider, data,pos);
             if (paint != null) {
                 paints.put(pos, paint);
             }
@@ -165,10 +165,9 @@ public class PaintInfo implements IAttachment {
      * 根据类型创建 AbstractPaint 实例，并反序列化数据
      */
     @Nullable
-    private AbstractPaint createPaintByType(String type, HolderLookup.Provider provider, CompoundTag data) {
+    private AbstractPaint createPaintByType(String type, HolderLookup.Provider provider, CompoundTag data,BlockPos pos) {
         // 通过工厂创建实例（假设工厂能返回 AbstractPaint 子类）
-        BlockState dummyState = Blocks.AIR.defaultBlockState();
-        AbstractRender<?, ?> render = PaintContent.getRender(type).apply(dummyState);
+        AbstractRender<?, ?> render = PaintContent.getRender(type).apply(pos);
         if (!(render instanceof AbstractPaint paint)) {
             // 类型不匹配，记录错误并返回 null
             return null;

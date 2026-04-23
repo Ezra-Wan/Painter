@@ -4,6 +4,7 @@ import com.SouthernWall_404.Painter.API.Paint.API.AbstractRender;
 import com.SouthernWall_404.Painter.API.Paint.Imply.SimpleBlockPaint;
 import com.SouthernWall_404.Painter.API.Paint.Imply.SlabBlockPaint;
 import com.mojang.datafixers.types.Func;
+import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.block.SlabBlock;
 import net.minecraft.world.level.block.state.BlockState;
@@ -17,14 +18,14 @@ public class PaintContent {
     public static final String SIMPLE_BLOCK="simple_block";
     public static final String SLAB_BLOCK="slab_block";
 
-    private static Map<String, Function<BlockState,AbstractRender>> RENDERS=new HashMap<>();
+    private static Map<String, Function<BlockPos,AbstractRender>> RENDERS=new HashMap<>();
 
     /**
      * 建立从NBT获取渲染种类的方法
      * @param nbt
      * @return
      */
-    public static Function<BlockState, AbstractRender> getRender(CompoundTag nbt)
+    public static Function<BlockPos,AbstractRender> getRender(CompoundTag nbt)
     {
         String type = nbt.getString("type");
         if (type.isEmpty()) {
@@ -33,14 +34,14 @@ public class PaintContent {
         return getRender(type);
     }
 
-    public static Function<BlockState, AbstractRender> getRender(String type)
+    public static Function<BlockPos,AbstractRender> getRender(String type)
     {
-        return RENDERS.getOrDefault(type,(blockState -> new SimpleBlockPaint()));
+        return RENDERS.getOrDefault(type,(pos -> new SimpleBlockPaint(pos)));
     }
 
     static {
-        RENDERS.put(SIMPLE_BLOCK,(blockState -> new SimpleBlockPaint()));
-        RENDERS.put(SLAB_BLOCK,(blockState -> new SlabBlockPaint()));
+        RENDERS.put(SIMPLE_BLOCK,(pos -> new SimpleBlockPaint(pos)));
+        RENDERS.put(SLAB_BLOCK,(pos -> new SlabBlockPaint(pos)));
     }
 
 

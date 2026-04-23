@@ -4,9 +4,11 @@ import com.SouthernWall_404.Painter.API.Paint.API.AbstractPaint;
 import com.SouthernWall_404.Painter.API.Paint.PaintContent;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.SlabType;
 import org.jetbrains.annotations.UnknownNullability;
@@ -25,14 +27,14 @@ public class SlabBlockPaint extends AbstractPaint {
     private SlabType slabType;
 
 
-    public SlabBlockPaint() {
-        this(SlabType.TOP);
+    public SlabBlockPaint(BlockPos blockPos) {
+        this(blockPos,SlabType.TOP);
     }
 
-    public SlabBlockPaint(SlabType slabType)
+    public SlabBlockPaint(BlockPos blockPos,SlabType slabType)
     {
 
-        super(PaintContent.SLAB_BLOCK);
+        super(blockPos,PaintContent.SLAB_BLOCK);
 
         this.slabType=slabType;
     }

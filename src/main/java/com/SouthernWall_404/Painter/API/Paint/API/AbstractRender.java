@@ -2,11 +2,16 @@
 package com.SouthernWall_404.Painter.API.Paint.API;
 
 import com.SouthernWall_404.Painter.Client.PaintRender;
+import net.minecraft.client.Minecraft;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
+import net.neoforged.fml.loading.FMLEnvironment;
 import org.jetbrains.annotations.UnknownNullability;
 
 import java.util.HashMap;
@@ -18,10 +23,15 @@ public abstract class AbstractRender<T, F extends Object> implements IRender<T> 
     protected Map<F, Integer> flags = new HashMap<>(); // 识别码定义系统
     protected Map<Integer, T> objects = new HashMap<>(); // 渲染内容缓存
     protected String type;
+    protected BlockPos blockPos;
+
+    protected BlockState origin;
 
     //========构造方法========
-    public AbstractRender(String type) {
+    public AbstractRender(BlockPos blockPos,String type) {
         this.type = type;
+        this.blockPos=blockPos;
+
         initFlags();
 
     }
@@ -44,6 +54,18 @@ public abstract class AbstractRender<T, F extends Object> implements IRender<T> 
     @OnlyIn(Dist.CLIENT)
     protected void update() {
         PaintRender.redraw();
+
+        if (FMLEnvironment.dist != Dist.CLIENT) return;
+        Minecraft mc=Minecraft.getInstance();
+        if(mc!=null)
+        {
+            Level level=mc.level;
+            if(level!=null)
+            {
+                this.origin=level.getBlockState(blockPos);
+
+            }
+        }
     }
 
     //========业务方法========

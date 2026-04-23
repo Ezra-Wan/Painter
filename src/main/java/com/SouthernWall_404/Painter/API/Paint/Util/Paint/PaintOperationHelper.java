@@ -26,7 +26,6 @@ import net.neoforged.api.distmarker.OnlyIn;
 
 import java.util.Map;
 
-@OnlyIn(Dist.CLIENT)
 public final class PaintOperationHelper {
 
 
@@ -80,13 +79,13 @@ public final class PaintOperationHelper {
             if(origin.getBlock() instanceof SlabBlock)
             {
                 SlabType slabType=origin.getValue(SlabBlock.TYPE);
-                AbstractPaint paint=new SlabBlockPaint(slabType);
+                AbstractPaint paint=new SlabBlockPaint(blockPos,slabType);
                 paint.setMaterial(direction, material);
                 paintInfo.putPaints(level,blockPos, paint);
             }
             if(origin.isCollisionShapeFullBlock(level,blockPos))
             {
-                AbstractPaint paint=new SimpleBlockPaint();
+                AbstractPaint paint=new SimpleBlockPaint(blockPos);
                 paint.setMaterial(direction, material);
                 paintInfo.putPaints(level,blockPos, paint);
             }

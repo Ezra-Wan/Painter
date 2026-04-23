@@ -1,6 +1,7 @@
 // AbstractPaint.java
 package com.SouthernWall_404.Painter.API.Paint.API;
 
+import com.SouthernWall_404.LaplaceAPI.Math37.Vector3f;
 import com.SouthernWall_404.LaplaceAPI.RegulappleEngine.ModelRender;
 import com.SouthernWall_404.Painter.API.Paint.Util.RenderUtil;
 import com.SouthernWall_404.LaplaceAPI.RegulappleEngine.BakedQuadRender;
@@ -54,10 +55,14 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>, Dire
     protected Map<Integer, BlockState> materials = new HashMap<>();
 
     //========构造方法========
-    public AbstractPaint(String type) {
-        super(type);
+    public AbstractPaint(BlockPos blockPos,String type) {
+        super(blockPos,type);
+
+
+
         update();
     }
+
 
     //========内部方法========
     @OnlyIn(Dist.CLIENT)
@@ -122,19 +127,23 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>, Dire
         }
     }
 
+
+    private static final double offset = 0.01; //TODO 考虑添加配置项
     @Override
+    @OnlyIn(Dist.CLIENT)
     public void render(BlockPos blockPos, PoseStack poseStack, int packedLight, int packedOverlay, float partialTick, VertexConsumer buffer) {
         Minecraft mc = Minecraft.getInstance();
         Level level = mc.level;
         for (Map.Entry<Integer, List<BakedQuad>> entry : objects.entrySet()) {
             List<BakedQuad> quads = entry.getValue();
             int flag = entry.getKey();
-            double offset = 0.01; // 考虑添加配置项
+
             BlockState material = materials.get(flag);
             Direction direction = getDirection(flag);
-            BlockState origin = level.getBlockState(blockPos);
-            if (!RenderUtil.shouldRenderFace(level, blockPos, origin, direction)) continue;
-            Vec3i normal = direction.getNormal();
+
+            if (!RenderUtil.shouldRenderFace(level, blockPos, origin, direction)) continue;//TODO 这一部分尝试缓存
+
+            Vector3f normal=new Vector3f(direction);
             Vec3 vec3 = new Vec3(blockPos.getX() + offset * normal.getX(),
                     blockPos.getY() + offset * normal.getY(),
                     blockPos.getZ() + offset * normal.getZ());
