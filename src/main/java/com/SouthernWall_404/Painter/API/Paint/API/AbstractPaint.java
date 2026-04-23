@@ -11,21 +11,16 @@ import com.mojang.serialization.DataResult;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.model.BakedQuad;
-import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.Vec3i;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.Tag;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.RandomSource;
-import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.TrapDoorBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
@@ -51,6 +46,8 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>, Dire
     private int tick = 0;
     private Map<Integer, ModelRender.AmbientOcclusionFace> aoFaces = new HashMap<>();
 
+    protected Map<Integer,Boolean> visibles =new HashMap<>();
+
 //    protected Map<Integer,Vector3f> normals=new HashMap<>();
     //========需要持久化的数据========
     protected Map<Integer, BlockState> materials = new HashMap<>();
@@ -66,11 +63,14 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>, Dire
     @OnlyIn(Dist.CLIENT)
     @Override
     protected void update() {
+        super.update();
         if (Minecraft.getInstance() == null) {
             return;
         }
         createQuads();
-        super.update();
+        refreshVisible();
+        refreshAO(blockPos);
+
     }
 
     @Override
@@ -120,6 +120,18 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>, Dire
 
     public abstract void createQuads();
 
+    @OnlyIn(Dist.CLIENT)
+    public void refreshVisible()
+    {
+        Level level=Minecraft.getInstance().level;
+        flags.forEach((direction,flag)->{
+            boolean shouldRender=RenderUtil.shouldRenderFace(blockPos, origin, direction);
+            visibles.put(flag,shouldRender);
+
+        });
+    }
+
+    @OnlyIn(Dist.CLIENT)
     public void refreshAO(BlockPos blockPos) {
         Level level = Minecraft.getInstance().level;
         for (Map.Entry<Integer, BlockState> entry : materials.entrySet()) {
@@ -142,13 +154,15 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>, Dire
         for (Map.Entry<Integer, List<BakedQuad>> entry : objects.entrySet()) {
             List<BakedQuad> quads = entry.getValue();
             int flag = entry.getKey();
+            Vector3f normal=normals.get(flag);
 
             BlockState material = materials.get(flag);
             Direction direction = getDirection(flag);
 
-            if (!RenderUtil.shouldRenderFace(level, blockPos, origin, direction)) continue;//TODO 这一部分尝试缓存
+//            if (!RenderUtil.shouldRenderFace(level, blockPos, origin, direction)) continue;//TODO 这一部分尝试缓存
 
-            Vector3f normal=normals.get(flag);
+            if (!visibles.getOrDefault(flag,false))continue;
+
             Vec3 vec3 = new Vec3(blockPos.getX() + offset * normal.getX(),
                     blockPos.getY() + offset * normal.getY(),
                     blockPos.getZ() + offset * normal.getZ());

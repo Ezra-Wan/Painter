@@ -61,6 +61,16 @@ public class RenderUtil {
 
 
     @OnlyIn(Dist.CLIENT)
+    public static boolean shouldRenderFace(BlockPos pos,BlockState state, Direction face ) {
+        Minecraft mc=Minecraft.getInstance();
+        if(mc!=null)
+        {
+            return shouldRenderFace(mc.level,pos,state,face);
+        }
+        return false;
+    }
+
+
     public static boolean shouldRenderFace(BlockGetter level, BlockPos pos,BlockState state, Direction face ) {
         //远距剔除
         if(Minecraft.getInstance()!=null)

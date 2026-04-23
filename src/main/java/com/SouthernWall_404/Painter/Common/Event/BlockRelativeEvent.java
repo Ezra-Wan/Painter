@@ -1,6 +1,8 @@
 package com.SouthernWall_404.Painter.Common.Event;
 
+import com.SouthernWall_404.Painter.API.Paint.API.AbstractPaint;
 import com.SouthernWall_404.Painter.API.Paint.Attachment.PaintInfo;
+import com.SouthernWall_404.Painter.API.Paint.Util.Paint.PaintAttachmentHelper;
 import com.SouthernWall_404.Painter.API.Paint.Util.Paint.PaintValidHelper;
 import com.SouthernWall_404.Painter.Common.Init.ModAttachments;
 import com.SouthernWall_404.Painter.Common.World.Item.BlockInteractItem;
