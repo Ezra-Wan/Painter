@@ -15,31 +15,18 @@ import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.SlabBlock;
 import net.minecraft.world.level.block.state.BlockState;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 import net.neoforged.neoforge.client.model.data.ModelData;
 
 import javax.annotation.Nullable;
 import java.util.List;
 
+
+@OnlyIn(Dist.CLIENT)
 public class RenderUtil {
 
-//    public static IRender addSimple(BlockState origin,)
-private static final ThreadLocal<Object2ByteLinkedOpenHashMap<Block.BlockStatePairKey>> OCCLUSION_CACHE = ThreadLocal.withInitial(() -> {
-    Object2ByteLinkedOpenHashMap<Block.BlockStatePairKey> object2bytelinkedopenhashmap = new Object2ByteLinkedOpenHashMap<Block.BlockStatePairKey>(2048, 0.25F) {
-        protected void rehash(int newN) {
-        }
-    };
-    object2bytelinkedopenhashmap.defaultReturnValue((byte)127);
-    return object2bytelinkedopenhashmap;
-});
 
-
-
-    @Deprecated
-    public static RenderType getRenderType(BlockGetter level,BlockPos pos)
-    {
-        BlockState blockState=level.getBlockState(pos);
-        return getRenderType(blockState);
-    }
 
     /**
      * 获取方块状态对应的渲染类型
@@ -76,40 +63,8 @@ private static final ThreadLocal<Object2ByteLinkedOpenHashMap<Block.BlockStatePa
     }
 
 
-    public static List<BakedQuad> getQuads(BlockState state, @Nullable Direction direction,
-                                           RandomSource random, ModelData modelData, RenderType renderType) {
-        Minecraft mc = Minecraft.getInstance();
-        BlockRenderDispatcher dispatcher = mc.getBlockRenderer();
-        BakedModel model = dispatcher.getBlockModel(state);
-        return model.getQuads(state, direction, random, modelData, renderType);
-    }
-
-    /**
-     * 简化版本：使用默认随机源和空的模型数据
-     */
-    public static List<BakedQuad> getQuads(BlockState state, @Nullable Direction direction, RenderType renderType) {
-        return getQuads(state, direction, RandomSource.create(), ModelData.EMPTY, renderType);
-    }
-
-    /**
-     * 获取指定方向的所有 quads（包括使用默认渲染类型）
-     */
-    public static List<BakedQuad> getQuads(BlockState state, @Nullable Direction direction) {
-        return getQuads(state, direction, RenderUtil.getRenderType(state));
-    }
-
-    @Deprecated
-    public static BlockState getPaintBlockOrigin(BlockGetter level,BlockPos neighborPos)
-    {
-        BlockState blockState=level.getBlockState(neighborPos);
-        return blockState;
-
-    }
-
-    @Deprecated
+    @OnlyIn(Dist.CLIENT)
     public static boolean shouldRenderFace(BlockGetter level, BlockPos pos,BlockState state, Direction face ) {
-
-
         //远距剔除
         if(Minecraft.getInstance()!=null)
         {

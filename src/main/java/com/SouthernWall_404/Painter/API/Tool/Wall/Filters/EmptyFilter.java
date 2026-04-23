@@ -1,6 +1,6 @@
 package com.SouthernWall_404.Painter.API.Tool.Wall.Filters;
 
-import com.SouthernWall_404.Painter.API.Paint.Util.PaintValidHelper;
+import com.SouthernWall_404.Painter.API.Paint.Util.Paint.PaintValidHelper;
 import com.SouthernWall_404.Painter.API.Paint.Util.RenderUtil;
 import com.SouthernWall_404.Painter.API.Tool.Wall.IFilter;
 import net.minecraft.core.BlockPos;

@@ -5,7 +5,6 @@ import com.SouthernWall_404.Painter.API.Paint.API.AbstractRender;
 import com.SouthernWall_404.Painter.API.Paint.Attachment.PaintInfo;
 import com.SouthernWall_404.Painter.API.Paint.Imply.SimpleBlockPaint;
 import com.SouthernWall_404.Painter.API.Paint.Imply.SlabBlockPaint;
-import com.SouthernWall_404.Painter.API.Paint.Util.PaintValidHelper;
 import com.SouthernWall_404.Painter.Common.Init.ModAttachments;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
