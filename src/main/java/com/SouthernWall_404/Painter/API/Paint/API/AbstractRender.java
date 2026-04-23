@@ -1,6 +1,7 @@
 // AbstractRender.java
 package com.SouthernWall_404.Painter.API.Paint.API;
 
+import com.SouthernWall_404.LaplaceAPI.Math37.Vector3f;
 import com.SouthernWall_404.Painter.Client.PaintRender;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
@@ -24,7 +25,7 @@ public abstract class AbstractRender<T, F extends Object> implements IRender<T> 
     protected Map<Integer, T> objects = new HashMap<>(); // 渲染内容缓存
     protected String type;
     protected BlockPos blockPos;
-
+    protected Map<Integer,Vector3f> normals=new HashMap<>();
     protected BlockState origin;
 
     //========构造方法========

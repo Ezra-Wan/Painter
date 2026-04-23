@@ -51,15 +51,13 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>, Dire
     private int tick = 0;
     private Map<Integer, ModelRender.AmbientOcclusionFace> aoFaces = new HashMap<>();
 
+//    protected Map<Integer,Vector3f> normals=new HashMap<>();
     //========需要持久化的数据========
     protected Map<Integer, BlockState> materials = new HashMap<>();
 
     //========构造方法========
     public AbstractPaint(BlockPos blockPos,String type) {
         super(blockPos,type);
-
-
-
         update();
     }
 
@@ -73,6 +71,13 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>, Dire
         }
         createQuads();
         super.update();
+    }
+
+    @Override
+    protected void registerFlag(Direction direction, int flag) {
+        super.registerFlag(direction, flag);
+
+        normals.put(flag,new Vector3f(direction));
     }
 
     public void cycleTextureUV(Direction direction) {
@@ -143,7 +148,7 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>, Dire
 
             if (!RenderUtil.shouldRenderFace(level, blockPos, origin, direction)) continue;//TODO 这一部分尝试缓存
 
-            Vector3f normal=new Vector3f(direction);
+            Vector3f normal=normals.get(flag);
             Vec3 vec3 = new Vec3(blockPos.getX() + offset * normal.getX(),
                     blockPos.getY() + offset * normal.getY(),
                     blockPos.getZ() + offset * normal.getZ());
