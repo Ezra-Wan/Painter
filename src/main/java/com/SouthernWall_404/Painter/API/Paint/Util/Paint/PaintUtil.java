@@ -1,5 +1,6 @@
 package com.SouthernWall_404.Painter.API.Paint.Util.Paint;
 
+import com.SouthernWall_404.LaplaceAPI.VertinCore.Util.BlockUtil;
 import com.SouthernWall_404.Painter.API.Paint.API.AbstractPaint;
 import com.SouthernWall_404.Painter.API.Tool.Wall.IFilter;
 import net.minecraft.core.BlockPos;
@@ -26,6 +27,7 @@ public class PaintUtil {
         Map<BlockPos,AbstractPaint> paints=PaintAttachmentHelper.getPaintInfo(chunk).getPaints();//获取本区块render
 
 
+        //TODO 实现喷涂逻辑
         AbstractPaint paint=paints.get(blockPos);
 
         if (paint!=null)//如果已经存在渲染
@@ -64,6 +66,53 @@ public class PaintUtil {
 
     public static void dealBucketClick(BlockPos pos, Direction face, Player player, Level level, List<IFilter> filters, boolean isInMainHand)
     {
+
+        BlockState origin=level.getBlockState(pos);
+        BlockState toPaint=null;//将被喷涂的BlockState
+        if(isInMainHand)//刷子在主手
+        {
+            ItemStack hand=player.getItemInHand(InteractionHand.OFF_HAND);
+
+            if(hand.getItem() instanceof  BlockItem blockItem)
+            {
+                Block block=blockItem.getBlock();//获取手上方块
+                toPaint= BlockUtil.createBlockStateToPlace(block,pos,face,level,player,hand,InteractionHand.OFF_HAND);
+
+                if(PaintValidHelper.isValidPaintOperation(toPaint,level,pos,origin))//合法检查
+                {
+                    AbstractPaint paint=PaintAttachmentHelper.getPaint(level,pos);
+                    if(paint!=null)//如果此处有paint
+                    {
+                        BlockState oldMeterial=paint.getMaterial(face);//尝试获取当前此面已有的材料
+                        if(oldMeterial!=null)
+                        {
+                            if(oldMeterial.getBlock()==toPaint.getBlock())//如果它存在
+                            {
+                                toPaint=PaintOperationHelper.cycleInDirection(oldMeterial);//喷涂类设定为点击处喷涂的旋转后状态
+                            }//没有原本喷涂
+                        }
+                    }
+                }else {
+                    return;
+                }
+            }else {//如果手上物品不为BlockItem
+
+                AbstractPaint paint=PaintAttachmentHelper.getPaint(level,pos);
+                if(paint!=null)//如果此处有paint
+                {
+                    BlockState oldMeterial=paint.getMaterial(face);//尝试获取当前此面已有的材料
+                    if(oldMeterial!=null)//如果它存在
+                    {
+                        toPaint=PaintOperationHelper.cycleInDirection(oldMeterial);//喷涂类设定为点击处喷涂的旋转后状态
+                    }//没有原本喷涂
+                    else {
+                        return;//没有动作
+                    }
+                }
+            }
+        }
+        if(toPaint==null)return;
+
         // 队列用于 BFS
         Queue<BlockPos> queue = new LinkedList<>();
         // 记录已处理过的方块，避免重复
@@ -85,6 +134,7 @@ public class PaintUtil {
         while (!queue.isEmpty()) {
             BlockPos current = queue.poll();
 
+
             // 检查当前方块是否在距离限制内（起始点切比雪夫距离 ≤ 32）
             if (Math.abs(current.getX() - pos.getX()) > 32 ||
                     Math.abs(current.getY() - pos.getY()) > 32 ||
@@ -92,10 +142,7 @@ public class PaintUtil {
                 continue; // 超出范围，不再扩散
             }
 
-            // 获取当前方块的 BlockState
-            BlockState currentState = level.getBlockState(current);
-            // 检查当前方块是否符合喷涂条件
-
+            PaintOperationHelper.paint(level,current,face,toPaint);
 
             boolean isAllowed=true;
             for(IFilter filter:filters)//遍历所有筛选项
