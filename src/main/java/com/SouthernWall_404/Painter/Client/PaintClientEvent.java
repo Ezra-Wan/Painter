@@ -29,7 +29,7 @@ public class PaintClientEvent {
             if(level==null)return;
 
             PaintChunkInfo chunkInfo=level.getData(ModAttachments.PAINT_CHUNK_INFO.get());
-            chunkInfo.getPaintPoses().forEach(chunkPos->{
+            chunkInfo.getPaintPosesNearby(mc.player.getOnPos()).forEach(chunkPos->{
                 LevelChunk chunk=level.getChunk(chunkPos.x,chunkPos.z);
                 PaintInfo paintInfo=chunk.getData(ModAttachments.PAINT_INFO);
                 paintInfo.tick(chunkPos);

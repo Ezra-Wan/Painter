@@ -7,6 +7,7 @@ import com.SouthernWall_404.Painter.API.Paint.Util.PaintUtil;
 import com.SouthernWall_404.Painter.Common.Init.ModAttachments;
 import com.SouthernWall_404.Painter.Common.Network.ClientRequestPack;
 import com.SouthernWall_404.Painter.Common.Network.ModChannels;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.ChunkPos;
@@ -63,10 +64,12 @@ public class PlayerJoinEvent {
     {
         if (!(event.getLevel() instanceof ClientLevel level)) return;
         if (!(event.getChunk() instanceof LevelChunk chunk)) return;
+        Minecraft mc=Minecraft.getInstance();
+
         ChunkPos pos=event.getChunk().getPos();
 
         PaintChunkInfo chunkInfo = level.getData(ModAttachments.PAINT_CHUNK_INFO);
-        if (!chunkInfo.getPaintPoses().contains(pos)) return;
+        if (!chunkInfo.getPaintPosesNearby(mc.player.getOnPos()).contains(pos)) return;
 
         PaintInfo paintInfo = chunk.getData(ModAttachments.PAINT_INFO);
 

@@ -69,20 +69,18 @@ public class PaintChunkInfo implements IAttachment {
         return result;
     }
 
+    public Set<ChunkPos> getPaintPosesNearby(BlockPos pos) {
+        ChunkPos playerPos=new ChunkPos(pos);
+        Set<ChunkPos> chunkNearby=new HashSet<>();
+        Minecraft mc=Minecraft.getInstance();
+        if(mc==null)return new HashSet<>();
+        int viewDistance=mc.options.getEffectiveRenderDistance();
+        paintPoses.forEach((chunkpos)->{
 
-    public Set<ChunkPos> getPaintPoses() {
+            if(playerPos.distanceSquared(chunkpos)<=viewDistance*viewDistance)chunkNearby.add(chunkpos);//如果在视距内，入队
+        });
         return Collections.unmodifiableSet(paintPoses);
     }
-
-//    public Set<ChunkPos> getPaintPosesNearby(BlockPos pos) {
-//        ChunkPos playerPos=new ChunkPos(pos);
-//        Set<ChunkPos> chunkNearby=new HashSet<>();//TODO 按需发包
-//        paintPoses.forEach((chunkpos)->{
-//
-//
-//        });
-//        return Collections.unmodifiableSet(paintPoses);
-//    }
 
     public void setChanged() {
         isChanged = true;
