@@ -3,6 +3,7 @@ package com.SouthernWall_404.Painter.Common.Event;
 import com.SouthernWall_404.Painter.API.Paint.Attachment.PaintChunkInfo;
 import com.SouthernWall_404.Painter.API.Paint.Attachment.PaintInfo;
 import com.SouthernWall_404.Painter.API.Paint.Util.PaintUtil;
+import com.SouthernWall_404.Painter.API.Paint.Util.PaintValidHelper;
 import com.SouthernWall_404.Painter.Common.Init.ModAttachments;
 import com.SouthernWall_404.Painter.Common.World.Item.BlockInteractItem;
 import net.minecraft.core.BlockPos;
@@ -54,7 +55,7 @@ public class BlockRelativeEvent {
         BlockPos pos=event.getPos();
         Level level=event.getPlayer().level();
 
-        if(PaintUtil.hasPaint(level,pos))
+        if(PaintValidHelper.hasPaint(level,pos))
         {
             LevelChunk chunk=level.getChunkAt(pos);
             PaintInfo paintInfo=chunk.getData(ModAttachments.PAINT_INFO);

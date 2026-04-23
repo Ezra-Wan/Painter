@@ -49,7 +49,7 @@ public class PaintItem extends BlockInteractItem {
             }
         }
         // 执行涂色
-        PaintUtil.dealWithPaintClick(level, blockPos, player, event.getFace(),isInMainHand);
+        PaintUtil.dealBrushClick(level, blockPos, player, event.getFace(),isInMainHand);
         player.swing(InteractionHand.MAIN_HAND);
     }
 

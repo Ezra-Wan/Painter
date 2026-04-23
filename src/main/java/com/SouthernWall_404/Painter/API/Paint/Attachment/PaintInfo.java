@@ -5,6 +5,7 @@ import com.SouthernWall_404.LaplaceAPI.VertinCore.IAttachment;
 import com.SouthernWall_404.Painter.API.Paint.API.AbstractPaint;
 import com.SouthernWall_404.Painter.API.Paint.API.AbstractRender;
 import com.SouthernWall_404.Painter.API.Paint.PaintContent;
+import com.SouthernWall_404.Painter.API.Paint.Util.PaintSyncHelper;
 import com.SouthernWall_404.Painter.API.Paint.Util.PaintUtil;
 import com.SouthernWall_404.Painter.API.Paint.Util.RenderUtil;
 import com.SouthernWall_404.Painter.Client.PaintRender;
@@ -101,7 +102,7 @@ public class PaintInfo implements IAttachment {
 
         removeRender(pos);
 
-        PaintUtil.syncToClient(level.getChunkAt(pos).getPos(),player);
+        PaintSyncHelper.syncToClient(level.getChunkAt(pos).getPos(),player);
 
     }
 

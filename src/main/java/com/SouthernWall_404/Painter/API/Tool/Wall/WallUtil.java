@@ -85,7 +85,7 @@ public class WallUtil {
 //                }
 //                //如果所有筛选项均满足
 
-                PaintUtil.dealWithPaintClick(level,current,player,face,isInMainHand);//执行喷涂
+                PaintUtil.dealBrushClick(level,current,player,face,isInMainHand);//执行喷涂
 
                 // 向墙面内的四个方向扩散
                 for (Direction wallDir : wallDirs) {
