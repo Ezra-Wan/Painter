@@ -142,7 +142,7 @@ public class PaintUtil {
                 continue; // 超出范围，不再扩散
             }
 
-            PaintOperationHelper.paint(level,current,face,toPaint);
+
 
             boolean isAllowed=true;
             for(IFilter filter:filters)//遍历所有筛选项
@@ -155,8 +155,8 @@ public class PaintUtil {
 
             if(isAllowed)
             {
-                PaintUtil.dealBrushClick(level,current,player,face,isInMainHand);//执行喷涂
-
+//                PaintUtil.dealBrushClick(level,current,player,face,isInMainHand);//执行喷涂
+                PaintOperationHelper.paint(level,current,face,toPaint);
                 // 向墙面内的四个方向扩散
                 for (Direction wallDir : wallDirs) {
                     BlockPos neighbor = current.relative(wallDir);
