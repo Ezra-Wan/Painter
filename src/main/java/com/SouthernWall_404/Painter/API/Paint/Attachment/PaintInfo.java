@@ -96,8 +96,8 @@ public class PaintInfo implements IAttachment {
                     int x = blockPos.getX();
                     int z = blockPos.getZ();
                     if (x >= startX && x <= endX && z >= startZ && z <= endZ) {
-                        paint.refreshAO(blockPos);
-                        paint.refreshVisible();
+//                        paint.refreshAO(blockPos);
+//                        paint.refreshVisible();
                     }
                 }
             });

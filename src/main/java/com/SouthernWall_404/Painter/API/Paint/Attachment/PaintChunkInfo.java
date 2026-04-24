@@ -1,7 +1,7 @@
 package com.SouthernWall_404.Painter.API.Paint.Attachment;
 
 import com.SouthernWall_404.LaplaceAPI.VertinCore.IAttachment;
-import com.SouthernWall_404.LaplaceAPI.xNetwork.API.Sync;
+import com.SouthernWall_404.LaplaceAPI.xNetwork.API.NetworkSync;
 import com.SouthernWall_404.Painter.API.Paint.API.AbstractRender;
 import com.SouthernWall_404.Painter.Common.Init.ModAttachments;
 import net.minecraft.client.Minecraft;
@@ -37,7 +37,7 @@ public class PaintChunkInfo implements IAttachment {
         }
         if(isChanged)
         {
-            Sync.syncLevelAttachmentToAll(level, ModAttachments.PAINT_CHUNK_INFO.get());
+//            NetworkSync.syncLevelAttachmentToAll(level,level.players(),ModAttachments.PAINT_CHUNK_INFO.get());//TODO 以后记得修好
             done();
         }
     }

@@ -4,8 +4,11 @@ import com.SouthernWall_404.LaplaceAPI.VertinCore.Frame.CommonRegisterFrame;
 import com.SouthernWall_404.Painter.Common.Event.BlockRelativeEvent;
 import com.SouthernWall_404.Painter.Common.Event.PlayerJoinEvent;
 import com.SouthernWall_404.Painter.Common.Init.*;
+import com.SouthernWall_404.Painter.Common.Network.ClientHandlers;
+import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.common.Mod;
+import net.neoforged.fml.loading.FMLEnvironment;
 import net.neoforged.neoforge.common.NeoForge;
 
 @Mod(Painter.MODID)
@@ -25,6 +28,8 @@ public class Painter {
 //        ModAttachments.ATTACHMENT_TYPES.register(modEventBus);
 
         frame.register(modEventBus);
+
+        if(FMLEnvironment.dist== Dist.CLIENT)ClientHandlers.register();
 
         NeoForge.EVENT_BUS.register(BlockRelativeEvent.class);
         NeoForge.EVENT_BUS.register(PlayerJoinEvent.class);

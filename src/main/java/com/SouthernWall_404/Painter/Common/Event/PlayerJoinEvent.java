@@ -1,6 +1,6 @@
 package com.SouthernWall_404.Painter.Common.Event;
 
-import com.SouthernWall_404.LaplaceAPI.xNetwork.API.Sync;
+import com.SouthernWall_404.LaplaceAPI.xNetwork.API.NetworkSync;
 import com.SouthernWall_404.Painter.API.Paint.Attachment.PaintChunkInfo;
 import com.SouthernWall_404.Painter.API.Paint.Attachment.PaintInfo;
 import com.SouthernWall_404.Painter.Common.Init.ModAttachments;
@@ -24,7 +24,7 @@ public class PlayerJoinEvent {
         Player player=event.getEntity();
         Level level=player.level();
         if(!level.isClientSide) {
-            Sync.syncLevelAttachment(level,ModAttachments.PAINT_CHUNK_INFO.get(),player);
+            NetworkSync.syncLevelAttachment(level,ModAttachments.PAINT_CHUNK_INFO.get(),player);
 
 //            PaintChunkInfo paintChunkInfo=level.getData(ModAttachments.PAINT_CHUNK_INFO);
 //
