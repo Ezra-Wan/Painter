@@ -136,6 +136,7 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>, Dire
     @OnlyIn(Dist.CLIENT)
     public void refreshAO(BlockPos blockPos) {
         Level level = Minecraft.getInstance().level;
+        if (level==null)return;
         for (Map.Entry<Integer, BlockState> entry : materials.entrySet()) {
             int flag = entry.getKey();
             BlockState state = materials.get(flag);

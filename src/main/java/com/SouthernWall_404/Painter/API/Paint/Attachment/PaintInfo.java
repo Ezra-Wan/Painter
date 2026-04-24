@@ -56,7 +56,7 @@ public class PaintInfo implements IAttachment {
     }
 
     public void putPaints(Level level, BlockPos pos, AbstractPaint paint) {
-        paints.put(pos, paint);//TODO 以后可以改一下，直接从paint获取内容
+        paints.put(pos, paint);
         PaintChunkInfo chunkInfo=level.getData(ModAttachments.PAINT_CHUNK_INFO);
         chunkInfo.addChunk(level.getChunkAt(pos).getPos());
 

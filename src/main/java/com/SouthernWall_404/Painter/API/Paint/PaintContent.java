@@ -36,7 +36,7 @@ public class PaintContent {
 
     public static Function<BlockPos,AbstractRender> getRender(String type)
     {
-        Function function=RENDERS.getOrDefault(type,(pos -> new SimpleBlockPaint(pos)));//TODO 这里出问题
+        Function function=RENDERS.getOrDefault(type,(pos -> new SimpleBlockPaint(pos)));
         return function;
     }
 

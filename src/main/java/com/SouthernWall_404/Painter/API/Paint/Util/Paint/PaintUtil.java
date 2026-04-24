@@ -21,46 +21,55 @@ public class PaintUtil {
 
 
     public static void dealBrushClick(Level level, BlockPos blockPos, Player player, Direction direction, boolean isInMainHand) {
+        LevelChunk chunk = level.getChunkAt(blockPos);
+        Map<BlockPos, AbstractPaint> paints = PaintAttachmentHelper.getPaintInfo(chunk).getPaints();
+        AbstractPaint paint = paints.get(blockPos);
 
+        if (!isInMainHand) {//当副手持刷子
+            if (paint != null) {//只要有paint在
+                PaintOperationHelper.cycleTextureUV(paint, direction); // 旋转纹理
+            }
+        }
+        else {//当主手持刷子
+            BlockState origin = level.getBlockState(blockPos);
+            BlockState toPaint = null;
 
-        LevelChunk chunk=level.getChunkAt(blockPos);
-        Map<BlockPos,AbstractPaint> paints=PaintAttachmentHelper.getPaintInfo(chunk).getPaints();//获取本区块render
+            //从副手获取方块物品，构造放置状态
+            ItemStack offHandItem = player.getItemInHand(InteractionHand.OFF_HAND);
+            if (offHandItem.getItem() instanceof BlockItem blockItem) {
+                Block block = blockItem.getBlock();
+                toPaint = BlockUtil.createBlockStateToPlace(block, blockPos, direction, level, player, offHandItem, InteractionHand.OFF_HAND);
 
-
-        //TODO 实现喷涂逻辑
-        AbstractPaint paint=paints.get(blockPos);
-
-        if (paint!=null)//如果已经存在渲染
-        {
-            if(isInMainHand)//如果刷子/油漆桶在主手
-            {
-                ItemStack handItemStack = player.getItemInHand(InteractionHand.OFF_HAND);//获取副手物品
-
-
-                if (handItemStack.isEmpty()) {//副手为空
-                    PaintOperationHelper.cycleTextureDir(paint, direction);//旋转
-                } else {
-                    if (handItemStack.getItem() instanceof BlockItem blockItem) {//副手为方块
-                        Block block = blockItem.getBlock();//获取方块
-
-                        if (paint.getMaterial(direction).getBlock() == block) {//若为相同方块
-                            PaintOperationHelper.cycleTextureDir( paint, direction);//旋转
-                        } else {//不为相同方块
-                            PaintOperationHelper.paint(level, blockPos, player, direction);//喷涂
-                        }
+                if (paint != null) {//如果点击存有paint
+                    BlockState existingMat = paint.getMaterial(direction);//获取当前面的喷涂
+                    if (existingMat != null && existingMat.getBlock() == toPaint.getBlock()) {//如果当面有喷涂，且与手中方块相同
+                        toPaint = PaintOperationHelper.cycleInDirection(existingMat);//旋转
+                    }
+                    //如果当面没有喷涂，或与手中方块不同
+                    //则正常喷涂
+                }
+                //如果点击处不存在paint
+                //则正常喷涂
+            } else {// 副手不是方块物品，则尝试利用已有的 paint 材质进行旋转
+                if (paint != null) {//如果存在paint
+                    BlockState oldMaterial = paint.getMaterial(direction);
+                    if (oldMaterial != null) {//且在点击面存在原有的喷涂
+                        toPaint = PaintOperationHelper.cycleInDirection(oldMaterial);//旋转uv
                     }
                 }
-
-            }else//如果刷子/油漆桶在副手
-            {
-                if (PaintValidHelper.hasPaint(paints,blockPos))//如果已经存在渲染
-                    PaintOperationHelper.cycleTextureUV(paint, direction);//旋转
             }
-        } else {//如果不存在渲染
-            PaintOperationHelper.paint(level, blockPos, player, direction);//喷涂
-        }
-        chunk.setUnsaved(true);
 
+            if (toPaint == null) return;
+
+
+            // 合法性检查
+            if (!PaintValidHelper.isValidPaintOperation(toPaint, level, blockPos, origin)) {
+                return;
+            }
+
+            // 执行单点喷涂
+            PaintOperationHelper.paint(level, blockPos, direction, toPaint);
+        }
     }
 
 
