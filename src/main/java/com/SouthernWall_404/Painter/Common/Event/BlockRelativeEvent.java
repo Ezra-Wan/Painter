@@ -13,6 +13,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
@@ -75,22 +76,22 @@ public class BlockRelativeEvent {
     {
         Set<BlockPos> posesToRefresh=new HashSet<>();
 
-        BlockPos origin=event.getPos();
-        // 添加以 origin 为中心的 3x3x3 区域内的所有方块
+        BlockPos originPos=event.getPos();
+//        event.getLevel().getBlockState(originPos);
+
+        // 添加以 originPos 为中心的 3x3x3 区域内的所有方块
         for (int dx = -1; dx <= 1; dx++) {
             for (int dy = -1; dy <= 1; dy++) {
                 for (int dz = -1; dz <= 1; dz++) {
-                    posesToRefresh.add(origin.offset(dx, dy, dz));
+                    posesToRefresh.add(originPos.offset(dx, dy, dz));
                 }
             }
         }
+
 
         //TODO 将可能出现AO更新、面剔除更新的位置加入
         //对于
         NetworkSync.sendBlockSetToPlayers(event.getLevel().getServer().getPlayerList().getPlayers(),posesToRefresh, ClientHandlers.AO_FRESH_PACKET);
 //        Set<>
-
     }
-
-
 }

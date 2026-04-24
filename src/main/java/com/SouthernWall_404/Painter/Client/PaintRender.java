@@ -14,6 +14,8 @@ import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LightLayer;
+import net.minecraft.world.level.lighting.BlockLightEngine;
 import net.minecraft.world.phys.AABB;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
@@ -30,6 +32,8 @@ public class PaintRender {
 
     private static Map<BlockPos,AbstractRender<?,?>> renders=new HashMap<>();//总渲染内容缓存
     private static boolean isFirstRender=true;
+    private static Minecraft mc=Minecraft.getInstance();
+
 
     @SubscribeEvent
     public static void onRenderLevelStage(RenderLevelStageEvent event) {
@@ -58,13 +62,23 @@ public class PaintRender {
                 continue; // 不可见，跳过渲染
             }
 
-            render.render(pos,event.getPoseStack(), 0,0,event.getRenderTick(),buffer);
+
+            Level level=mc.level;
+            int packedOverLay=calculatePackedLight(level,pos);
+            render.render(pos,event.getPoseStack(),packedOverLay,0,event.getRenderTick(),buffer);
         }
 
         bufferSource.endBatch(RenderType.cutout());
 
     }
+    // 辅助方法：获取方块位置的光照值（合并天空光与方块光）
+    private static int calculatePackedLight(Level level, BlockPos pos) {
 
+        if(level==null)return 0;
+        int blockLight = level.getBrightness(LightLayer.BLOCK, pos);
+        int skyLight = level.getBrightness(LightLayer.SKY, pos);
+        return (skyLight << 20) | (blockLight << 4);  // 标准打包方式
+    }
     public static void redraw()
     {
 
