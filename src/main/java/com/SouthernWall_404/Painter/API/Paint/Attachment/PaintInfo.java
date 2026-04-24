@@ -24,6 +24,7 @@ import org.jetbrains.annotations.UnknownNullability;
 import javax.annotation.Nullable;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Function;
 
 public class PaintInfo implements IAttachment {
 
@@ -168,7 +169,8 @@ public class PaintInfo implements IAttachment {
     @Nullable
     private AbstractPaint createPaintByType(String type, HolderLookup.Provider provider, CompoundTag data,BlockPos pos) {
         // 通过工厂创建实例（假设工厂能返回 AbstractPaint 子类）
-        AbstractRender<?, ?> render = PaintContent.getRender(type).apply(pos);
+        Function<BlockPos,AbstractRender> function= PaintContent.getRender(type);
+        AbstractRender render=function.apply(pos);
         if (!(render instanceof AbstractPaint paint)) {
             // 类型不匹配，记录错误并返回 null
             return null;

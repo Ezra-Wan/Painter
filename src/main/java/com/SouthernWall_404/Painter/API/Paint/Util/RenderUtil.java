@@ -79,6 +79,8 @@ public class RenderUtil {
             int distance=mc.options.renderDistance().get()*16;
             Player player=mc.player;
 
+            if(player==null)return false;
+
             Vector3f eyePos=new Vector3f(player.getEyePosition());
             Vector3f blockPos=new Vector3f(pos);
 

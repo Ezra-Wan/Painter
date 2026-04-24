@@ -27,6 +27,7 @@ import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
+import net.neoforged.fml.loading.FMLEnvironment;
 import net.neoforged.neoforge.client.model.data.ModelData;
 
 import java.util.BitSet;
@@ -64,6 +65,7 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>, Dire
     @Override
     protected void update() {
         super.update();
+        if(FMLEnvironment.dist!=Dist.CLIENT)return;
         if (Minecraft.getInstance() == null) {
             return;
         }
@@ -229,6 +231,8 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>, Dire
             BlockState state = stateResult.getOrThrow();
             materials.put(flag, state);
         }
-        update();
+
+        createQuads();
+//        if(FMLEnvironment.dist==Dist.CLIENT) update();
     }
 }

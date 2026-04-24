@@ -54,12 +54,11 @@ public abstract class AbstractRender<T, F extends Object> implements IRender<T> 
 
     @OnlyIn(Dist.CLIENT)
     protected void update() {
-        PaintRender.redraw();
-
         if (FMLEnvironment.dist != Dist.CLIENT) return;
         Minecraft mc=Minecraft.getInstance();
         if(mc!=null)
         {
+            PaintRender.redraw();
             Level level=mc.level;
             if(level!=null)
             {
