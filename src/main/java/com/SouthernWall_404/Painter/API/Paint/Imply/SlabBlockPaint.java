@@ -122,6 +122,13 @@ public class SlabBlockPaint extends AbstractPaint {
         return direction;
     }
 
+    @Override
+    public Direction getDirectionForEmpty() {
+        if (slabType == SlabType.TOP)return Direction.DOWN;
+        if(slabType==SlabType.BOTTOM)return Direction.UP;
+        return Direction.UP;
+    }
+
     private BakedQuad createSlabQuad(BakedQuad quad, Direction direction, int tintIndex) {
         // 剔除不应该渲染的面
         SlabType uvSlabType = slabTypes.getOrDefault(getFlag(direction), slabType);

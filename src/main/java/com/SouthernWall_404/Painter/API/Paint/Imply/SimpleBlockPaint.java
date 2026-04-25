@@ -30,6 +30,11 @@ public class SimpleBlockPaint extends AbstractPaint {
     }
 
     @Override
+    public Direction getDirectionForEmpty() {
+        return Direction.UP;
+    }
+
+    @Override
     public void initFlags() {
         registerFlag(Direction.NORTH, NORTH);
         registerFlag(Direction.SOUTH, SOUTH);

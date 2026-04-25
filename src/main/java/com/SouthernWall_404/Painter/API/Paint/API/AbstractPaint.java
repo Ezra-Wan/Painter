@@ -141,12 +141,14 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>, Dire
             int flag = entry.getKey();
             BlockState state = materials.get(flag);
             Direction direction = getDirection(flag);
+            if(direction==null)direction=getDirectionForEmpty();
             ModelRender.AmbientOcclusionFace aoFace = new ModelRender.AmbientOcclusionFace();
             aoFace.calculate(level, state, blockPos.relative(direction), direction, shape, shapeFlags, true);
             aoFaces.put(flag, aoFace);
         }
     }
 
+    public abstract Direction getDirectionForEmpty();
 
     private static final double offset = 0.01; //TODO 考虑添加配置项
     @Override
