@@ -80,6 +80,8 @@ public class PlayerJoinEvent {
         }
     }
 
+    //TODO 封装一下
+
 //    @SubscribeEvent
 //    public static void onLevelTick(LevelTickEvent.Post event)
 //    {
