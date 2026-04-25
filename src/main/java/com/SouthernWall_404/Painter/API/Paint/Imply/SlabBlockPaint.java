@@ -75,6 +75,13 @@ public class SlabBlockPaint extends AbstractPaint {
     }
 
     @Override
+    public int getFlag(Direction object) {
+
+        if(object==null)return -1;
+        return super.getFlag(object);
+    }
+
+    @Override
     public void createQuads() {
         for(Map.Entry<Integer,BlockState> entry:materials.entrySet())
         {
