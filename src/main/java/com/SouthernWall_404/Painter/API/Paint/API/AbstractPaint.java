@@ -168,7 +168,7 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>, Dire
             if (!visibles.getOrDefault(flag,false))continue;
 
             Vec3 vec3 = new Vec3(blockPos.getX() + offset * normal.getX(),
-                    blockPos.getY() + offset * normal.getY(),
+                    blockPos.getY() + offset * normal.getY()+0.02,//TODO 记得删测试
                     blockPos.getZ() + offset * normal.getZ());
             for (BakedQuad quad : quads) {
                 if (aoFaces.containsKey(flag)) {

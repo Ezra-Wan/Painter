@@ -1,5 +1,8 @@
 package com.SouthernWall_404.Painter.API.Paint.Imply;
 
+import com.SouthernWall_404.LaplaceAPI.Math37.Vector3f;
+import com.SouthernWall_404.LaplaceAPI.RegulappleEngine.BakedQuad.VerticeInfo;
+import com.SouthernWall_404.LaplaceAPI.RegulappleEngine.BakedQuad.VerticesInfo;
 import com.SouthernWall_404.Painter.API.Paint.API.AbstractPaint;
 import com.SouthernWall_404.Painter.API.Paint.PaintContent;
 import net.minecraft.client.renderer.block.model.BakedQuad;
@@ -37,6 +40,17 @@ public class SlabBlockPaint extends AbstractPaint {
         super(blockPos,PaintContent.SLAB_BLOCK);
 
         this.slabType=slabType;
+        if(slabType==SlabType.TOP) normals.put(-1,new Vector3f(0,-1,0));
+        if(slabType==SlabType.BOTTOM) normals.put(-1,new Vector3f(0,1,0));
+
+    }
+
+
+    @Override
+    public void refreshVisible() {
+        super.refreshVisible();
+
+        visibles.put(-1,visibles.get(getFlag(getDirectionForEmpty())));
     }
 
     @Override
@@ -47,6 +61,15 @@ public class SlabBlockPaint extends AbstractPaint {
         registerFlag(Direction.EAST, EAST);
         registerFlag(Direction.UP, UP);
         registerFlag(Direction.DOWN, DOWN);
+
+
+    }
+
+    @Override
+    public void setMaterial(Direction f, BlockState blockState) {
+        if(slabType==SlabType.TOP&&f==Direction.DOWN)f=null;
+        if(slabType==SlabType.BOTTOM&&f==Direction.UP)f=null;
+        super.setMaterial(f, blockState);
     }
 
     @Override
@@ -75,6 +98,16 @@ public class SlabBlockPaint extends AbstractPaint {
     }
 
     @Override
+    public BlockState getMaterial(Direction f) {
+        if(f==null)
+        {
+            if(slabType==SlabType.TOP)f=Direction.DOWN;
+            if (slabType==SlabType.BOTTOM)f=Direction.UP;
+        }
+        return super.getMaterial(f);
+    }
+
+    @Override
     public int getFlag(Direction object) {
 
         if(object==null)return -1;
@@ -82,23 +115,94 @@ public class SlabBlockPaint extends AbstractPaint {
     }
 
     @Override
-    public void createQuads() {
-        for(Map.Entry<Integer,BlockState> entry:materials.entrySet())
-        {
-            int flag=entry.getKey();
-            BlockState material=entry.getValue();
+    public Direction getDirection(int flag) {
 
-            Direction direction=getDirection(flag);
-
-
-            if(slabTypes.get(flag)==null) slabTypes.put(flag,SlabType.TOP);
-            //            Block block= RenderUtil.getBlockFromID(paintPaths.get(flag));
-            List<BakedQuad> quads = createSlabQuads(direction,material);
-
-            objects.put(flag, quads);
-
-        }
+        if(flag==-1)return null;
+        return super.getDirection(flag);
     }
+
+    public List<BakedQuad> createQuad(int flag, BlockState material)
+    {
+        Direction direction = getDirection(flag);
+        Direction aoDirection=getDirectionForEmpty();
+        List<BakedQuad> originQuads = getQuadsForDirection(origin, direction);
+        List<BakedQuad> materialQuads = getQuadsForDirection(material, aoDirection);
+
+        if (originQuads == null || originQuads.isEmpty() || materialQuads == null || materialQuads.isEmpty()) {
+            return List.of();
+        }
+
+        // 为了简单，假设每个方向只有一个 quad（多数方块模型如此）；
+        // 如果有多个，你可以按索引一一对应，或统一使用第一个 originQuad 的形状。
+        BakedQuad originQuad = originQuads.get(0);
+        VerticesInfo originVertices = new VerticesInfo(originQuad);
+
+        List<BakedQuad> newQuads = new ArrayList<>();
+
+        for (BakedQuad materialQuad : materialQuads) {
+            VerticesInfo materialVertices = new VerticesInfo(materialQuad);
+
+            // 逐顶点混合数据
+            VerticeInfo[] mixedVertices = new VerticeInfo[4];
+            for (int i = 0; i < 4; i++) {
+                VerticeInfo originVert = originVertices.vertices.get(i);
+                VerticeInfo materialVert = materialVertices.vertices.get(i);
+
+                mixedVertices[i] = VerticeInfo.builder()
+                        .position(originVert.position)          // 几何位置来自原始方块
+                        .color(materialVert.alpha, materialVert.red, materialVert.green, materialVert.blue) // 颜色来自原始方块
+                        .uv(materialVert.u, materialVert.v)     // ★ 纹理坐标来自材质方块 ★
+                        .light(originVert.light)                // 光照值保持原始方块（或可根据需要混合）
+                        .normal(originVert.normal)              // 法线保持原始方块
+                        .build();
+            }
+
+            VerticesInfo newQuadVertices = new VerticesInfo(List.of(mixedVertices));
+            int[] newVertexArray = newQuadVertices.vertices();
+
+            // 使用 materialQuad 的元数据创建新的 BakedQuad
+            BakedQuad newQuad = new BakedQuad(
+                    newVertexArray,
+                    materialQuad.getTintIndex(),
+                    originQuad.getDirection(),
+                    materialQuad.getSprite(),
+                    true
+            );
+
+            newQuads.add(newQuad);
+        }
+
+        return newQuads;
+    }
+
+    @Override
+    public void createQuads() {
+        materials.forEach((flag, material) -> {
+
+
+            objects.put(flag, createQuad(flag,material));   // 存入结果，objects 应为 Map<Integer, List<BakedQuad>>
+        });
+        objects.put(-1, createQuad(-1,materials.get(-1)));   // 存入结果，objects 应为 Map<Integer, List<BakedQuad>>
+
+    }
+//    @Override
+//    public void createQuads() {
+//        for(Map.Entry<Integer,BlockState> entry:materials.entrySet())
+//        {
+//            int flag=entry.getKey();
+//            BlockState material=entry.getValue();
+//
+//            Direction direction=getDirection(flag);
+//
+//
+//            if(slabTypes.get(flag)==null) slabTypes.put(flag,SlabType.TOP);
+//            //            Block block= RenderUtil.getBlockFromID(paintPaths.get(flag));
+//            List<BakedQuad> quads = createSlabQuads(direction,material);
+//
+//            objects.put(flag, quads);
+//
+//        }
+//    }
 
     private List<BakedQuad> createSlabQuads(Direction direction,BlockState material)
     {
