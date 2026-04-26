@@ -23,11 +23,6 @@ public class SimpleBlockPaint extends AbstractPaint {
     }
 
     @Override
-    public Direction getDirectionForEmpty() {
-        return Direction.UP;
-    }
-
-    @Override
     public void initNormalForEmpty() {
 
     }

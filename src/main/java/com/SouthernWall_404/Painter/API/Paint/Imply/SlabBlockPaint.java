@@ -175,14 +175,7 @@ public class SlabBlockPaint extends AbstractPaint {
         });
 
     }
-    //TODO 需要处理无方向面的渲染bug
-
-    @Override
-    public Direction getDirectionForEmpty() {
-        if (slabType == SlabType.TOP)return Direction.DOWN;
-        if(slabType==SlabType.BOTTOM)return Direction.UP;
-        return Direction.UP;
-    }
+    //TODO 需要处理无方向面的渲染bug，需要注意，null面似乎是以当前方块为基准计算的
 //
 //    private BakedQuad createSlabQuad(BakedQuad quad, Direction direction, int tintIndex) {
 //        // 剔除不应该渲染的面
