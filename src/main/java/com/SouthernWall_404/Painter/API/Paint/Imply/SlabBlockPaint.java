@@ -69,17 +69,6 @@ public class SlabBlockPaint extends AbstractPaint {
         update();
     }
 
-    @Override
-    public BlockState getMaterial(Direction f) {
-        if(f==null)
-        {
-            if(slabType==SlabType.TOP)f=Direction.DOWN;
-            if (slabType==SlabType.BOTTOM)f=Direction.UP;
-        }
-        return super.getMaterial(f);
-    }
-
-
     //TODO 需要处理无方向面的渲染bug，需要注意，null面似乎是以当前方块为基准计算的
 //
 //    private BakedQuad createSlabQuad(BakedQuad quad, Direction direction, int tintIndex) {
