@@ -18,7 +18,7 @@ import org.jetbrains.annotations.UnknownNullability;
 import java.util.*;
 
 public class SlabBlockPaint extends AbstractPaint {
-    private static final int NORTH = 1, SOUTH = 2, WEST = 4, EAST = 8, UP = 16, DOWN = 32;
+
 
 
 
@@ -50,17 +50,7 @@ public class SlabBlockPaint extends AbstractPaint {
         if(slabType==SlabType.BOTTOM) normals.put(-1,new Vector3f(0,1,0));
     }
 
-    @Override
-    public void initFlags() {
-        registerFlag(Direction.NORTH, NORTH);
-        registerFlag(Direction.SOUTH, SOUTH);
-        registerFlag(Direction.WEST, WEST);
-        registerFlag(Direction.EAST, EAST);
-        registerFlag(Direction.UP, UP);
-        registerFlag(Direction.DOWN, DOWN);
 
-
-    }
 
     @Override
     public void setMaterial(Direction f, BlockState blockState) {
@@ -182,46 +172,7 @@ public class SlabBlockPaint extends AbstractPaint {
         objects.put(-1, createQuad(-1,materials.get(-1)));   // 存入结果，objects 应为 Map<Integer, List<BakedQuad>>
 
     }
-//    @Override
-//    public void createQuads() {
-//        for(Map.Entry<Integer,BlockState> entry:materials.entrySet())
-//        {
-//            int flag=entry.getKey();
-//            BlockState material=entry.getValue();
-//
-//            Direction direction=getDirection(flag);
-//
-//
-//            if(slabTypes.get(flag)==null) slabTypes.put(flag,SlabType.TOP);
-//            //            Block block= RenderUtil.getBlockFromID(paintPaths.get(flag));
-//            List<BakedQuad> quads = createSlabQuads(direction,material);
-//
-//            objects.put(flag, quads);
-//
-//        }
-//    }
-
-    private List<BakedQuad> createSlabQuads(Direction direction,BlockState material)
-    {
-        List<BakedQuad> quads=getQuadsForDirection(material,direction);
-        List<BakedQuad> result=new ArrayList<>();
-        for(BakedQuad quad:quads)
-        {
-            BakedQuad resultQuad=createSlabQuad(quad,direction,quad.getTintIndex());
-
-            result.add(resultQuad);
-        }
-
-
-        return result;
-    }
     //TODO 需要处理无方向面的渲染bug
-
-    public Direction getSpecialDirectionForCheck(Direction direction) {
-        if(direction==Direction.UP&&slabType==SlabType.BOTTOM) return null;
-        if(direction==Direction.DOWN&&slabType==SlabType.TOP)return null;
-        return direction;
-    }
 
     @Override
     public Direction getDirectionForEmpty() {
@@ -229,108 +180,108 @@ public class SlabBlockPaint extends AbstractPaint {
         if(slabType==SlabType.BOTTOM)return Direction.UP;
         return Direction.UP;
     }
-
-    private BakedQuad createSlabQuad(BakedQuad quad, Direction direction, int tintIndex) {
-        // 剔除不应该渲染的面
-        SlabType uvSlabType = slabTypes.getOrDefault(getFlag(direction), slabType);
-        TextureAtlasSprite sprite = quad.getSprite();
-        int[] original = quad.getVertices();
-        int[] newVertices = original.clone();
-
-        float v0 = sprite.getV0();
-        float v1 = sprite.getV1();
-        float vMid = (v0 + v1) / 2f;
-
-        float u0=sprite.getU0();
-        float u1=sprite.getU1();
-        float uMid=(u0+u1)/2f;
-
-        float[][] originUV=new float[4][2];
-
-
-        for (int i = 0; i < 4; i++) {
-            int offset = i * 8;
-
-            // 读取原始数据
-            float x = Float.intBitsToFloat(original[offset]);
-            float y = Float.intBitsToFloat(original[offset + 1]);
-            float z = Float.intBitsToFloat(original[offset + 2]);
-            float u = Float.intBitsToFloat(original[offset + 4]);
-            float v = Float.intBitsToFloat(original[offset + 5]);
-
-            // 调整 Y 坐标（半砖高度裁剪）
-            if (slabType == SlabType.TOP && y < 0.5f) y = 0.5f;
-            if (slabType == SlabType.BOTTOM && y > 0.5f) y = 0.5f;
-
-
-            originUV[i][0]=u;
-            originUV[i][1]=v;
-            // 调整 V 坐标（仅水平方向的面）
-
-        int packedNormal = packNormal(direction.getNormal().getX(),
-                direction.getNormal().getY(),
-                direction.getNormal().getZ());
-            // 写回新顶点（保留颜色、光照、法线）
-            newVertices[offset]     = Float.floatToRawIntBits(x);
-            newVertices[offset + 1] = Float.floatToRawIntBits(y);
-            newVertices[offset + 2] = Float.floatToRawIntBits(z);
-            newVertices[offset + 3] = -1;   // 白色
-
-            newVertices[offset + 6] = 0;    // 光照（渲染时填充）
-            newVertices[offset + 7] = packedNormal;
-        }
-
-
-        //从底面的uv情况获取具体调整值
-
-        float leftDownU=originUV[1][0];
-        float rightDownU=originUV[2][0];
-
-        boolean isV=leftDownU==rightDownU?false:true;
-
-        for(int i=0;i<4;i++)
-        {
-
-            int offset = i * 8;
-            float u=originUV[i][0];
-            float v=originUV[i][1];
-
-
-            if (direction.getAxis().isHorizontal()) {
-                if(isV)
-                {
-                    switch (uvSlabType) {
-                        case TOP -> v = v0 + (v - v0) * 0.5f;
-                        case BOTTOM -> v = vMid + (v - v0)*0.5f;
-                        case DOUBLE -> {} // 不变
-                    }
-                }else
-                {
-                    switch (uvSlabType) {
-                        case TOP -> u = u0 + (u - u0) * 0.5f;
-                        case BOTTOM -> u = uMid + (u - u0)*0.5f;
-                        case DOUBLE -> {} // 不变
-                    }
-                }
-
-            }
-
-            newVertices[offset + 4] = Float.floatToRawIntBits(u);
-            newVertices[offset + 5] = Float.floatToRawIntBits(v);
-
-        }
-
-        return new BakedQuad(newVertices, tintIndex, direction, sprite, true);
-    }
-
-
-    // 辅助方法：将法线向量打包为 int（与 DefaultVertexFormat 一致）
-    private static int packNormal(float x, float y, float z) {
-        int nx = (int) (x * 127);
-        int ny = (int) (y * 127);
-        int nz = (int) (z * 127);
-        return (nx & 0xFF) | ((ny & 0xFF) << 8) | ((nz & 0xFF) << 16);
-    }
+//
+//    private BakedQuad createSlabQuad(BakedQuad quad, Direction direction, int tintIndex) {
+//        // 剔除不应该渲染的面
+//        SlabType uvSlabType = slabTypes.getOrDefault(getFlag(direction), slabType);
+//        TextureAtlasSprite sprite = quad.getSprite();
+//        int[] original = quad.getVertices();
+//        int[] newVertices = original.clone();
+//
+//        float v0 = sprite.getV0();
+//        float v1 = sprite.getV1();
+//        float vMid = (v0 + v1) / 2f;
+//
+//        float u0=sprite.getU0();
+//        float u1=sprite.getU1();
+//        float uMid=(u0+u1)/2f;
+//
+//        float[][] originUV=new float[4][2];
+//
+//
+//        for (int i = 0; i < 4; i++) {
+//            int offset = i * 8;
+//
+//            // 读取原始数据
+//            float x = Float.intBitsToFloat(original[offset]);
+//            float y = Float.intBitsToFloat(original[offset + 1]);
+//            float z = Float.intBitsToFloat(original[offset + 2]);
+//            float u = Float.intBitsToFloat(original[offset + 4]);
+//            float v = Float.intBitsToFloat(original[offset + 5]);
+//
+//            // 调整 Y 坐标（半砖高度裁剪）
+//            if (slabType == SlabType.TOP && y < 0.5f) y = 0.5f;
+//            if (slabType == SlabType.BOTTOM && y > 0.5f) y = 0.5f;
+//
+//
+//            originUV[i][0]=u;
+//            originUV[i][1]=v;
+//            // 调整 V 坐标（仅水平方向的面）
+//
+//        int packedNormal = packNormal(direction.getNormal().getX(),
+//                direction.getNormal().getY(),
+//                direction.getNormal().getZ());
+//            // 写回新顶点（保留颜色、光照、法线）
+//            newVertices[offset]     = Float.floatToRawIntBits(x);
+//            newVertices[offset + 1] = Float.floatToRawIntBits(y);
+//            newVertices[offset + 2] = Float.floatToRawIntBits(z);
+//            newVertices[offset + 3] = -1;   // 白色
+//
+//            newVertices[offset + 6] = 0;    // 光照（渲染时填充）
+//            newVertices[offset + 7] = packedNormal;
+//        }
+//
+//
+//        //从底面的uv情况获取具体调整值
+//
+//        float leftDownU=originUV[1][0];
+//        float rightDownU=originUV[2][0];
+//
+//        boolean isV=leftDownU==rightDownU?false:true;
+//
+//        for(int i=0;i<4;i++)
+//        {
+//
+//            int offset = i * 8;
+//            float u=originUV[i][0];
+//            float v=originUV[i][1];
+//
+//
+//            if (direction.getAxis().isHorizontal()) {
+//                if(isV)
+//                {
+//                    switch (uvSlabType) {
+//                        case TOP -> v = v0 + (v - v0) * 0.5f;
+//                        case BOTTOM -> v = vMid + (v - v0)*0.5f;
+//                        case DOUBLE -> {} // 不变
+//                    }
+//                }else
+//                {
+//                    switch (uvSlabType) {
+//                        case TOP -> u = u0 + (u - u0) * 0.5f;
+//                        case BOTTOM -> u = uMid + (u - u0)*0.5f;
+//                        case DOUBLE -> {} // 不变
+//                    }
+//                }
+//
+//            }
+//
+//            newVertices[offset + 4] = Float.floatToRawIntBits(u);
+//            newVertices[offset + 5] = Float.floatToRawIntBits(v);
+//
+//        }
+//
+//        return new BakedQuad(newVertices, tintIndex, direction, sprite, true);
+//    }
+//
+//
+//    // 辅助方法：将法线向量打包为 int（与 DefaultVertexFormat 一致）
+//    private static int packNormal(float x, float y, float z) {
+//        int nx = (int) (x * 127);
+//        int ny = (int) (y * 127);
+//        int nz = (int) (z * 127);
+//        return (nx & 0xFF) | ((ny & 0xFF) << 8) | ((nz & 0xFF) << 16);
+//    }
 
     // ======== 序列化/反序列化 ========
     @Override

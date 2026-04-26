@@ -42,7 +42,7 @@ import java.util.Map;
 public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>, Direction> {
 
     protected static final int FLAG_NONE = -1;
-
+    protected static final int NORTH = 1, SOUTH = 2, WEST = 4, EAST = 8, UP = 16, DOWN = 32;
     //========不需要持久化的数据========
     public static float[] shape = new float[ModelRender.DIRECTIONS.length * 2];
     private static BitSet shapeFlags = new BitSet(3);
@@ -154,6 +154,17 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>, Dire
             aoFace.calculate(level, state, blockPos.relative(direction), direction, shape, shapeFlags, true);
             aoFaces.put(flag, aoFace);
         }
+    }
+    @Override
+    public void initFlags() {
+        registerFlag(Direction.NORTH, NORTH);
+        registerFlag(Direction.SOUTH, SOUTH);
+        registerFlag(Direction.WEST, WEST);
+        registerFlag(Direction.EAST, EAST);
+        registerFlag(Direction.UP, UP);
+        registerFlag(Direction.DOWN, DOWN);
+
+
     }
 
     public abstract Direction getDirectionForEmpty();

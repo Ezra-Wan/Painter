@@ -16,13 +16,6 @@ import java.util.Map;
 
 public class SimpleBlockPaint extends AbstractPaint {
 
-    //======== Flag 定义，与 Direction 绑定 ========
-    private static final int NORTH = 1;
-    private static final int SOUTH = 2;
-    private static final int WEST  = 4;
-    private static final int EAST  = 8;
-    private static final int UP    = 16;
-    private static final int DOWN  = 32;
 
 
     public SimpleBlockPaint(BlockPos blockPos) {
@@ -37,16 +30,6 @@ public class SimpleBlockPaint extends AbstractPaint {
     @Override
     public void initNormalForEmpty() {
 
-    }
-
-    @Override
-    public void initFlags() {
-        registerFlag(Direction.NORTH, NORTH);
-        registerFlag(Direction.SOUTH, SOUTH);
-        registerFlag(Direction.WEST,  WEST);
-        registerFlag(Direction.EAST,  EAST);
-        registerFlag(Direction.UP,    UP);
-        registerFlag(Direction.DOWN,  DOWN);
     }
 
     public List<BakedQuad> createQuad(int flag,BlockState material)
