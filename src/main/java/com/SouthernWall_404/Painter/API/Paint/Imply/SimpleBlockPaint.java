@@ -21,12 +21,4 @@ public class SimpleBlockPaint extends AbstractPaint {
     public SimpleBlockPaint(BlockPos blockPos) {
         super(blockPos, PaintContent.SIMPLE_BLOCK);
     }
-
-    @Override
-    public void initNormalForEmpty() {
-
-    }
-
-
-
 }

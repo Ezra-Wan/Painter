@@ -37,17 +37,9 @@ public class SlabBlockPaint extends AbstractPaint {
 
         super(blockPos,PaintContent.SLAB_BLOCK);
         this.slabType=slabType;
-        initNormalForEmpty();
 
     }
 
-    @Override
-    public void initNormalForEmpty() {
-
-
-        if(slabType==SlabType.TOP) normals.put(-1,new Vector3f(0,-1,0));
-        if(slabType==SlabType.BOTTOM) normals.put(-1,new Vector3f(0,1,0));
-    }
 
     @Override
     public void putMaterial(Direction f, BlockState blockState) {

@@ -222,8 +222,6 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>, Dire
         return newQuads;
     }
 
-//    public abstract List<BakedQuad> createQuad(int flag,BlockState material);
-
     public void createQuads() {
         materials.forEach((flag, material) -> {
 
@@ -231,8 +229,6 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>, Dire
             objects.put(flag, createQuad(flag,material));   // 存入结果，objects 应为 Map<Integer, List<BakedQuad>>
         });
     }
-
-    public abstract void initNormalForEmpty();
 
     private static final double offset = 0.01; //TODO 考虑添加配置项
     @Override
