@@ -158,6 +158,8 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>, Dire
 
     public abstract Direction getDirectionForEmpty();
 
+    public abstract void initNormalForEmpty();
+
     private static final double offset = 0.01; //TODO 考虑添加配置项
     @Override
     @OnlyIn(Dist.CLIENT)

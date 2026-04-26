@@ -11,7 +11,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.SlabType;
 import org.jetbrains.annotations.UnknownNullability;
@@ -38,20 +37,18 @@ public class SlabBlockPaint extends AbstractPaint {
     {
 
         super(blockPos,PaintContent.SLAB_BLOCK);
-
         this.slabType=slabType;
-        if(slabType==SlabType.TOP) normals.put(-1,new Vector3f(0,-1,0));
-        if(slabType==SlabType.BOTTOM) normals.put(-1,new Vector3f(0,1,0));
+        initNormalForEmpty();
 
     }
 
-//
-//    @Override
-//    public void refreshVisible() {
-//        super.refreshVisible();
-//
-//        visibles.put(-1,visibles.get(getFlag(getDirectionForEmpty())));
-//    }
+    @Override
+    public void initNormalForEmpty() {
+
+
+        if(slabType==SlabType.TOP) normals.put(-1,new Vector3f(0,-1,0));
+        if(slabType==SlabType.BOTTOM) normals.put(-1,new Vector3f(0,1,0));
+    }
 
     @Override
     public void initFlags() {

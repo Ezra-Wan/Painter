@@ -35,6 +35,11 @@ public class SimpleBlockPaint extends AbstractPaint {
     }
 
     @Override
+    public void initNormalForEmpty() {
+
+    }
+
+    @Override
     public void initFlags() {
         registerFlag(Direction.NORTH, NORTH);
         registerFlag(Direction.SOUTH, SOUTH);
