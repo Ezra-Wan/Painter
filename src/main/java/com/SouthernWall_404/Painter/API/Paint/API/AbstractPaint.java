@@ -271,8 +271,18 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>, Dire
     public void putMaterial(Direction f, BlockState blockState)
     {
         int flag = getFlag(f);
-        materials.put(flag, blockState);
+
+        if(hasNullInDirection(f))
+        {
+            materials.put(-flag,blockState);
+        }else
+        {
+            materials.put(flag, blockState);
+        }
     }
+
+    public abstract boolean hasNullInDirection(Direction f);
+
 
     public BlockState getMaterial(Direction f) {
         int flag = getFlag(f);

@@ -21,4 +21,9 @@ public class SimpleBlockPaint extends AbstractPaint {
     public SimpleBlockPaint(BlockPos blockPos) {
         super(blockPos, PaintContent.SIMPLE_BLOCK);
     }
+
+    @Override
+    public boolean hasNullInDirection(Direction f) {
+        return false;
+    }
 }

@@ -1,11 +1,7 @@
 package com.SouthernWall_404.Painter.API.Paint.Imply;
 
-import com.SouthernWall_404.LaplaceAPI.Math37.Vector3f;
-import com.SouthernWall_404.LaplaceAPI.RegulappleEngine.BakedQuad.VerticeInfo;
-import com.SouthernWall_404.LaplaceAPI.RegulappleEngine.BakedQuad.VerticesInfo;
 import com.SouthernWall_404.Painter.API.Paint.API.AbstractPaint;
 import com.SouthernWall_404.Painter.API.Paint.PaintContent;
-import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
@@ -40,17 +36,12 @@ public class SlabBlockPaint extends AbstractPaint {
 
     }
 
-
     @Override
-    public void putMaterial(Direction f, BlockState blockState) {
-        super.putMaterial(f, blockState);
+    public boolean hasNullInDirection(Direction f) {
 
-        if((slabType==SlabType.TOP&&f==Direction.DOWN)||(slabType==SlabType.BOTTOM&&f==Direction.UP))
-        {
-            int flag=getFlag(f);
-            materials.remove(flag);
-            materials.put(-flag,blockState);
-        }
+        if(slabType==SlabType.TOP&&f==Direction.DOWN) return true;
+        if(slabType==SlabType.BOTTOM&&f==Direction.UP)return true;
+        return false;
     }
 
     @Override
