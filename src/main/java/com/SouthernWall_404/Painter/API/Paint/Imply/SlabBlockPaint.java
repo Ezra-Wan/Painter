@@ -45,13 +45,13 @@ public class SlabBlockPaint extends AbstractPaint {
 
     }
 
-
-    @Override
-    public void refreshVisible() {
-        super.refreshVisible();
-
-        visibles.put(-1,visibles.get(getFlag(getDirectionForEmpty())));
-    }
+//
+//    @Override
+//    public void refreshVisible() {
+//        super.refreshVisible();
+//
+//        visibles.put(-1,visibles.get(getFlag(getDirectionForEmpty())));
+//    }
 
     @Override
     public void initFlags() {

@@ -41,6 +41,8 @@ import java.util.Map;
  */
 public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>, Direction> {
 
+    protected static final int FLAG_NONE = -1;
+
     //========不需要持久化的数据========
     public static float[] shape = new float[ModelRender.DIRECTIONS.length * 2];
     private static BitSet shapeFlags = new BitSet(3);
@@ -123,16 +125,22 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>, Dire
     public abstract void createQuads();
 
     @OnlyIn(Dist.CLIENT)
-    public void refreshVisible()
-    {
-        Level level=Minecraft.getInstance().level;
-        flags.forEach((direction,flag)->{
-            boolean shouldRender=RenderUtil.shouldRenderFace(blockPos, origin, direction);
-            visibles.put(flag,shouldRender);
-
+    public void refreshVisible() {
+        Level level = Minecraft.getInstance().level;
+        flags.forEach((direction, flag) -> {
+            boolean shouldRender = RenderUtil.shouldRenderFace(blockPos, origin, direction);
+            visibles.put(flag, shouldRender);
         });
+        //如果存在无方向面，将其可见性绑定到 getDirectionForEmpty() 对应的面
+        if (materials.containsKey(FLAG_NONE)) {
+            Direction refDir = getDirectionForEmpty();
+            if (refDir != null) {
+                int refFlag = getFlag(refDir);
+                boolean visible = visibles.getOrDefault(refFlag, false);
+                visibles.put(FLAG_NONE, visible);
+            }
+        }
     }
-
     @OnlyIn(Dist.CLIENT)
     public void refreshAO(BlockPos blockPos) {
         Level level = Minecraft.getInstance().level;
