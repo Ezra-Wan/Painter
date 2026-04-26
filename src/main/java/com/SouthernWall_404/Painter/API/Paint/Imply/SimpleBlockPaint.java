@@ -34,9 +34,8 @@ public class SimpleBlockPaint extends AbstractPaint {
 
     public List<BakedQuad> createQuad(int flag,BlockState material)
     {
-        Direction direction = getDirection(flag);
-        List<BakedQuad> originQuads = getQuadsForDirection(origin, direction);
-        List<BakedQuad> materialQuads = getQuadsForDirection(material, direction);
+        List<BakedQuad> originQuads = getQuadsForDirection(origin, flag);
+        List<BakedQuad> materialQuads = getQuadsForDirection(material, flag);
 
         if (originQuads == null || originQuads.isEmpty() || materialQuads == null || materialQuads.isEmpty()) {
             return List.of();

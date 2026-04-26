@@ -31,7 +31,7 @@ public class PlayerJoinEvent {
 //            Sync.syncLevelAttachment(level,ModAttachments.PAINT_CHUNK_INFO.get(),player);
 //            for(ChunkPos pos:paintChunkInfo.getPaintPoses())
 //            {
-//                PaintUtil.syncToClient(pos,player);
+//                PaintUtil.syncToClient(pos,player);//TODO 退出清缓存
 //            }
         }
     }

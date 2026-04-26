@@ -6,7 +6,6 @@ import com.SouthernWall_404.LaplaceAPI.RegulappleEngine.BakedQuad.VerticesInfo;
 import com.SouthernWall_404.Painter.API.Paint.API.AbstractPaint;
 import com.SouthernWall_404.Painter.API.Paint.PaintContent;
 import net.minecraft.client.renderer.block.model.BakedQuad;
-import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
@@ -50,13 +49,16 @@ public class SlabBlockPaint extends AbstractPaint {
         if(slabType==SlabType.BOTTOM) normals.put(-1,new Vector3f(0,1,0));
     }
 
-
-
     @Override
-    public void setMaterial(Direction f, BlockState blockState) {
-        if(slabType==SlabType.TOP&&f==Direction.DOWN)f=null;
-        if(slabType==SlabType.BOTTOM&&f==Direction.UP)f=null;
-        super.setMaterial(f, blockState);
+    public void putMaterial(Direction f, BlockState blockState) {
+        super.putMaterial(f, blockState);
+
+        if((slabType==SlabType.TOP&&f==Direction.DOWN)||(slabType==SlabType.BOTTOM&&f==Direction.UP))
+        {
+            int flag=getFlag(f);
+            materials.remove(flag);
+            materials.put(-flag,blockState);
+        }
     }
 
     @Override
@@ -111,9 +113,9 @@ public class SlabBlockPaint extends AbstractPaint {
     public List<BakedQuad> createQuad(int flag, BlockState material)
     {
         Direction direction = getDirection(flag);
-        Direction aoDirection=getDirectionForEmpty();
-        List<BakedQuad> originQuads = getQuadsForDirection(origin, direction);
-        List<BakedQuad> materialQuads = getQuadsForDirection(material, aoDirection);
+        Direction aoDirection=getDirection(flag);
+        List<BakedQuad> originQuads = getQuadsForDirection(origin, flag);
+        List<BakedQuad> materialQuads = getQuadsForDirection(material, getFlag(direction));
 
         if (originQuads == null || originQuads.isEmpty() || materialQuads == null || materialQuads.isEmpty()) {
             return List.of();
@@ -168,8 +170,9 @@ public class SlabBlockPaint extends AbstractPaint {
 
 
             objects.put(flag, createQuad(flag,material));   // 存入结果，objects 应为 Map<Integer, List<BakedQuad>>
+//            objects.put(-flag, createQuad(-flag,material));   // 存入结果，objects 应为 Map<Integer, List<BakedQuad>>
+
         });
-        objects.put(-1, createQuad(-1,materials.get(-1)));   // 存入结果，objects 应为 Map<Integer, List<BakedQuad>>
 
     }
     //TODO 需要处理无方向面的渲染bug

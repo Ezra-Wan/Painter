@@ -41,8 +41,10 @@ import java.util.Map;
  */
 public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>, Direction> {
 
-    protected static final int FLAG_NONE = -1;
+//    protected static final int FLAG_NONE = -1;
     protected static final int NORTH = 1, SOUTH = 2, WEST = 4, EAST = 8, UP = 16, DOWN = 32;
+    protected static final int NULL_NORTH = -1, NULL_SOUTH = -2, NULL_WEST = -4, NULL_EAST = -8, NULL_UP = -16, NULL_DOWN = -32;
+
     //========不需要持久化的数据========
     public static float[] shape = new float[ModelRender.DIRECTIONS.length * 2];
     private static BitSet shapeFlags = new BitSet(3);
@@ -82,6 +84,8 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>, Dire
         super.registerFlag(direction, flag);
 
         normals.put(flag,new Vector3f(direction));
+        normals.put(-flag,new Vector3f(direction));
+
     }
 
     public void cycleTextureUV(Direction direction) {
@@ -91,22 +95,29 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>, Dire
     public void cycleTextureDir(Direction direction) {
         BlockState material = getMaterial(direction);
         if (material.hasProperty(TrapDoorBlock.HALF) && material.getOptionalValue(TrapDoorBlock.OPEN).orElse(false))
-            setMaterial(direction, material.cycle(TrapDoorBlock.HALF));
+            paint(direction, material.cycle(TrapDoorBlock.HALF));
         else if (material.hasProperty(BlockStateProperties.FACING))
-            setMaterial(direction, material.cycle(BlockStateProperties.FACING));
+            paint(direction, material.cycle(BlockStateProperties.FACING));
         else if (material.hasProperty(BlockStateProperties.HORIZONTAL_FACING))
-            setMaterial(direction, material.setValue(BlockStateProperties.HORIZONTAL_FACING,
+            paint(direction, material.setValue(BlockStateProperties.HORIZONTAL_FACING,
                     material.getValue(BlockStateProperties.HORIZONTAL_FACING).getClockWise()));
         else if (material.hasProperty(BlockStateProperties.AXIS))
-            setMaterial(direction, material.cycle(BlockStateProperties.AXIS));
+            paint(direction, material.cycle(BlockStateProperties.AXIS));
         else if (material.hasProperty(BlockStateProperties.HORIZONTAL_AXIS))
-            setMaterial(direction, material.cycle(BlockStateProperties.HORIZONTAL_AXIS));
+            paint(direction, material.cycle(BlockStateProperties.HORIZONTAL_AXIS));
         else if (material.hasProperty(BlockStateProperties.LIT))
-            setMaterial(direction, material.cycle(BlockStateProperties.LIT));
+            paint(direction, material.cycle(BlockStateProperties.LIT));
         super.update();
     }
 
-    public List<BakedQuad> getQuadsForDirection(BlockState state, Direction direction) {
+    public List<BakedQuad> getQuadsForDirection(BlockState state, int flag) {
+        Direction direction;
+
+        if(flag<0)
+        {
+            direction=null;
+        }else direction=getDirection(flag);
+
         BakedModel model = Minecraft.getInstance().getModelManager().getBlockModelShaper().getBlockModel(state);
         RandomSource random = RandomSource.create();
         RenderType renderType = RenderUtil.getRenderType(state);
@@ -114,6 +125,7 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>, Dire
     }
 
     public Direction getDirection(int flag) {
+        if(flag<0)flag=-flag;
         for (Map.Entry<Direction, Integer> entry : flags.entrySet()) {
             if (entry.getValue() == flag) {
                 return entry.getKey();
@@ -130,16 +142,8 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>, Dire
         flags.forEach((direction, flag) -> {
             boolean shouldRender = RenderUtil.shouldRenderFace(blockPos, origin, direction);
             visibles.put(flag, shouldRender);
+            visibles.put(-flag,shouldRender);
         });
-        //如果存在无方向面，将其可见性绑定到 getDirectionForEmpty() 对应的面
-        if (materials.containsKey(FLAG_NONE)) {
-            Direction refDir = getDirectionForEmpty();
-            if (refDir != null) {
-                int refFlag = getFlag(refDir);
-                boolean visible = visibles.getOrDefault(refFlag, false);
-                visibles.put(FLAG_NONE, visible);
-            }
-        }
     }
     @OnlyIn(Dist.CLIENT)
     public void refreshAO(BlockPos blockPos) {
@@ -149,7 +153,7 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>, Dire
             int flag = entry.getKey();
             BlockState state = materials.get(flag);
             Direction direction = getDirection(flag);
-            if(direction==null)direction=getDirectionForEmpty();
+
             ModelRender.AmbientOcclusionFace aoFace = new ModelRender.AmbientOcclusionFace();
             aoFace.calculate(level, state, blockPos.relative(direction), direction, shape, shapeFlags, true);
             aoFaces.put(flag, aoFace);
@@ -189,7 +193,7 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>, Dire
             if (!visibles.getOrDefault(flag,false))continue;
 
             Vec3 vec3 = new Vec3(blockPos.getX() + offset * normal.getX(),
-                    blockPos.getY() + offset * normal.getY()+0.02,//TODO 记得删测试
+                    blockPos.getY() + offset * normal.getY()-0.02,//TODO 记得删测试
                     blockPos.getZ() + offset * normal.getZ());
             for (BakedQuad quad : quads) {
                 if (aoFaces.containsKey(flag)) {
@@ -203,10 +207,16 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>, Dire
         }
     }
 
-    public void setMaterial(Direction f, BlockState blockState) {
+    public final void paint(Direction f, BlockState blockState) {
+
+        putMaterial(f,blockState);
+        update();
+    }
+
+    public void putMaterial(Direction f, BlockState blockState)
+    {
         int flag = getFlag(f);
         materials.put(flag, blockState);
-        update();
     }
 
     public BlockState getMaterial(Direction f) {

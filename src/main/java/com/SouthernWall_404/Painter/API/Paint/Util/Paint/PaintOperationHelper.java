@@ -1,7 +1,6 @@
 package com.SouthernWall_404.Painter.API.Paint.Util.Paint;
 
 import com.SouthernWall_404.Painter.API.Paint.API.AbstractPaint;
-import com.SouthernWall_404.Painter.API.Paint.API.AbstractRender;
 import com.SouthernWall_404.Painter.API.Paint.Attachment.PaintInfo;
 import com.SouthernWall_404.Painter.API.Paint.Imply.SimpleBlockPaint;
 import com.SouthernWall_404.Painter.API.Paint.Imply.SlabBlockPaint;
@@ -23,8 +22,6 @@ import net.minecraft.world.level.block.state.properties.SlabType;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
 
 import java.util.Map;
 
@@ -64,7 +61,7 @@ public final class PaintOperationHelper {
 
             AbstractPaint paint=paints.get(blockPos);
 
-            paint.setMaterial(direction,material);
+            paint.paint(direction,material);
 
             paintInfo.putPaints(level,blockPos, paint);
             chunk.setUnsaved(true);
@@ -82,13 +79,13 @@ public final class PaintOperationHelper {
             {
                 SlabType slabType=origin.getValue(SlabBlock.TYPE);
                 AbstractPaint paint=new SlabBlockPaint(blockPos,slabType);
-                paint.setMaterial(direction, material);
+                paint.paint(direction, material);
                 paintInfo.putPaints(level,blockPos, paint);
             }
             if(origin.isCollisionShapeFullBlock(level,blockPos))
             {
                 AbstractPaint paint=new SimpleBlockPaint(blockPos);
-                paint.setMaterial(direction, material);
+                paint.paint(direction, material);
                 paintInfo.putPaints(level,blockPos, paint);
             }
             //        AbstractRender render = new SimpleBlockPaint();//默认普通方块
