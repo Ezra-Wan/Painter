@@ -88,19 +88,6 @@ public class SlabBlockPaint extends AbstractPaint {
         return super.getMaterial(f);
     }
 
-    @Override
-    public int getFlag(Direction object) {
-
-        if(object==null)return -1;
-        return super.getFlag(object);
-    }
-
-    @Override
-    public Direction getDirection(int flag) {
-
-        if(flag==-1)return null;
-        return super.getDirection(flag);
-    }
 
     //TODO 需要处理无方向面的渲染bug，需要注意，null面似乎是以当前方块为基准计算的
 //
