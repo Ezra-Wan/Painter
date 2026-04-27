@@ -168,10 +168,17 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>, Dire
 
     }
 
+    private static int[][] UV_ORDER=new int[][]{
+            {0,1},
+            {1,1},
+            {1,0},
+            {0,0}
+    };
+
+    private static int[]test=new int[]{0,3,2,1};
     public List<BakedQuad> createQuad(int flag, BlockState material)
     {
         Direction direction = getDirection(flag);
-        Direction aoDirection=getDirection(flag);
         List<BakedQuad> originQuads = getQuadsForDirection(origin, flag);
         List<BakedQuad> materialQuads = getQuadsForDirection(material, getFlag(direction));
 
@@ -189,20 +196,30 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>, Dire
         for (BakedQuad materialQuad : materialQuads) {
             VerticesInfo materialVertices = new VerticesInfo(materialQuad);
 
+            VerticeInfo materialLeftDown=materialVertices.LeftDown();
+            float startU=materialLeftDown.u;
+            float startV=materialLeftDown.v;
+            float uOffset=originVertices.getULength();
+            float vOffset=originVertices.getVLength();
+
+
             // 逐顶点混合数据
             VerticeInfo[] mixedVertices = new VerticeInfo[4];
+
             for (int i = 0; i < 4; i++) {
-                VerticeInfo originVert = originVertices.vertices.get(i);
-                VerticeInfo materialVert = materialVertices.vertices.get(i);
+                VerticeInfo originVert = originVertices.vertices.get(test[i]);
+                VerticeInfo materialVert = materialVertices.vertices.get(test[i]);
 
                 mixedVertices[i] = VerticeInfo.builder()
                         .position(originVert.position)          // 几何位置来自原始方块
                         .color(materialVert.alpha, materialVert.red, materialVert.green, materialVert.blue) // 颜色来自原始方块
-                        .uv(materialVert.u, materialVert.v)     // ★ 纹理坐标来自材质方块 ★
+                        .uv(startU+uOffset*UV_ORDER[i][0],startV+vOffset*UV_ORDER[i][1])     // ★ 纹理坐标来自材质方块 ★
                         .light(originVert.light)                // 光照值保持原始方块（或可根据需要混合）
                         .normal(originVert.normal)              // 法线保持原始方块
                         .build();
             }
+            //TODO 改Laplace
+            //TODO 改uv旋转
 
             VerticesInfo newQuadVertices = new VerticesInfo(List.of(mixedVertices));
             int[] newVertexArray = newQuadVertices.vertices();
