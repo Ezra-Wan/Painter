@@ -168,14 +168,12 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>, Dire
 
     }
 
-    private static int[][] UV_ORDER=new int[][]{
-            {0,1},
-            {1,1},
-            {1,0},
-            {0,0}
-    };
-
-    private static int[]test=new int[]{0,3,2,1};
+    /**
+     * 将uv转移，即将origin面各自的uv长度应用于material左下角
+     * @param flag
+     * @param material
+     * @return
+     */
     public List<BakedQuad> createQuad(int flag, BlockState material)
     {
         Direction direction = getDirection(flag);
@@ -196,32 +194,37 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>, Dire
         for (BakedQuad materialQuad : materialQuads) {
             VerticesInfo materialVertices = new VerticesInfo(materialQuad);
 
-            VerticeInfo materialLeftDown=materialVertices.LeftDown();
-            float startU=materialLeftDown.u;
-            float startV=materialLeftDown.v;
+//            VerticeInfo materialLeftDown=materialVertices.LeftDown();
+//            VerticeInfo materialRightUp=materialVertices.RightUp();
+//            float materialStartU=materialLeftDown.u;
+//            float materialStartV=materialLeftDown.v;//UV的起始点
+//            float materaialEndU=materialRightUp.u;
+//            float materialEndV=materialRightUp.v;
             float uOffset=originVertices.getULength();
-            float vOffset=originVertices.getVLength();
+            float vOffset=originVertices.getVLength();//uv各自长度
 
 
-            // 逐顶点混合数据
-            VerticeInfo[] mixedVertices = new VerticeInfo[4];
 
-            for (int i = 0; i < 4; i++) {
-                VerticeInfo originVert = originVertices.vertices.get(test[i]);
-                VerticeInfo materialVert = materialVertices.vertices.get(test[i]);
-
-                mixedVertices[i] = VerticeInfo.builder()
-                        .position(originVert.position)          // 几何位置来自原始方块
-                        .color(materialVert.alpha, materialVert.red, materialVert.green, materialVert.blue) // 颜色来自原始方块
-                        .uv(startU+uOffset*UV_ORDER[i][0],startV+vOffset*UV_ORDER[i][1])     // ★ 纹理坐标来自材质方块 ★
-                        .light(originVert.light)                // 光照值保持原始方块（或可根据需要混合）
-                        .normal(originVert.normal)              // 法线保持原始方块
-                        .build();
-            }
+//            // 逐顶点混合数据
+//            VerticeInfo[] mixedVertices = new VerticeInfo[4];
+//
+//            for (int i = 0; i < 4; i++) {
+//                VerticeInfo originVert = originVertices.vertices.get(test[i]);
+//                VerticeInfo materialVert = materialVertices.vertices.get(test[i]);
+//
+//                mixedVertices[i] = VerticeInfo.builder()
+//                        .position(originVert.position)          // 几何位置来自原始方块
+//                        .color(materialVert.alpha, materialVert.red, materialVert.green, materialVert.blue) // 颜色来自原始方块
+//                        .uv(materialStartU+uOffset*UV_ORDER[i][0],materialStartV+vOffset*UV_ORDER[i][1])     // ★ 纹理坐标来自材质方块 ★
+//                        .light(originVert.light)                // 光照值保持原始方块（或可根据需要混合）
+//                        .normal(originVert.normal)              // 法线保持原始方块
+//                        .build();
+//            }
             //TODO 改Laplace
             //TODO 改uv旋转
 
-            VerticesInfo newQuadVertices = new VerticesInfo(List.of(mixedVertices));
+            VerticesInfo newQuadVertices =materialVertices;
+            newQuadVertices.transUV(1f,0.5f);
             int[] newVertexArray = newQuadVertices.vertices();
 
             // 使用 materialQuad 的元数据创建新的 BakedQuad
