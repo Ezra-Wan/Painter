@@ -195,7 +195,7 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>, Dire
     {
         Direction direction = getDirection(flag);
         List<BakedQuad> originQuads = getQuadsForDirection(origin, flag);
-        List<BakedQuad> materialQuads = getQuadsForDirection(material, getFlag(direction));
+        List<BakedQuad> materialQuads = getQuadsForDirection(material, Math.abs(getFlag(direction)));
 
         if (originQuads == null || originQuads.isEmpty() || materialQuads == null || materialQuads.isEmpty()) {
             return List.of();
@@ -315,13 +315,15 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>, Dire
     {
         int flag = getFlag(f);
 
-        if(hasNullInDirection(f))
-        {
-            materials.put(-flag,blockState);
-        }else
-        {
-            materials.put(flag, blockState);
-        }
+
+        materials.put(flag, blockState);
+
+//        if(hasNullInDirection(f))
+//        {
+//            materials.put(-flag,blockState);
+//        }else
+//        {
+//        }
     }
 
     public abstract boolean hasNullInDirection(Direction f);
@@ -330,6 +332,12 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>, Dire
     public BlockState getMaterial(Direction f) {
         int flag = getFlag(f);
         return materials.get(flag);
+    }
+
+    @Override
+    public int getFlag(Direction object) {
+        if(hasNullInDirection(object))return -super.getFlag(object);
+        return super.getFlag(object);
     }
 
     private int hasBlockInPaint(BlockState toCheck) {
