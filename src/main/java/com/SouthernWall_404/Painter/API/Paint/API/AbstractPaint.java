@@ -200,8 +200,8 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>, Dire
 //            float materialStartV=materialLeftDown.v;//UV的起始点
 //            float materaialEndU=materialRightUp.u;
 //            float materialEndV=materialRightUp.v;
-            float uOffset=originVertices.RightUp().position.getX()-originVertices.LeftDown().position.getX();
-            float vOffset=originVertices.RightUp().position.getY()-originVertices.LeftDown().position.getY();//uv各自长度
+
+
 
             //TODO
 
@@ -226,7 +226,7 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>, Dire
             //TODO 改uv旋转
 
             VerticesInfo newQuadVertices =new VerticesInfo(List.of(mixedVertices[0],mixedVertices[1],mixedVertices[2],mixedVertices[3]));
-            newQuadVertices.transUV(uOffset/1,vOffset/1);
+            newQuadVertices.implyUV(originVertices);
             int[] newVertexArray = newQuadVertices.vertices();
 
             // 使用 materialQuad 的元数据创建新的 BakedQuad
