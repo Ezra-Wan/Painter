@@ -42,7 +42,8 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>, Dire
 
 //    protected static final int FLAG_NONE = -1;
     protected static final int NORTH = 1, SOUTH = 2, WEST = 4, EAST = 8, UP = 16, DOWN = 32;
-    protected static final int NULL_NORTH = -1, NULL_SOUTH = -2, NULL_WEST = -4, NULL_EAST = -8, NULL_UP = -16, NULL_DOWN = -32;
+
+
 
     //========不需要持久化的数据========
     public static float[] shape = new float[ModelRender.DIRECTIONS.length * 2];
@@ -55,11 +56,14 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>, Dire
 //    protected Map<Integer,Vector3f> normals=new HashMap<>();
     //========需要持久化的数据========
     protected Map<Integer, BlockState> materials = new HashMap<>();
+    protected Map<Integer,float[]> uvOffsets =new HashMap<>();
 
     //========构造方法========
     public AbstractPaint(BlockPos blockPos,String type) {
         super(blockPos,type);
         update();
+
+        registerUVs();
     }
 
 
@@ -85,6 +89,19 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>, Dire
         normals.put(flag,new Vector3f(direction));
         normals.put(-flag,new Vector3f(direction));
 
+    }
+
+    private void registerUVs()
+    {
+        if(uvOffsets==null)
+        {
+            uvOffsets=new HashMap<>();
+        }
+
+        flags.forEach((direction,flag)->{
+            uvOffsets.put(flag,new float[]{0,0});
+            uvOffsets.put(-flag,new float[]{0,0});
+        });
     }
 
     public void cycleTextureUV(Direction direction) {
@@ -225,10 +242,12 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>, Dire
             //TODO 改Laplace
             //TODO 改uv旋转
 
+
             VerticesInfo newQuadVertices =new VerticesInfo(List.of(mixedVertices[0],mixedVertices[1],mixedVertices[2],mixedVertices[3]));
             newQuadVertices.implyUV(originVertices);
 
-            newQuadVertices.implyUVOffest(0.7f,0.2f);
+            float[] uvOffset= this.uvOffsets.get(flag);
+            newQuadVertices.implyUVOffest(uvOffset[0],uvOffset[1]);
             int[] newVertexArray = newQuadVertices.vertices();
 
             // 使用 materialQuad 的元数据创建新的 BakedQuad
