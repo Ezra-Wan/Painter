@@ -227,6 +227,8 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>, Dire
 
             VerticesInfo newQuadVertices =new VerticesInfo(List.of(mixedVertices[0],mixedVertices[1],mixedVertices[2],mixedVertices[3]));
             newQuadVertices.implyUV(originVertices);
+
+            newQuadVertices.implyUVOffest(0.7f,0.2f);
             int[] newVertexArray = newQuadVertices.vertices();
 
             // 使用 materialQuad 的元数据创建新的 BakedQuad
