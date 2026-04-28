@@ -47,23 +47,14 @@ public class SlabBlockPaint extends AbstractPaint {
     @Override
     public void cycleTextureUV(Direction direction) {
 
-        int key=getFlag(direction);
-        SlabType defaultType=SlabType.TOP;
-        SlabType current=slabTypes.getOrDefault(getFlag(direction),defaultType);
-
-        switch (current){
-
-            case TOP:
-                slabTypes.put(key,SlabType.BOTTOM);
-                break;
-            case BOTTOM:
-                slabTypes.put(key,SlabType.TOP);
-
-                break;
-            case DOUBLE:
-                break;
-            default:
-                break;
+        int flag=getFlag(direction);
+        float[] uvOffset=uvOffsets.get(flag);
+        float v=uvOffset[1];
+        if(v==0)
+        {
+            uvOffsets.put(flag,new float[]{0,0.5f});
+        }else {
+            uvOffsets.put(flag,new float[]{0,0.0f});
         }
 
         update();
