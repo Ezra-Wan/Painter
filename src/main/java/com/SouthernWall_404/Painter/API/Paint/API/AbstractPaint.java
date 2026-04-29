@@ -1,6 +1,7 @@
 // AbstractPaint.java
 package com.SouthernWall_404.Painter.API.Paint.API;
 
+// logging removed: previously used for debug logging
 import com.SouthernWall_404.LaplaceAPI.Math37.Vector3f;
 import com.SouthernWall_404.LaplaceAPI.RegulappleEngine.BakedQuad.VerticeInfo;
 import com.SouthernWall_404.LaplaceAPI.RegulappleEngine.BakedQuad.VerticesInfo;
@@ -33,12 +34,14 @@ import net.neoforged.fml.loading.FMLEnvironment;
 import net.neoforged.neoforge.client.model.data.ModelData;
 
 import java.util.*;
+// removed: java.util.Arrays import
 
 /**
  * Quad Vertice顺序 留档备用
  * 顺序：左上，左下，右下，右上
  */
 public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>, Direction> {
+    //LOGGER removed
 
 //    protected static final int FLAG_NONE = -1;
     protected static final int NORTH = 1, SOUTH = 2, WEST = 4, EAST = 8, UP = 16, DOWN = 32;
@@ -105,7 +108,18 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>, Dire
     }
 
     public void cycleTextureUV(Direction direction) {
-        // 预留
+        // 简单实现：切换当前方向的UVU偏移，以便在未实现完整UI前有可观的可视化变化用于调试
+        int flag = getFlag(direction);
+        float[] uv = uvOffsets.get(flag);
+        if (uv == null || uv.length < 2) {
+            uv = new float[]{0f, 0f};
+        }
+        // Toggle U 偏移在 0 和 0.25 之间切换，V 保持不变
+        float newU = (Math.abs(uv[0]) < 0.0001f) ? 0.25f : 0f;
+        uv[0] = newU;
+        uvOffsets.put(flag, uv);
+        // 触发重新渲染以便看到UV的变化
+        update();
     }
 
     public void cycleTextureDir(Direction direction) {
@@ -311,6 +325,24 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>, Dire
         update();
     }
 
+    /**
+     * 设置某个方向的UV偏移，供调试或扩展UI使用
+     * @param direction 方向
+     * @param u U分量偏移
+     * @param v V分量偏移
+     */
+    public void setUVOffset(Direction direction, float u, float v) {
+        int flag = getFlag(direction);
+        float[] off = uvOffsets.get(flag);
+        if (off == null || off.length < 2) {
+            off = new float[]{0f, 0f};
+        }
+        off[0] = u;
+        off[1] = v;
+        uvOffsets.put(flag, off);
+        update();
+    }
+
     public void putMaterial(Direction f, BlockState blockState)
     {
         int flag = getFlag(f);
@@ -364,6 +396,22 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>, Dire
             materialsList.add(entryTag);
         }
         tag.put("materials", materialsList);
+
+        // Persist UV offset data
+        ListTag uvList = new ListTag();
+        if (uvOffsets != null) {
+            for (Map.Entry<Integer, float[]> e : uvOffsets.entrySet()) {
+                CompoundTag uvTag = new CompoundTag();
+                uvTag.putInt("flag", e.getKey());
+                float[] arr = e.getValue();
+                float u = (arr != null && arr.length > 0) ? arr[0] : 0f;
+                float v = (arr != null && arr.length > 1) ? arr[1] : 0f;
+                uvTag.putFloat("u", u);
+                uvTag.putFloat("v", v);
+                uvList.add(uvTag);
+            }
+        }
+        tag.put("uvOffsets", uvList);
         return tag;
     }
 
@@ -380,6 +428,38 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>, Dire
                     provider.createSerializationContext(NbtOps.INSTANCE), stateTag);
             BlockState state = stateResult.getOrThrow();
             materials.put(flag, state);
+        }
+
+        // Restore UV offsets
+        uvOffsets.clear();
+        if (tag.contains("uvOffsets", Tag.TAG_LIST)) {
+            ListTag uvList = tag.getList("uvOffsets", Tag.TAG_COMPOUND);
+            for (int i = 0; i < uvList.size(); i++) {
+                CompoundTag uvTag = uvList.getCompound(i);
+                int flag = uvTag.getInt("flag");
+                float u = uvTag.getFloat("u");
+                float v = uvTag.getFloat("v");
+                uvOffsets.put(flag, new float[]{u, v});
+            }
+        }
+        // no debug logs
+        // Ensure all direction flags have an entry
+        if (uvOffsets.isEmpty()) {
+            registerUVs();
+        } else {
+            flags.forEach((direction, f) -> {
+                uvOffsets.computeIfAbsent(f, k -> new float[]{0f, 0f});
+                uvOffsets.computeIfAbsent(-f, k -> new float[]{0f, 0f});
+            });
+            // If all loaded UV offsets are zeros, apply a small non-zero default to assist debugging
+            boolean anyNonZero = uvOffsets.values().stream().anyMatch(a -> a != null && (a[0] != 0f || a[1] != 0f));
+            if (!anyNonZero) {
+                // Find a representative flag to modify (e.g., NORTH)
+                int northFlag = getFlag(Direction.NORTH);
+                uvOffsets.put(northFlag, new float[]{0.25f, 0f});
+                uvOffsets.put(-northFlag, new float[]{0.25f, 0f});
+                // logging removed
+            }
         }
 
         createQuads();
