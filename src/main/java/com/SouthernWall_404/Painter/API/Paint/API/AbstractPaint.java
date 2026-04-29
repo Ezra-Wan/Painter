@@ -149,7 +149,8 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>, Dire
             }
         }
 
-        uvOffsets.put(flag, new float[]{newU, newV});
+        setUVOffset(direction, newU, newV);
+//        uvOffsets.put(flag, new float[]{newU, newV});
         update();
     }
 
