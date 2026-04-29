@@ -44,21 +44,21 @@ public class SlabBlockPaint extends AbstractPaint {
         return false;
     }
 
-    @Override
-    public void cycleTextureUV(Direction direction) {
-
-        int flag=getFlag(direction);
-        float[] uvOffset=uvOffsets.get(flag);
-        float v=uvOffset[1];
-        if(v==0)
-        {
-            uvOffsets.put(flag,new float[]{0,0.5f});
-        }else {
-            uvOffsets.put(flag,new float[]{0,0.0f});
-        }
-
-        update();
-    }
+//    @Override
+//    public void cycleTextureUV(Direction direction) {
+//
+//        int flag=getFlag(direction);
+//        float[] uvOffset=uvOffsets.get(flag);
+//        float v=uvOffset[1];
+//        if(v==0)
+//        {
+//            uvOffsets.put(flag,new float[]{0,0.5f});
+//        }else {
+//            uvOffsets.put(flag,new float[]{0,0.0f});
+//        }
+//
+//        update();
+//    }
 
     //TODO 需要处理无方向面的渲染bug，需要注意，null面似乎是以当前方块为基准计算的
 //

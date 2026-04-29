@@ -107,18 +107,67 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>, Dire
         });
     }
 
+//    public void cycleTextureUV(Direction direction) {
+//        // 简单实现：切换当前方向的UVU偏移，以便在未实现完整UI前有可观的可视化变化用于调试
+//        int flag = getFlag(direction);
+//        float[] uv = uvOffsets.get(flag);
+//        if (uv == null || uv.length < 2) {
+//            uv = new float[]{0f, 0f};
+//        }
+//        // Toggle U 偏移在 0 和 0.25 之间切换，V 保持不变
+//        float newU = (Math.abs(uv[0]) < 0.0001f) ? 0.25f : 0f;
+//        uv[0] = newU;
+//        uvOffsets.put(flag, uv);
+//        // 触发重新渲染以便看到UV的变化
+//        update();
+//    }
+
+    /**
+     * Cycle UV frame for a given face direction based on the origin face dimensions.
+     * The cycle uses direct step sizes equal to origin's xLength and yLength.
+     * Logic: Try adding stepU first, if U exceeds boundary (1.0), try adding stepV;
+     * if V also exceeds boundary, reset to (0,0).
+     */
     public void cycleTextureUV(Direction direction) {
-        // 简单实现：切换当前方向的UVU偏移，以便在未实现完整UI前有可观的可视化变化用于调试
         int flag = getFlag(direction);
-        float[] uv = uvOffsets.get(flag);
-        if (uv == null || uv.length < 2) {
-            uv = new float[]{0f, 0f};
+        // Obtain an origin quad for the direction to read its UV-space length
+        List<BakedQuad> originQuads = getQuadsForDirection(origin, flag);
+        if (originQuads == null || originQuads.isEmpty()) {
+            return;
         }
-        // Toggle U 偏移在 0 和 0.25 之间切换，V 保持不变
-        float newU = (Math.abs(uv[0]) < 0.0001f) ? 0.25f : 0f;
-        uv[0] = newU;
-        uvOffsets.put(flag, uv);
-        // 触发重新渲染以便看到UV的变化
+        BakedQuad originQuad = originQuads.get(0);
+        VerticesInfo originVertices = new VerticesInfo(originQuad);
+        float stepU = originVertices.getXLength();
+        float stepV = originVertices.getYLength();
+        // Fallback sane defaults if lengths are non-positive
+        if (stepU <= 0f) stepU = 0f;
+        if (stepV <= 0f) stepV = 0f;
+
+        // Get current UV offset
+        float[] current = uvOffsets.get(flag);
+        if (current == null || current.length < 2) {
+            current = new float[]{0f, 0f};
+        }
+
+        float currentU = current[0];
+        float currentV = current[1];
+
+        // Try to add stepU first
+        float newU = currentU + stepU;
+        float newV = currentV;
+
+        // If U exceeds boundary (1.0), reset U and try adding stepV
+        if (newU > 1.0f-stepU) {
+            newU = 0f;
+            newV = currentV + stepV;
+
+            // If V also exceeds boundary, reset both to (0,0)
+            if (newV > 1.0f-stepV) {
+                newV = 0f;
+            }
+        }
+
+        uvOffsets.put(flag, new float[]{newU, newV});
         update();
     }
 
