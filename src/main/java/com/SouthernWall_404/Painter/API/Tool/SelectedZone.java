@@ -3,10 +3,14 @@ package com.SouthernWall_404.Painter.API.Tool;
 import com.SouthernWall_404.LaplaceAPI.Math37.Vector3f;
 import com.SouthernWall_404.LaplaceAPI.RegulappleEngine.Quad.Quad;
 import com.SouthernWall_404.LaplaceAPI.RegulappleEngine.RenderHelper;
+import com.SouthernWall_404.LaplaceAPI.VertinCore.Config.Configs;
 import com.SouthernWall_404.Painter.API.Tool.Wall.Edge;
 import com.SouthernWall_404.Painter.API.Tool.Wall.Squad;
+import com.SouthernWall_404.Painter.Client.Config.ClientConfig;
+import com.SouthernWall_404.Painter.Painter;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.neoforged.neoforge.common.ModConfigSpec;
 
 import java.util.*;
 
@@ -36,16 +40,22 @@ public class SelectedZone {
     public void addAPosition(BlockPos pos) {
         if(!quads.containsKey(pos)){
             float[][] positions= RenderHelper.getSimpleQuadVertex(face);
-            quads.put(
-                    pos,
-                    Quad.builder()
-                            .setColor(0x4cebe5d1)//TODO考虑允许配置项
-                            .addVertex(new Vector3f(positions[0]).add(new Vector3f(face),offset))
-                            .addVertex(new Vector3f(positions[1]).add(new Vector3f(face),offset))
-                            .addVertex(new Vector3f(positions[2]).add(new Vector3f(face),offset))
-                            .addVertex(new Vector3f(positions[3]).add(new Vector3f(face),offset))
-                            .build()
-            );
+            // 使用ClientConfig的静态方法获取颜色值
+            ModConfigSpec.ConfigValue value=Configs.getValue(Painter.MODID,ClientConfig.QUAD_COLOR);
+            var o=value.get();
+            if(o instanceof Integer color)
+            {
+                quads.put(
+                        pos,
+                        Quad.builder()
+                                .setColor(color)
+                                .addVertex(new Vector3f(positions[0]).add(new Vector3f(face),offset))
+                                .addVertex(new Vector3f(positions[1]).add(new Vector3f(face),offset))
+                                .addVertex(new Vector3f(positions[2]).add(new Vector3f(face),offset))
+                                .addVertex(new Vector3f(positions[3]).add(new Vector3f(face),offset))
+                                .build()
+                );
+            }
         }
     }
 
