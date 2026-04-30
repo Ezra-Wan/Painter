@@ -16,7 +16,9 @@ public class ClientConfig {
 
 
     public static final String LINE_COLOR="line_color";
+    public static final String LINE_COLOR_ALPHA="line_color_alpha";
     public static final String QUAD_COLOR="quad_color";
+    public static final String QUAD_COLOR_ALPHA="quad_color_alpha";
 
     public static void register(ModContainer container)
     {
@@ -28,8 +30,12 @@ public class ClientConfig {
                         .defineBool("test",true)
                         // 使用Integer.MIN_VALUE到Integer.MAX_VALUE以支持完整的ARGB颜色范围
                         // 0xFFFFFFFF 在Java中表示为 -1
-                        .defineInt(QUAD_COLOR, 0x4cebe5d1, Integer.MIN_VALUE, Integer.MAX_VALUE)
-                        .defineInt(LINE_COLOR, 0xccebe5d1, Integer.MIN_VALUE, Integer.MAX_VALUE)
+                        .defineInt(QUAD_COLOR, 0xebe5d1, 0x00, 0xffffff)
+                        .defineInt(QUAD_COLOR_ALPHA,0x4c,0x00,0xff)
+
+                        .defineInt(LINE_COLOR, 0xebe5d1, 0x00, 0xffffff)
+                        .defineInt(LINE_COLOR_ALPHA, 0xcc, 0x00, 0xffffff)
+
                         .build());
     }
 }

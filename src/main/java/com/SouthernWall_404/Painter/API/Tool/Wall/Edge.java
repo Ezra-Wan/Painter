@@ -12,6 +12,7 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Vec3i;
+import net.minecraft.util.FastColor;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.common.ModConfigSpec;
 import org.joml.Matrix4f;
@@ -26,13 +27,19 @@ public class Edge {
 
     public Edge(Vector3f a, Vector3f b) {
 
-        ModConfigSpec.ConfigValue value= Configs.getValue(Painter.MODID, ClientConfig.LINE_COLOR);
-        var o=value.get();
-        if(o instanceof Integer color)
+        ModConfigSpec.ConfigValue colorValue= Configs.getValue(Painter.MODID, ClientConfig.LINE_COLOR);
+        ModConfigSpec.ConfigValue alphaValue= Configs.getValue(Painter.MODID, ClientConfig.LINE_COLOR_ALPHA);
         line= Line.builder(a,b)
-                .setColor(color)
+                .setColor(FastColor.ARGB32.color((int)alphaValue.get(),(int)colorValue.get()))
                 .setWidth(0.05f)
                 .build();
+
+//        var o=colorValue.get();
+//        if(o instanceof Integer color)
+//        line= Line.builder(a,b)
+//                .setColor(color)
+//                .setWidth(0.05f)
+//                .build();
     }
 
     public void render(Vec3 camPos,VertexConsumer buffer,PoseStack poseStack)
