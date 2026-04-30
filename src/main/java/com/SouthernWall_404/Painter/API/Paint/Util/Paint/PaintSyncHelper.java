@@ -1,6 +1,8 @@
 package com.SouthernWall_404.Painter.API.Paint.Util.Paint;
 
+import com.SouthernWall_404.LaplaceAPI.xNetwork.API.NetworkSync;
 import com.SouthernWall_404.Painter.API.Paint.Attachment.PaintInfo;
+import com.SouthernWall_404.Painter.Client.PaintRender;
 import com.SouthernWall_404.Painter.Common.Init.ModAttachments;
 import com.SouthernWall_404.Painter.Common.Network.ClientRequestPack;
 import com.SouthernWall_404.Painter.Common.Network.ModChannels;
@@ -24,7 +26,8 @@ public class PaintSyncHelper {
         LevelChunk chunk = level.getChunk(pos.x,pos.z);
         PaintInfo paintInfo = chunk.getData(ModAttachments.PAINT_INFO);
         CompoundTag modPack=paintInfo.serializeNBT(player.level().registryAccess());
-
-        ModChannels.sendToClient(new ChunkS2CPacket(modPack,pos),(ServerPlayer) player);
+        NetworkSync.syncChunkAttachment(level, pos,ModAttachments.PAINT_INFO.get(), (ServerPlayer) player);
+        PaintRender.redraw();//TODO 考虑放到渲染管线中进行帧末渲染
+//        ModChannels.sendToClient(new ChunkS2CPacket(modPack,pos),(ServerPlayer) player);
     }
 }
