@@ -6,8 +6,11 @@ import com.SouthernWall_404.LaplaceAPI.Math37.Vector3f;
 import com.SouthernWall_404.LaplaceAPI.RegulappleEngine.BakedQuad.VerticeInfo;
 import com.SouthernWall_404.LaplaceAPI.RegulappleEngine.BakedQuad.VerticesInfo;
 import com.SouthernWall_404.LaplaceAPI.RegulappleEngine.ModelRender;
+import com.SouthernWall_404.LaplaceAPI.VertinCore.Config.Configs;
 import com.SouthernWall_404.Painter.API.Paint.Util.RenderUtil;
 import com.SouthernWall_404.LaplaceAPI.RegulappleEngine.BakedQuadRender;
+import com.SouthernWall_404.Painter.Client.Config.ClientConfig;
+import com.SouthernWall_404.Painter.Painter;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.serialization.DataResult;
@@ -305,12 +308,12 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>, Dire
         });
     }
 
-    private static final double offset = 0.01; //TODO 考虑添加配置项
     @Override
     @OnlyIn(Dist.CLIENT)
     public void render(BlockPos blockPos, PoseStack poseStack, int packedLight, int packedOverlay, float partialTick, VertexConsumer buffer) {
         Minecraft mc = Minecraft.getInstance();
         Level level = mc.level;
+        double offset= (double)Configs.getValue(Painter.MODID, ClientConfig.PAINT_OFFSET).get();
         for (Map.Entry<Integer, List<BakedQuad>> entry : objects.entrySet()) {
             List<BakedQuad> quads = entry.getValue();
             int flag = entry.getKey();
