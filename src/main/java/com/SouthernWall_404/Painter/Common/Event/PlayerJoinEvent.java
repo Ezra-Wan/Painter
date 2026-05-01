@@ -5,8 +5,6 @@ import com.SouthernWall_404.Painter.API.Paint.Attachment.PaintChunkInfo;
 import com.SouthernWall_404.Painter.API.Paint.Attachment.PaintInfo;
 import com.SouthernWall_404.Painter.API.Paint.Util.Paint.PaintSyncHelper;
 import com.SouthernWall_404.Painter.Common.Init.ModAttachments;
-import com.SouthernWall_404.Painter.Common.Network.ClientRequestPack;
-import com.SouthernWall_404.Painter.Common.Network.ModChannels;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.world.entity.player.Player;
