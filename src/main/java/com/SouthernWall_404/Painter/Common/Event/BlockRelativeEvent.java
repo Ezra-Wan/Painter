@@ -1,16 +1,12 @@
 package com.SouthernWall_404.Painter.Common.Event;
 
 import com.SouthernWall_404.LaplaceAPI.xNetwork.API.NetworkSync;
-import com.SouthernWall_404.LaplaceAPI.xNetwork.Packet.S2C.ClientHandler;
-import com.SouthernWall_404.Painter.API.Paint.API.AbstractPaint;
 import com.SouthernWall_404.Painter.API.Paint.Attachment.PaintInfo;
-import com.SouthernWall_404.Painter.API.Paint.Util.Paint.PaintAttachmentHelper;
 import com.SouthernWall_404.Painter.API.Paint.Util.Paint.PaintValidHelper;
 import com.SouthernWall_404.Painter.Common.Init.ModAttachments;
-import com.SouthernWall_404.Painter.Common.Network.ClientHandlers;
+import com.SouthernWall_404.Painter.Common.Laplace.Network.ClientHandlers;
 import com.SouthernWall_404.Painter.Common.World.Item.BlockInteractItem;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
@@ -20,7 +16,6 @@ import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 import net.neoforged.neoforge.event.level.BlockEvent;
 import net.neoforged.neoforge.event.tick.ServerTickEvent;
 
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
