@@ -16,17 +16,12 @@ import net.minecraft.world.level.chunk.LevelChunk;
 
 public class PaintSyncHelper {
 
-
-    public static void RequireSync(ChunkPos pos)
-    {
-        ModChannels.sendToServer(new ClientRequestPack(1,pos));
-    }
     public static void syncToClient(ChunkPos pos, Player player) {
         Level level = player.level();
         LevelChunk chunk = level.getChunk(pos.x,pos.z);
         PaintInfo paintInfo = chunk.getData(ModAttachments.PAINT_INFO);
         CompoundTag modPack=paintInfo.serializeNBT(player.level().registryAccess());
-        NetworkSync.syncChunkAttachment(level, pos,ModAttachments.PAINT_INFO.get(), (ServerPlayer) player);
+        NetworkSync.syncChunkAttachment(level, pos,ModAttachments.PAINT_INFO.get(), player);
         PaintRender.redraw();//TODO 考虑放到渲染管线中进行帧末渲染
 //        ModChannels.sendToClient(new ChunkS2CPacket(modPack,pos),(ServerPlayer) player);
     }

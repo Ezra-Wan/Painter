@@ -3,6 +3,7 @@ package com.SouthernWall_404.Painter.Common.Event;
 import com.SouthernWall_404.LaplaceAPI.xNetwork.API.NetworkSync;
 import com.SouthernWall_404.Painter.API.Paint.Attachment.PaintChunkInfo;
 import com.SouthernWall_404.Painter.API.Paint.Attachment.PaintInfo;
+import com.SouthernWall_404.Painter.API.Paint.Util.Paint.PaintSyncHelper;
 import com.SouthernWall_404.Painter.Common.Init.ModAttachments;
 import com.SouthernWall_404.Painter.Common.Network.ClientRequestPack;
 import com.SouthernWall_404.Painter.Common.Network.ModChannels;
@@ -74,9 +75,9 @@ public class PlayerJoinEvent {
 
         if (paintInfo.getPaints().isEmpty()) {
             // 需要向服务器请求
-            //TODO 使用新版网络
             //TODO 优化区块加载卡顿
-            ModChannels.sendToServer(new ClientRequestPack(1, pos));
+//            ModChannels.sendToServer(new ClientRequestPack(1, pos));
+            PaintSyncHelper.syncToClient(pos, mc.player);
         }
     }
 
