@@ -69,13 +69,19 @@ public class PaintInfo implements IAttachment {
         }
     }
 
-    public void tick(ChunkPos pos) {
+    /**
+     * 时域分布光照更新算法
+     * 将区块中所有 AbstractPaint 的光照更新在时域中进行分布式计算，以降低每帧渲染压力
+     * 目前作为技术储备
+     * TODO 考虑配置项启用
+     * @param pos
+     */
+    public void TDDAO(ChunkPos pos) {
         int minX = pos.getMinBlockX();   // pos.x * 16
         int minZ = pos.getMinBlockZ();   // pos.z * 16
         int maxX = pos.getMaxBlockX();   // minX + 15
         int maxZ = pos.getMaxBlockZ();
 
-        //TODO 考虑修改分块配置项
         int amount = 2;          // 4x4 分块
         int step = 16 / amount;  // 每个分块边长 4
 
@@ -93,8 +99,8 @@ public class PaintInfo implements IAttachment {
                     int x = blockPos.getX();
                     int z = blockPos.getZ();
                     if (x >= startX && x <= endX && z >= startZ && z <= endZ) {
-//                        paint.refreshAO(blockPos);
-//                        paint.refreshVisible();
+                        paint.refreshAO(blockPos);
+                        paint.refreshVisible();
                     }
                 }
             });
