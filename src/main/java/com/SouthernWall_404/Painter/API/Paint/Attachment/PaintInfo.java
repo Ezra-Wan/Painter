@@ -17,9 +17,6 @@ import net.minecraft.nbt.Tag;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.state.BlockState;
-import org.jetbrains.annotations.UnknownNullability;
 
 import javax.annotation.Nullable;
 import java.util.HashMap;
@@ -116,7 +113,7 @@ public class PaintInfo implements IAttachment {
 
         removeRender(pos);
 
-        PaintSyncHelper.syncToClient(level.getChunkAt(pos).getPos(),player);
+        PaintSyncHelper.sync(level.getChunkAt(pos).getPos(),player);
 
     }
 

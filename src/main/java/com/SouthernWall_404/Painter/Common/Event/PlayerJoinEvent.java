@@ -35,27 +35,6 @@ public class PlayerJoinEvent {
         }
     }
 
-//    @SubscribeEvent
-//    public static void onPlayerTick(PlayerTickEvent.Post event)
-//    {
-//        Player player=event.getEntity();
-//        Level level=player.level();
-//
-//        if(level.isClientSide)
-//        {
-//            LevelChunk chunk=level.getChunkAt(player.getOnPos());
-//            PaintInfo paintInfo=chunk.getData(ModAttachments.PAINT_INFO);
-//
-//            if(!paintInfo.getRenders().isEmpty())
-//            {
-//                player.displayClientMessage(Component.literal("客户端检测：存在渲染"),true);
-//            }else {
-//                player.displayClientMessage(Component.literal("服务端检测：存在渲染"),true);
-//
-//            }
-//        }
-//    }
-
 
     @SubscribeEvent
     public static void ChunkEvent(ChunkEvent.Load event)
@@ -73,19 +52,9 @@ public class PlayerJoinEvent {
 
         if (paintInfo.getPaints().isEmpty()) {
             // 需要向服务器请求
-            //TODO 优化区块加载卡顿
-//            ModChannels.sendToServer(new ClientRequestPack(1, pos));
-            PaintSyncHelper.syncToClient(pos, mc.player);
+            PaintSyncHelper.sync(pos, mc.player);
         }
     }
 
-    //TODO 封装一下
-
-//    @SubscribeEvent
-//    public static void onLevelTick(LevelTickEvent.Post event)
-//    {
-//        Level level=event.getLevel();
-//        level.getData(ModAttachments.PAINT_CHUNK_INFO).tick(level);
-//    }
 
 }
