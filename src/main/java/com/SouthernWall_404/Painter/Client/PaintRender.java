@@ -42,6 +42,8 @@ public class PaintRender {
     {
         changed =false;
     }
+
+    //TODO 远离后再加载会出现不渲染的情况，似乎是更新延迟的问题
     @SubscribeEvent
     public static void onRenderLevelStage(RenderLevelStageEvent event) {
         if (event.getStage() != RenderLevelStageEvent.Stage.AFTER_TRANSLUCENT_BLOCKS) {
@@ -101,6 +103,6 @@ public class PaintRender {
         PaintChunkInfo chunkInfo=level.getData(ModAttachments.PAINT_CHUNK_INFO);
         renders=chunkInfo.getRenderNearby(player.getOnPos());
 
-        chunkInfo.done();
+        done();
     }
 }
