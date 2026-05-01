@@ -73,7 +73,7 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>, Dire
     //========内部方法========
     @OnlyIn(Dist.CLIENT)
     @Override
-    protected void update() {
+    public void update() {
         super.update();
         if(FMLEnvironment.dist!=Dist.CLIENT)return;
         if (Minecraft.getInstance() == null) {

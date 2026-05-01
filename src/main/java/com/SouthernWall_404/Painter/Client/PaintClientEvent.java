@@ -5,8 +5,6 @@ import com.SouthernWall_404.Painter.API.Paint.Attachment.PaintInfo;
 import com.SouthernWall_404.Painter.Common.Init.ModAttachments;
 import com.SouthernWall_404.Painter.Painter;
 import net.minecraft.client.Minecraft;
-import net.minecraft.core.BlockPos;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.neoforged.api.distmarker.Dist;
@@ -32,7 +30,6 @@ public class PaintClientEvent {
             chunkInfo.getPaintPosesNearby(mc.player.getOnPos()).forEach(chunkPos->{
                 LevelChunk chunk=level.getChunk(chunkPos.x,chunkPos.z);
                 PaintInfo paintInfo=chunk.getData(ModAttachments.PAINT_INFO);
-                paintInfo.tick(chunkPos);
             });
 
         }
