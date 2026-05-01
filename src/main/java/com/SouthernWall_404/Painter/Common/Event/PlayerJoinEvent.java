@@ -4,6 +4,7 @@ import com.SouthernWall_404.LaplaceAPI.xNetwork.API.NetworkSync;
 import com.SouthernWall_404.Painter.API.Paint.Attachment.PaintChunkInfo;
 import com.SouthernWall_404.Painter.API.Paint.Attachment.PaintInfo;
 import com.SouthernWall_404.Painter.API.Paint.Util.Paint.PaintSyncHelper;
+import com.SouthernWall_404.Painter.Client.PaintRender;
 import com.SouthernWall_404.Painter.Common.Init.ModAttachments;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -25,16 +26,9 @@ public class PlayerJoinEvent {
         if(!level.isClientSide) {
             NetworkSync.syncLevelAttachment(level,ModAttachments.PAINT_CHUNK_INFO.get(),player);
 
-//            PaintChunkInfo paintChunkInfo=level.getData(ModAttachments.PAINT_CHUNK_INFO);
-//
-//            Sync.syncLevelAttachment(level,ModAttachments.PAINT_CHUNK_INFO.get(),player);
-//            for(ChunkPos pos:paintChunkInfo.getPaintPoses())
-//            {
-//                PaintUtil.syncToClient(pos,player);//TODO 退出清缓存
-//            }
+            PaintRender.setChanged();//重绘以免出现渲染残留
         }
     }
-
 
     @SubscribeEvent
     public static void ChunkEvent(ChunkEvent.Load event)
