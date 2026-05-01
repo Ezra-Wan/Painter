@@ -58,7 +58,7 @@ public abstract class AbstractRender<T, F extends Object> implements IRender<T> 
         Minecraft mc=Minecraft.getInstance();
         if(mc!=null)
         {
-            PaintRender.redraw();
+            PaintRender.setChanged();
             Level level=mc.level;
             if(level!=null)
             {

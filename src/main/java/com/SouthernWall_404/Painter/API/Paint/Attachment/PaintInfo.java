@@ -68,7 +68,7 @@ public class PaintInfo implements IAttachment {
 
         if(Minecraft.getInstance()!=null)
         {
-            PaintRender.redraw();
+            PaintRender.setChanged();
         }
     }
 

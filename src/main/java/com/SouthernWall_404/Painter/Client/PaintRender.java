@@ -30,11 +30,18 @@ import java.util.*;
 
 public class PaintRender {
 
-    private static Map<BlockPos,AbstractRender<?,?>> renders=new HashMap<>();//总渲染内容缓存
-    private static boolean isFirstRender=true;
-    private static Minecraft mc=Minecraft.getInstance();
+    private static Map<BlockPos, AbstractRender<?, ?>> renders = new HashMap<>();//总渲染内容缓存
+    private static boolean changed = false;
+    private static Minecraft mc = Minecraft.getInstance();
 
+    public static void setChanged() {
+        changed =true;
+    }
 
+    public static void done()
+    {
+        changed =false;
+    }
     @SubscribeEvent
     public static void onRenderLevelStage(RenderLevelStageEvent event) {
         if (event.getStage() != RenderLevelStageEvent.Stage.AFTER_TRANSLUCENT_BLOCKS) {
@@ -42,18 +49,18 @@ public class PaintRender {
         }
 
         ModelBlockRenderer.enableCaching();
-        MultiBufferSource.BufferSource bufferSource=Minecraft.getInstance().renderBuffers().bufferSource();
+        MultiBufferSource.BufferSource bufferSource = Minecraft.getInstance().renderBuffers().bufferSource();
 
-        Frustum frustum =event.getFrustum();
+        Frustum frustum = event.getFrustum();
         if (frustum == null) {
             return; // 视锥体不可用时不渲染
         }
 
-        VertexConsumer buffer=bufferSource.getBuffer(RenderType.cutout());
-        for(Map.Entry<BlockPos,AbstractRender<?,?>> entry:renders.entrySet())
-        {
-            BlockPos pos=entry.getKey();
-            AbstractRender render=entry.getValue();
+        if(changed)redraw();
+        VertexConsumer buffer = bufferSource.getBuffer(RenderType.cutout());
+        for (Map.Entry<BlockPos, AbstractRender<?, ?>> entry : renders.entrySet()) {
+            BlockPos pos = entry.getKey();
+            AbstractRender render = entry.getValue();
 
 
             // 视锥剔除：检查方块位置的包围盒是否可见
@@ -63,22 +70,26 @@ public class PaintRender {
             }
 
 
-            Level level=mc.level;
-            int packedOverLay=calculatePackedLight(level,pos);
-            render.render(pos,event.getPoseStack(),packedOverLay,0,event.getRenderTick(),buffer);
+            Level level = mc.level;
+            int packedOverLay = calculatePackedLight(level, pos);
+            render.render(pos, event.getPoseStack(), packedOverLay, 0, event.getRenderTick(), buffer);
         }
 
         bufferSource.endBatch(RenderType.cutout());
 
     }
+
     // 辅助方法：获取方块位置的光照值（合并天空光与方块光）
     private static int calculatePackedLight(Level level, BlockPos pos) {
 
-        if(level==null)return 0;
+        if (level == null) return 0;
         int blockLight = level.getBrightness(LightLayer.BLOCK, pos);
         int skyLight = level.getBrightness(LightLayer.SKY, pos);
         return (skyLight << 20) | (blockLight << 4);  // 标准打包方式
     }
+
+
+
     public static void redraw()
     {
 
@@ -89,5 +100,7 @@ public class PaintRender {
         if(level==null)return;
         PaintChunkInfo chunkInfo=level.getData(ModAttachments.PAINT_CHUNK_INFO);
         renders=chunkInfo.getRenderNearby(player.getOnPos());
+
+        chunkInfo.done();
     }
 }
