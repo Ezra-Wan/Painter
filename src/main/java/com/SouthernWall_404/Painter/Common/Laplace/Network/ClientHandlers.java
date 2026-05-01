@@ -1,22 +1,18 @@
-package com.SouthernWall_404.Painter.Common.Network;
+package com.SouthernWall_404.Painter.Common.Laplace.Network;
 
 import com.SouthernWall_404.LaplaceAPI.xNetwork.API.NetworkRegister;
-import com.SouthernWall_404.LaplaceAPI.xNetwork.Packet.S2C.AttachmentPacket;
 import com.SouthernWall_404.LaplaceAPI.xNetwork.Packet.S2C.BlockSetPacket;
 import com.SouthernWall_404.Painter.API.Paint.API.AbstractPaint;
 import com.SouthernWall_404.Painter.API.Paint.Util.Paint.PaintAttachmentHelper;
-import com.SouthernWall_404.Painter.Client.PaintRender;
 import com.SouthernWall_404.Painter.Painter;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.Level;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 import net.neoforged.fml.loading.FMLEnvironment;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
-import net.neoforged.neoforge.network.handling.IPayloadHandler;
 
 import java.util.Set;
 
@@ -50,9 +46,7 @@ public class ClientHandlers {
                     {
                         paint.refreshVisible();
                         paint.refreshAO(blockPos);
-//                        PaintRender.redraw();
                     }
-
                 }));
             }
         });
