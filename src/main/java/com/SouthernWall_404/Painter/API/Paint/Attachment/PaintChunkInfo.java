@@ -51,11 +51,11 @@ public class PaintChunkInfo implements IAttachment {
 
         Level level=mc.level;
 
-        int viewDistance=mc.options.getEffectiveRenderDistance();
-        int viewDistanceSquared=viewDistance*viewDistance;
+        int viewDistance=mc.options.simulationDistance().get()+1;
 
-        for(ChunkPos pos:paintPoses){
-            if(pos.distanceSquared(playerPos)<=viewDistanceSquared){
+        paintPoses.forEach(pos -> {
+            if(pos.getChessboardDistance(playerPos)<=viewDistance)
+            {
 
                 LevelChunk chunk=level.getChunkSource().getChunkNow(pos.x,pos.z);
                 if(chunk!=null)
@@ -64,8 +64,7 @@ public class PaintChunkInfo implements IAttachment {
                     result.putAll(paintInfo.getPaints());
                 }
             }
-        }
-
+        });
         return result;
     }
 
