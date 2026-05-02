@@ -73,17 +73,19 @@ public class RenderUtil {
 
     public static boolean shouldRenderFace(BlockGetter level, BlockPos pos,BlockState state, Direction face ) {
         //远距剔除
-        if(Minecraft.getInstance()!=null)
+        Minecraft mc=Minecraft.getInstance();
+        if(mc!=null)
         {
-            Minecraft mc=Minecraft.getInstance();
-            int distance=(mc.options.renderDistance().get()+8)*16;//TODO 这里记得改
+
+            int distance=(mc.options.renderDistance().get()+1)*16;//TODO 这里记得改
+            int distanceSquared=distance*distance;
 
             Vector3f camPos=new Vector3f(mc.gameRenderer.getMainCamera().getBlockPosition());//获取主视角位置
             Vector3f blockPos=new Vector3f(pos);
 
 
             float actualDistance=camPos.distanceSquaredTo(blockPos);
-            if(actualDistance>distance*distance)
+            if(actualDistance>distanceSquared)
             {
                 return false;
             }

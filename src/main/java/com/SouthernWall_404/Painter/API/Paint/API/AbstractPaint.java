@@ -52,9 +52,9 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>, Dire
 
 
     //========不需要持久化的数据========
-    public static float[] shape = new float[ModelRender.DIRECTIONS.length * 2];
-    private static BitSet shapeFlags = new BitSet(3);
-    private Map<Integer, ModelRender.AmbientOcclusionFace> aoFaces = new HashMap<>();
+    private final float[] shape = new float[ModelRender.DIRECTIONS.length * 2];
+    private final BitSet shapeFlags = new BitSet(3);
+    protected Map<Integer, ModelRender.AmbientOcclusionFace> aoFaces = new HashMap<>();
     protected Map<Integer,Boolean> visibles =new HashMap<>();
     //========需要持久化的数据========
     protected Map<Integer, BlockState> materials = new HashMap<>();
