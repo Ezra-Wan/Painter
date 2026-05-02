@@ -89,7 +89,9 @@ public class PaintRender {
         return (skyLight << 20) | (blockLight << 4);  // 标准打包方式
     }
 
-
+    //TODO 仍需优化
+    //TODO 解决远距渲染的bug
+    //TODO 解决半透明面光影不兼容的问题
 
     public static void redraw()
     {

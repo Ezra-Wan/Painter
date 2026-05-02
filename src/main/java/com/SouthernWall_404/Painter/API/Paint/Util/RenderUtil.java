@@ -77,7 +77,7 @@ public class RenderUtil {
         if(mc!=null)
         {
 
-            int distance=(mc.options.renderDistance().get()+1)*16;
+            int distance=(mc.options.renderDistance().get()+1)*16;//TODO这里需要修改，以解决多普勒式影响
             int distanceSquared=distance*distance;
 
             Vector3f camPos=new Vector3f(mc.gameRenderer.getMainCamera().getBlockPosition());//获取主视角位置
