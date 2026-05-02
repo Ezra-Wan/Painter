@@ -10,6 +10,7 @@ import com.SouthernWall_404.LaplaceAPI.VertinCore.Config.Configs;
 import com.SouthernWall_404.Painter.API.Paint.Util.RenderUtil;
 import com.SouthernWall_404.LaplaceAPI.RegulappleEngine.BakedQuadRender;
 import com.SouthernWall_404.Painter.Client.Config.ClientConfig;
+import com.SouthernWall_404.Painter.Client.PaintRender;
 import com.SouthernWall_404.Painter.Painter;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
@@ -53,9 +54,7 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>, Dire
     //========不需要持久化的数据========
     public static float[] shape = new float[ModelRender.DIRECTIONS.length * 2];
     private static BitSet shapeFlags = new BitSet(3);
-    private int tick = 0;
     private Map<Integer, ModelRender.AmbientOcclusionFace> aoFaces = new HashMap<>();
-
     protected Map<Integer,Boolean> visibles =new HashMap<>();
     //========需要持久化的数据========
     protected Map<Integer, BlockState> materials = new HashMap<>();
@@ -64,25 +63,8 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>, Dire
     //========构造方法========
     public AbstractPaint(BlockPos blockPos,String type) {
         super(blockPos,type);
-        update();
 
         registerUVs();
-    }
-
-
-    //========内部方法========
-    @OnlyIn(Dist.CLIENT)
-    @Override
-    public void update() {
-        super.update();
-        if(FMLEnvironment.dist!=Dist.CLIENT)return;
-        if (Minecraft.getInstance() == null) {
-            return;
-        }
-        createQuads();
-        refreshVisible();
-        refreshAO(blockPos);
-
     }
 
     @Override
@@ -154,7 +136,7 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>, Dire
 
         setUVOffset(direction, newU, newV);
 //        uvOffsets.put(flag, new float[]{newU, newV});
-        update();
+        refresh();
     }
 
     public void cycleTextureDir(Direction direction) {
@@ -172,7 +154,7 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>, Dire
             paint(direction, material.cycle(BlockStateProperties.HORIZONTAL_AXIS));
         else if (material.hasProperty(BlockStateProperties.LIT))
             paint(direction, material.cycle(BlockStateProperties.LIT));
-        super.update();
+        refresh();
     }
 
     public List<BakedQuad> getQuadsForDirection(BlockState state, int flag) {
@@ -203,7 +185,7 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>, Dire
     public void refreshVisible() {
         Level level = Minecraft.getInstance().level;
         if(level==null) {
-            visibles = null;
+            visibles .clear();
             return;
         };
         flags.forEach((direction, flag) -> {
@@ -216,7 +198,7 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>, Dire
     public void refreshAO(BlockPos blockPos) {
         Level level = Minecraft.getInstance().level;
         if (level==null){
-            aoFaces=null;
+            aoFaces.clear();
             return;
         }
         for (Map.Entry<Integer, BlockState> entry : materials.entrySet()) {
@@ -228,6 +210,13 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>, Dire
             aoFace.calculate(level, state, blockPos.relative(direction), direction, shape, shapeFlags, true);
             aoFaces.put(flag, aoFace);
         }
+    }
+
+    public void refresh() {
+        visibles.clear();
+        aoFaces.clear();
+        objects.clear();
+        PaintRender.setChanged();
     }
     @Override
     public void initFlags() {
@@ -311,7 +300,11 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>, Dire
         materials.forEach((flag, material) -> {
 
 
-            objects.put(flag, createQuad(flag,material));   // 存入结果，objects 应为 Map<Integer, List<BakedQuad>>
+            List<BakedQuad> quads=createQuad(flag,material);
+            if(!quads.isEmpty())
+            {
+                objects.put(flag,quads);   // 存入结果，objects 应为 Map<Integer, List<BakedQuad>>
+            }
         });
     }
 
@@ -321,6 +314,11 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>, Dire
         Minecraft mc = Minecraft.getInstance();
         Level level = mc.level;
         double offset= (double)Configs.getValue(Painter.MODID, ClientConfig.PAINT_OFFSET).get();
+
+        if (objects.isEmpty())createQuads();
+        if(visibles.isEmpty())refreshVisible();
+        if(aoFaces.isEmpty())refreshAO(blockPos);
+
         for (Map.Entry<Integer, List<BakedQuad>> entry : objects.entrySet()) {
             List<BakedQuad> quads = entry.getValue();
             int flag = entry.getKey();
@@ -329,8 +327,7 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>, Dire
             BlockState material = materials.get(flag);
             Direction direction = getDirection(flag);
 
-            if(visibles== null)refreshVisible();
-            if(aoFaces==null)refreshAO(blockPos);
+
             if (!visibles.getOrDefault(flag,false))continue;
 
             Vec3 vec3 = new Vec3(blockPos.getX() + offset * normal.getX(),
@@ -351,7 +348,7 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>, Dire
     public final void paint(Direction f, BlockState blockState) {
 
         putMaterial(f,blockState);
-        update();
+        refresh();
     }
 
     /**
@@ -369,7 +366,7 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>, Dire
         off[0] = u;
         off[1] = v;
         uvOffsets.put(flag, off);
-        update();
+        refresh();
     }
 
     public void putMaterial(Direction f, BlockState blockState)
@@ -484,7 +481,6 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>, Dire
                 // logging removed
             }
         }
-
-        createQuads();
+        refresh();
     }
 }
