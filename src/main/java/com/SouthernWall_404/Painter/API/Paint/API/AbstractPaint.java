@@ -435,9 +435,24 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>, Dire
         return tag;
     }
 
+    /**
+     * 从NBT标签反序列化粉刷数据，恢复材质映射和UV偏移信息
+     * <p>
+     * 该方法执行以下操作：
+     * 1. 调用父类反序列化方法恢复基础数据
+     * 2. 解析并恢复各方向的材质方块状态（materials）
+     * 3. 解析并恢复各方向的UV纹理偏移量（uvOffsets）
+     * 4. 确保所有方向标志都有对应的UV偏移条目
+     * 5. 触发刷新以重建渲染缓存
+     *
+     * @param provider 注册表提供者，用于BlockState的编解码上下文
+     * @param tag      包含序列化数据的NBT复合标签，应包含"materials"和"uvOffsets"列表
+     */
     @Override
     public void deserializeNBT(HolderLookup.Provider provider, CompoundTag tag) {
         super.deserializeNBT(provider, tag);
+        
+        // 清空并恢复材质映射数据
         this.materials.clear();
         ListTag materialsList = tag.getList("materials", Tag.TAG_COMPOUND);
         for (int i = 0; i < materialsList.size(); i++) {
@@ -450,7 +465,7 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>, Dire
             materials.put(flag, state);
         }
 
-        // Restore UV offsets
+        // 清空并恢复UV偏移数据
         uvOffsets.clear();
         if (tag.contains("uvOffsets", Tag.TAG_LIST)) {
             ListTag uvList = tag.getList("uvOffsets", Tag.TAG_COMPOUND);
@@ -462,8 +477,8 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>, Dire
                 uvOffsets.put(flag, new float[]{u, v});
             }
         }
-        // no debug logs
-        // Ensure all direction flags have an entry
+        
+        // 确保所有方向标志都有对应的UV偏移条目，防止空指针异常
         if (uvOffsets.isEmpty()) {
             registerUVs();
         } else {
@@ -471,16 +486,9 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>, Dire
                 uvOffsets.computeIfAbsent(f, k -> new float[]{0f, 0f});
                 uvOffsets.computeIfAbsent(-f, k -> new float[]{0f, 0f});
             });
-            // If all loaded UV offsets are zeros, apply a small non-zero default to assist debugging
-            boolean anyNonZero = uvOffsets.values().stream().anyMatch(a -> a != null && (a[0] != 0f || a[1] != 0f));
-            if (!anyNonZero) {
-                // Find a representative flag to modify (e.g., NORTH)
-                int northFlag = getFlag(Direction.NORTH);
-                uvOffsets.put(northFlag, new float[]{0.25f, 0f});
-                uvOffsets.put(-northFlag, new float[]{0.25f, 0f});
-                // logging removed
-            }
         }
+        
+        // 触发渲染系统刷新，重建可见性、环境光遮蔽和四元面缓存
         refresh();
     }
 }
