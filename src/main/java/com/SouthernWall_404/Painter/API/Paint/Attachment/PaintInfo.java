@@ -2,6 +2,7 @@ package com.SouthernWall_404.Painter.API.Paint.Attachment;
 
 
 import com.SouthernWall_404.LaplaceAPI.VertinCore.IAttachment;
+import com.SouthernWall_404.LaplaceAPI.xNetwork.API.NetworkSync;
 import com.SouthernWall_404.Painter.API.Paint.API.AbstractPaint;
 import com.SouthernWall_404.Painter.API.Paint.API.AbstractRender;
 import com.SouthernWall_404.Painter.API.Paint.PaintContent;
@@ -17,9 +18,6 @@ import net.minecraft.nbt.Tag;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.state.BlockState;
-import org.jetbrains.annotations.UnknownNullability;
 
 import javax.annotation.Nullable;
 import java.util.HashMap;
@@ -68,17 +66,23 @@ public class PaintInfo implements IAttachment {
 
         if(Minecraft.getInstance()!=null)
         {
-            PaintRender.redraw();
+            PaintRender.setChanged();
         }
     }
 
-    public void tick(ChunkPos pos) {
+    /**
+     * 时域分布光照更新算法
+     * 将区块中所有 AbstractPaint 的光照更新在时域中进行分布式计算，以降低每帧渲染压力
+     * 目前作为技术储备
+     * TODO 考虑配置项启用
+     * @param pos
+     */
+    public void TDDAO(ChunkPos pos) {
         int minX = pos.getMinBlockX();   // pos.x * 16
         int minZ = pos.getMinBlockZ();   // pos.z * 16
         int maxX = pos.getMaxBlockX();   // minX + 15
         int maxZ = pos.getMaxBlockZ();
 
-        //TODO 考虑修改分块配置项
         int amount = 2;          // 4x4 分块
         int step = 16 / amount;  // 每个分块边长 4
 
@@ -96,8 +100,8 @@ public class PaintInfo implements IAttachment {
                     int x = blockPos.getX();
                     int z = blockPos.getZ();
                     if (x >= startX && x <= endX && z >= startZ && z <= endZ) {
-//                        paint.refreshAO(blockPos);
-//                        paint.refreshVisible();
+                        paint.refreshAO();
+                        paint.refreshVisible();
                     }
                 }
             });
@@ -116,7 +120,11 @@ public class PaintInfo implements IAttachment {
 
         removeRender(pos);
 
-        PaintSyncHelper.syncToClient(level.getChunkAt(pos).getPos(),player);
+        if(paints.isEmpty()){//如果
+            level.getData(ModAttachments.PAINT_CHUNK_INFO).removeChunk(new ChunkPos(pos));
+        }
+
+        PaintSyncHelper.sync(level.getChunkAt(pos).getPos(),player);
 
     }
 
