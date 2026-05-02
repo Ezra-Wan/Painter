@@ -2,6 +2,7 @@ package com.SouthernWall_404.Painter.API.Paint.Attachment;
 
 
 import com.SouthernWall_404.LaplaceAPI.VertinCore.IAttachment;
+import com.SouthernWall_404.LaplaceAPI.xNetwork.API.NetworkSync;
 import com.SouthernWall_404.Painter.API.Paint.API.AbstractPaint;
 import com.SouthernWall_404.Painter.API.Paint.API.AbstractRender;
 import com.SouthernWall_404.Painter.API.Paint.PaintContent;
@@ -66,7 +67,7 @@ public class PaintInfo implements IAttachment {
         if(Minecraft.getInstance()!=null)
         {
             PaintRender.setChanged();
-        }//TODO添加对PaintChunkInfo的更新
+        }
     }
 
     /**
@@ -118,6 +119,10 @@ public class PaintInfo implements IAttachment {
     public void removeRender(Level level, Player player,BlockPos pos) {
 
         removeRender(pos);
+
+        if(paints.isEmpty()){//如果
+            level.getData(ModAttachments.PAINT_CHUNK_INFO).removeChunk(new ChunkPos(pos));
+        }
 
         PaintSyncHelper.sync(level.getChunkAt(pos).getPos(),player);
 
