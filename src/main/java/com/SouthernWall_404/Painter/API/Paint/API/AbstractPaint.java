@@ -10,6 +10,7 @@ import com.SouthernWall_404.LaplaceAPI.VertinCore.Config.Configs;
 import com.SouthernWall_404.Painter.API.Paint.Util.RenderUtil;
 import com.SouthernWall_404.LaplaceAPI.RegulappleEngine.BakedQuadRender;
 import com.SouthernWall_404.Painter.Client.Config.ClientConfig;
+import com.SouthernWall_404.Painter.Client.PaintRender;
 import com.SouthernWall_404.Painter.Painter;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
@@ -51,11 +52,9 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>, Dire
 
 
     //========不需要持久化的数据========
-    public static float[] shape = new float[ModelRender.DIRECTIONS.length * 2];
-    private static BitSet shapeFlags = new BitSet(3);
-    private int tick = 0;
-    private Map<Integer, ModelRender.AmbientOcclusionFace> aoFaces = new HashMap<>();
-
+    private final float[] shape = new float[ModelRender.DIRECTIONS.length * 2];
+    private final BitSet shapeFlags = new BitSet(3);
+    protected Map<Integer, ModelRender.AmbientOcclusionFace> aoFaces = new HashMap<>();
     protected Map<Integer,Boolean> visibles =new HashMap<>();
     //========需要持久化的数据========
     protected Map<Integer, BlockState> materials = new HashMap<>();
@@ -64,25 +63,8 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>, Dire
     //========构造方法========
     public AbstractPaint(BlockPos blockPos,String type) {
         super(blockPos,type);
-        update();
 
         registerUVs();
-    }
-
-
-    //========内部方法========
-    @OnlyIn(Dist.CLIENT)
-    @Override
-    public void update() {
-        super.update();
-        if(FMLEnvironment.dist!=Dist.CLIENT)return;
-        if (Minecraft.getInstance() == null) {
-            return;
-        }
-        createQuads();
-        refreshVisible();
-        refreshAO(blockPos);
-
     }
 
     @Override
@@ -154,7 +136,7 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>, Dire
 
         setUVOffset(direction, newU, newV);
 //        uvOffsets.put(flag, new float[]{newU, newV});
-        update();
+        refresh();
     }
 
     public void cycleTextureDir(Direction direction) {
@@ -172,7 +154,7 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>, Dire
             paint(direction, material.cycle(BlockStateProperties.HORIZONTAL_AXIS));
         else if (material.hasProperty(BlockStateProperties.LIT))
             paint(direction, material.cycle(BlockStateProperties.LIT));
-        super.update();
+        refresh();
     }
 
     public List<BakedQuad> getQuadsForDirection(BlockState state, int flag) {
@@ -202,6 +184,10 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>, Dire
     @OnlyIn(Dist.CLIENT)
     public void refreshVisible() {
         Level level = Minecraft.getInstance().level;
+        if(level==null) {
+            visibles .clear();
+            return;
+        };
         flags.forEach((direction, flag) -> {
             boolean shouldRender = RenderUtil.shouldRenderFace(blockPos, origin, direction);
             visibles.put(flag, shouldRender);
@@ -209,18 +195,33 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>, Dire
         });
     }
     @OnlyIn(Dist.CLIENT)
-    public void refreshAO(BlockPos blockPos) {
+    public void refreshAO() {
         Level level = Minecraft.getInstance().level;
-        if (level==null)return;
+        if (level==null){
+            aoFaces.clear();
+            return;
+        }
         for (Map.Entry<Integer, BlockState> entry : materials.entrySet()) {
             int flag = entry.getKey();
             BlockState state = materials.get(flag);
             Direction direction = getDirection(flag);
 
+            BlockPos blockPos=this.blockPos;
+            if(!hasNullInDirection( direction)){
+                blockPos=blockPos.relative(direction);
+            }
+
             ModelRender.AmbientOcclusionFace aoFace = new ModelRender.AmbientOcclusionFace();
-            aoFace.calculate(level, state, blockPos.relative(direction), direction, shape, shapeFlags, true);
+            aoFace.calculate(level, state,blockPos, direction, shape, shapeFlags, true);
             aoFaces.put(flag, aoFace);
         }
+    }
+
+    public void refresh() {
+        visibles.clear();
+        aoFaces.clear();
+        objects.clear();
+        PaintRender.setChanged();
     }
     @Override
     public void initFlags() {
@@ -304,7 +305,11 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>, Dire
         materials.forEach((flag, material) -> {
 
 
-            objects.put(flag, createQuad(flag,material));   // 存入结果，objects 应为 Map<Integer, List<BakedQuad>>
+            List<BakedQuad> quads=createQuad(flag,material);
+            if(!quads.isEmpty())
+            {
+                objects.put(flag,quads);   // 存入结果，objects 应为 Map<Integer, List<BakedQuad>>
+            }
         });
     }
 
@@ -314,6 +319,11 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>, Dire
         Minecraft mc = Minecraft.getInstance();
         Level level = mc.level;
         double offset= (double)Configs.getValue(Painter.MODID, ClientConfig.PAINT_OFFSET).get();
+
+        if (objects.isEmpty())createQuads();
+        if(visibles.isEmpty())refreshVisible();
+        if(aoFaces.isEmpty())refreshAO();
+
         for (Map.Entry<Integer, List<BakedQuad>> entry : objects.entrySet()) {
             List<BakedQuad> quads = entry.getValue();
             int flag = entry.getKey();
@@ -325,16 +335,16 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>, Dire
 
             if (!visibles.getOrDefault(flag,false))continue;
 
-            Vec3 vec3 = new Vec3(blockPos.getX() + offset * normal.getX(),
+            Vec3 renderVec3 = new Vec3(blockPos.getX() + offset * normal.getX(),
                     blockPos.getY() + offset * normal.getY(),
                     blockPos.getZ() + offset * normal.getZ());
             for (BakedQuad quad : quads) {
                 if (aoFaces.containsKey(flag)) {
-                    BakedQuadRender.renderInOfferredAO(quad, material, vec3, poseStack, buffer, aoFaces.get(flag));
+                    BakedQuadRender.renderInOfferredAO(quad, material, renderVec3, poseStack, buffer, aoFaces.get(flag));
                 } else {
-                    refreshAO(blockPos);
+                    refreshAO();
                     if (aoFaces.containsKey(flag))
-                        BakedQuadRender.renderInOfferredAO(quad, material, vec3, poseStack, buffer, aoFaces.get(flag));
+                        BakedQuadRender.renderInOfferredAO(quad, material, renderVec3, poseStack, buffer, aoFaces.get(flag));
                 }
             }
         }
@@ -343,7 +353,7 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>, Dire
     public final void paint(Direction f, BlockState blockState) {
 
         putMaterial(f,blockState);
-        update();
+        refresh();
     }
 
     /**
@@ -361,7 +371,7 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>, Dire
         off[0] = u;
         off[1] = v;
         uvOffsets.put(flag, off);
-        update();
+        refresh();
     }
 
     public void putMaterial(Direction f, BlockState blockState)
@@ -430,9 +440,24 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>, Dire
         return tag;
     }
 
+    /**
+     * 从NBT标签反序列化粉刷数据，恢复材质映射和UV偏移信息
+     * <p>
+     * 该方法执行以下操作：
+     * 1. 调用父类反序列化方法恢复基础数据
+     * 2. 解析并恢复各方向的材质方块状态（materials）
+     * 3. 解析并恢复各方向的UV纹理偏移量（uvOffsets）
+     * 4. 确保所有方向标志都有对应的UV偏移条目
+     * 5. 触发刷新以重建渲染缓存
+     *
+     * @param provider 注册表提供者，用于BlockState的编解码上下文
+     * @param tag      包含序列化数据的NBT复合标签，应包含"materials"和"uvOffsets"列表
+     */
     @Override
     public void deserializeNBT(HolderLookup.Provider provider, CompoundTag tag) {
         super.deserializeNBT(provider, tag);
+        
+        // 清空并恢复材质映射数据
         this.materials.clear();
         ListTag materialsList = tag.getList("materials", Tag.TAG_COMPOUND);
         for (int i = 0; i < materialsList.size(); i++) {
@@ -445,7 +470,7 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>, Dire
             materials.put(flag, state);
         }
 
-        // Restore UV offsets
+        // 清空并恢复UV偏移数据
         uvOffsets.clear();
         if (tag.contains("uvOffsets", Tag.TAG_LIST)) {
             ListTag uvList = tag.getList("uvOffsets", Tag.TAG_COMPOUND);
@@ -457,8 +482,8 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>, Dire
                 uvOffsets.put(flag, new float[]{u, v});
             }
         }
-        // no debug logs
-        // Ensure all direction flags have an entry
+        
+        // 确保所有方向标志都有对应的UV偏移条目，防止空指针异常
         if (uvOffsets.isEmpty()) {
             registerUVs();
         } else {
@@ -466,17 +491,9 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>, Dire
                 uvOffsets.computeIfAbsent(f, k -> new float[]{0f, 0f});
                 uvOffsets.computeIfAbsent(-f, k -> new float[]{0f, 0f});
             });
-            // If all loaded UV offsets are zeros, apply a small non-zero default to assist debugging
-            boolean anyNonZero = uvOffsets.values().stream().anyMatch(a -> a != null && (a[0] != 0f || a[1] != 0f));
-            if (!anyNonZero) {
-                // Find a representative flag to modify (e.g., NORTH)
-                int northFlag = getFlag(Direction.NORTH);
-                uvOffsets.put(northFlag, new float[]{0.25f, 0f});
-                uvOffsets.put(-northFlag, new float[]{0.25f, 0f});
-                // logging removed
-            }
         }
-
-        createQuads();
+        
+        // 触发渲染系统刷新，重建可见性、环境光遮蔽和四元面缓存
+        refresh();
     }
 }

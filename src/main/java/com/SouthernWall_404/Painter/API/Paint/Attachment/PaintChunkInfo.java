@@ -77,6 +77,7 @@ public class PaintChunkInfo implements IAttachment {
         paintPoses.forEach((chunkpos)->{
 
             if(playerPos.distanceSquared(chunkpos)<=viewDistance*viewDistance)chunkNearby.add(chunkpos);//如果在视距内，入队
+            //TODO 这里可能会有bug，因为ChunkPos.distanceSquared()返回的是正方形距离，而BlockPos.distanceSquared()返回的是欧式距离,仅做注意
         });
         return Collections.unmodifiableSet(paintPoses);
     }
