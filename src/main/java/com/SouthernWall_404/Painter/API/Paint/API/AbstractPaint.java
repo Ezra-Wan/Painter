@@ -195,7 +195,7 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>, Dire
         });
     }
     @OnlyIn(Dist.CLIENT)
-    public void refreshAO(BlockPos blockPos) {
+    public void refreshAO() {
         Level level = Minecraft.getInstance().level;
         if (level==null){
             aoFaces.clear();
@@ -206,8 +206,13 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>, Dire
             BlockState state = materials.get(flag);
             Direction direction = getDirection(flag);
 
+            BlockPos blockPos=this.blockPos;
+            if(!hasNullInDirection( direction)){
+                blockPos=blockPos.relative(direction);
+            }
+
             ModelRender.AmbientOcclusionFace aoFace = new ModelRender.AmbientOcclusionFace();
-            aoFace.calculate(level, state, blockPos.relative(direction), direction, shape, shapeFlags, true);
+            aoFace.calculate(level, state,blockPos, direction, shape, shapeFlags, true);
             aoFaces.put(flag, aoFace);
         }
     }
@@ -317,7 +322,7 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>, Dire
 
         if (objects.isEmpty())createQuads();
         if(visibles.isEmpty())refreshVisible();
-        if(aoFaces.isEmpty())refreshAO(blockPos);
+        if(aoFaces.isEmpty())refreshAO();
 
         for (Map.Entry<Integer, List<BakedQuad>> entry : objects.entrySet()) {
             List<BakedQuad> quads = entry.getValue();
@@ -330,16 +335,16 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>, Dire
 
             if (!visibles.getOrDefault(flag,false))continue;
 
-            Vec3 vec3 = new Vec3(blockPos.getX() + offset * normal.getX(),
+            Vec3 renderVec3 = new Vec3(blockPos.getX() + offset * normal.getX(),
                     blockPos.getY() + offset * normal.getY(),
                     blockPos.getZ() + offset * normal.getZ());
             for (BakedQuad quad : quads) {
                 if (aoFaces.containsKey(flag)) {
-                    BakedQuadRender.renderInOfferredAO(quad, material, vec3, poseStack, buffer, aoFaces.get(flag));
+                    BakedQuadRender.renderInOfferredAO(quad, material, renderVec3, poseStack, buffer, aoFaces.get(flag));
                 } else {
-                    refreshAO(blockPos);
+                    refreshAO();
                     if (aoFaces.containsKey(flag))
-                        BakedQuadRender.renderInOfferredAO(quad, material, vec3, poseStack, buffer, aoFaces.get(flag));
+                        BakedQuadRender.renderInOfferredAO(quad, material, renderVec3, poseStack, buffer, aoFaces.get(flag));
                 }
             }
         }

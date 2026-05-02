@@ -45,7 +45,7 @@ public class ClientHandlers {
                     if(paint!=null)
                     {
                         paint.refreshVisible();
-                        paint.refreshAO(blockPos);
+                        paint.refreshAO();
                     }
                 }));
             }
