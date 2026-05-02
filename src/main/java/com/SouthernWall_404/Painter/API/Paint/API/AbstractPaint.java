@@ -202,6 +202,10 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>, Dire
     @OnlyIn(Dist.CLIENT)
     public void refreshVisible() {
         Level level = Minecraft.getInstance().level;
+        if(level==null) {
+            visibles = null;
+            return;
+        };
         flags.forEach((direction, flag) -> {
             boolean shouldRender = RenderUtil.shouldRenderFace(blockPos, origin, direction);
             visibles.put(flag, shouldRender);
@@ -211,7 +215,10 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>, Dire
     @OnlyIn(Dist.CLIENT)
     public void refreshAO(BlockPos blockPos) {
         Level level = Minecraft.getInstance().level;
-        if (level==null)return;
+        if (level==null){
+            aoFaces=null;
+            return;
+        }
         for (Map.Entry<Integer, BlockState> entry : materials.entrySet()) {
             int flag = entry.getKey();
             BlockState state = materials.get(flag);
@@ -322,7 +329,8 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>, Dire
             BlockState material = materials.get(flag);
             Direction direction = getDirection(flag);
 
-
+            if(visibles== null)refreshVisible();
+            if(aoFaces==null)refreshAO(blockPos);
             if (!visibles.getOrDefault(flag,false))continue;
 
             Vec3 vec3 = new Vec3(blockPos.getX() + offset * normal.getX(),

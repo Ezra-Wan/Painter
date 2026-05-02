@@ -76,7 +76,7 @@ public class RenderUtil {
         if(Minecraft.getInstance()!=null)
         {
             Minecraft mc=Minecraft.getInstance();
-            int distance=(mc.options.renderDistance().get()+8)*16;
+            int distance=(mc.options.renderDistance().get()+8)*16;//TODO 这里记得改
 
             Vector3f camPos=new Vector3f(mc.gameRenderer.getMainCamera().getBlockPosition());//获取主视角位置
             Vector3f blockPos=new Vector3f(pos);
@@ -93,7 +93,6 @@ public class RenderUtil {
         BlockPos neighborPos = pos.relative(face);
         // 调用原版标准面渲染判定逻辑
         boolean shouldRender=Block.shouldRenderFace(state, level, pos, face, neighborPos);
-
         return shouldRender;
     }
 }
