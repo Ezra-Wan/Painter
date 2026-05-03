@@ -3,6 +3,7 @@ package com.SouthernWall_404.Painter.API.Paint.Attachment;
 import com.SouthernWall_404.LaplaceAPI.VertinCore.IAttachment;
 import com.SouthernWall_404.LaplaceAPI.xNetwork.API.NetworkSync;
 import com.SouthernWall_404.Painter.API.Paint.API.AbstractRender;
+import com.SouthernWall_404.Painter.Client.PaintRender;
 import com.SouthernWall_404.Painter.Common.Init.ModAttachments;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
@@ -77,7 +78,6 @@ public class PaintChunkInfo implements IAttachment {
         paintPoses.forEach((chunkpos)->{
 
             if(playerPos.distanceSquared(chunkpos)<=viewDistance*viewDistance)chunkNearby.add(chunkpos);//如果在视距内，入队
-            //TODO 这里可能会有bug，因为ChunkPos.distanceSquared()返回的是正方形距离，而BlockPos.distanceSquared()返回的是欧式距离,仅做注意
         });
         return Collections.unmodifiableSet(paintPoses);
     }
@@ -97,6 +97,8 @@ public class PaintChunkInfo implements IAttachment {
         {
             paintPoses.add(pos);
 
+            PaintRender.addChunk(pos);//TODO 可能需要检测
+
             setChanged();
         }
     }
@@ -104,11 +106,15 @@ public class PaintChunkInfo implements IAttachment {
     public void removeChunk(ChunkPos pos) {
         if (paintPoses.contains(pos)){
             paintPoses.remove(pos);
+            PaintRender.removeChunk(pos);
         }
 
         setChanged();
     }
 
+    public Set<ChunkPos> getPaintPoses() {
+        return paintPoses;
+    }
 
     @Override
     public @UnknownNullability CompoundTag serializeNBT(HolderLookup.Provider provider) {

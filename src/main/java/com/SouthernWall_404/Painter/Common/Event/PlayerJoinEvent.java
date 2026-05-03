@@ -26,7 +26,7 @@ public class PlayerJoinEvent {
         if(!level.isClientSide) {
             NetworkSync.syncLevelAttachment(level,ModAttachments.PAINT_CHUNK_INFO.get(),player);
 
-            PaintRender.setChanged();//重绘以免出现渲染残留
+            PaintRender.clear();//重绘以免出现渲染残留
         }
     }
 
@@ -39,15 +39,25 @@ public class PlayerJoinEvent {
 
         ChunkPos pos=event.getChunk().getPos();
 
+        PaintSyncHelper.sync(pos, mc.player);
+
         PaintChunkInfo chunkInfo = level.getData(ModAttachments.PAINT_CHUNK_INFO);
-        if (!chunkInfo.getPaintPosesNearby(mc.player.getOnPos()).contains(pos)) return;
-
-        PaintInfo paintInfo = chunk.getData(ModAttachments.PAINT_INFO);
-
-        if (paintInfo.getPaints().isEmpty()) {
-            // 需要向服务器请求
-            PaintSyncHelper.sync(pos, mc.player);
+        if(chunkInfo.getPaintPoses().contains(pos)){
+            PaintRender.addChunk(pos);
         }
+    }
+
+    @SubscribeEvent
+    public static void ChunkEvent(ChunkEvent.Unload event)
+    {
+        if (!(event.getLevel() instanceof ClientLevel level)) return;
+        if (!(event.getChunk() instanceof LevelChunk chunk)) return;
+        Minecraft mc=Minecraft.getInstance();
+
+        ChunkPos pos=event.getChunk().getPos();
+
+        PaintChunkInfo chunkInfo = level.getData(ModAttachments.PAINT_CHUNK_INFO);
+        if(chunkInfo.getPaintPoses().contains(pos))PaintRender.removeChunk(pos);
     }
 
 

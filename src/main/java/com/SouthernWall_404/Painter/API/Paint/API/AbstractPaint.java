@@ -184,7 +184,7 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>, Dire
     @OnlyIn(Dist.CLIENT)
     public void refreshVisible() {
         Level level = Minecraft.getInstance().level;
-        if(level==null) {
+        if(level==null||origin==null) {
             visibles .clear();
             return;
         };
@@ -221,7 +221,7 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>, Dire
         visibles.clear();
         aoFaces.clear();
         objects.clear();
-        PaintRender.setChanged();
+//        PaintRender.setChanged();
     }
     @Override
     public void initFlags() {
