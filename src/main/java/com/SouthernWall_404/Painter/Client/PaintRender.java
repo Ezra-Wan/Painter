@@ -3,6 +3,7 @@ package com.SouthernWall_404.Painter.Client;
 
 import com.SouthernWall_404.Painter.API.Paint.API.AbstractRender;
 import com.SouthernWall_404.Painter.API.Paint.Attachment.PaintChunkInfo;
+import com.SouthernWall_404.Painter.API.Paint.Attachment.PaintInfo;
 import com.SouthernWall_404.Painter.Common.Init.ModAttachments;
 import com.SouthernWall_404.Painter.Painter;
 import com.mojang.blaze3d.vertex.VertexConsumer;
@@ -13,8 +14,10 @@ import net.minecraft.client.renderer.block.ModelBlockRenderer;
 import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LightLayer;
+import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.lighting.BlockLightEngine;
 import net.minecraft.world.phys.AABB;
 import net.neoforged.api.distmarker.Dist;
@@ -107,5 +110,49 @@ public class PaintRender {
                 render.update());
 
         done();
+    }
+
+    public static void addChunk(ChunkPos pos)
+    {
+        Minecraft mc=Minecraft.getInstance();
+        if(mc!=null)
+        {
+            Level level=mc.level;
+            PaintChunkInfo chunkInfo=level.getData(ModAttachments.PAINT_CHUNK_INFO);
+            if(chunkInfo.getPaintPoses().contains(pos))
+            {
+                LevelChunk chunk=level.getChunk(pos.x,pos.z);
+                PaintInfo paintInfo=chunk.getData(ModAttachments.PAINT_INFO);
+                renders.putAll(paintInfo.getRenders());
+            }
+        }
+    }
+
+    public static void addRender(BlockPos pos, AbstractRender<?, ?> render)
+    {
+        renders.put(pos,render);
+    }
+
+    public static void removeChunk(ChunkPos pos)
+    {
+        Minecraft mc=Minecraft.getInstance();
+        if(mc!=null)
+        {
+            Level level=mc.level;
+            PaintChunkInfo chunkInfo=level.getData(ModAttachments.PAINT_CHUNK_INFO);
+            if(chunkInfo.getPaintPoses().contains(pos))
+            {
+                LevelChunk chunk=level.getChunk(pos.x,pos.z);
+                PaintInfo paintInfo=chunk.getData(ModAttachments.PAINT_INFO);
+
+                paintInfo.getRenders().forEach((pos1,render)->
+                        renders.remove(pos1));
+            }
+        }
+    }
+
+    public void removeRender(BlockPos pos)
+    {
+        renders.remove(pos);
     }
 }

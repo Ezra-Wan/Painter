@@ -109,6 +109,9 @@ public class PaintChunkInfo implements IAttachment {
         setChanged();
     }
 
+    public Set<ChunkPos> getPaintPoses() {
+        return paintPoses;
+    }
 
     @Override
     public @UnknownNullability CompoundTag serializeNBT(HolderLookup.Provider provider) {
