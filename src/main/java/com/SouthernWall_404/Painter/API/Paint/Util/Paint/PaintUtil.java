@@ -2,7 +2,9 @@ package com.SouthernWall_404.Painter.API.Paint.Util.Paint;
 
 import com.SouthernWall_404.LaplaceAPI.VertinCore.Util.BlockUtil;
 import com.SouthernWall_404.Painter.API.Paint.API.AbstractPaint;
+import com.SouthernWall_404.Painter.API.Paint.Attachment.PaintInfo;
 import com.SouthernWall_404.Painter.API.Tool.Wall.IFilter;
+import com.SouthernWall_404.Painter.Common.Init.ModAttachments;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.InteractionHand;
@@ -22,12 +24,13 @@ public class PaintUtil {
 
     public static void dealBrushClick(Level level, BlockPos blockPos, Player player, Direction direction, boolean isInMainHand) {
         LevelChunk chunk = level.getChunkAt(blockPos);
-        Map<BlockPos, AbstractPaint> paints = PaintAttachmentHelper.getPaintInfo(chunk).getPaints();
+        PaintInfo paintInfo = chunk.getData(ModAttachments.PAINT_INFO);
+        Map<BlockPos, AbstractPaint> paints =paintInfo.getPaints();
         AbstractPaint paint = paints.get(blockPos);
 
         if (!isInMainHand) {//当副手持刷子
             if (paint != null) {//只要有paint在
-                PaintOperationHelper.cycleTextureUV(paint, direction); // 旋转纹理
+                if(level.isClientSide) PaintOperationHelper.cycleTextureUV(paint,direction); // 旋转纹理并发送网络包
             }
         }
         else {//当主手持刷子
