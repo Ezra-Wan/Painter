@@ -13,6 +13,6 @@ public class PaintSyncHelper {
         Level level = player.level();
         NetworkSync.syncChunkAttachment(level, pos,ModAttachments.PAINT_INFO.get(), player);
 
-        PaintRender.setChanged();
+        PaintRender.addChunk(pos);
     }
 }

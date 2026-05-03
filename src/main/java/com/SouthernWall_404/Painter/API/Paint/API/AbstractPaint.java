@@ -221,7 +221,7 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>, Dire
         visibles.clear();
         aoFaces.clear();
         objects.clear();
-        PaintRender.setChanged();
+//        PaintRender.setChanged();
     }
     @Override
     public void initFlags() {
