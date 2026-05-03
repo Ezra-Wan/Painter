@@ -39,9 +39,6 @@ public class PlayerJoinEvent {
 
         ChunkPos pos=event.getChunk().getPos();
 
-        PaintChunkInfo chunkInfo = level.getData(ModAttachments.PAINT_CHUNK_INFO);
-        if (!chunkInfo.getPaintPoses().contains(pos)) return;
-
 //        PaintInfo paintInfo = chunk.getData(ModAttachments.PAINT_INFO);
 
 //        if (paintInfo.getPaints().isEmpty()) {

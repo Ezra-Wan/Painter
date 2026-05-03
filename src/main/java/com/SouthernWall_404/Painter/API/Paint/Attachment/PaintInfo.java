@@ -7,6 +7,7 @@ import com.SouthernWall_404.Painter.API.Paint.API.AbstractPaint;
 import com.SouthernWall_404.Painter.API.Paint.API.AbstractRender;
 import com.SouthernWall_404.Painter.API.Paint.PaintContent;
 import com.SouthernWall_404.Painter.API.Paint.Util.Paint.PaintSyncHelper;
+import com.SouthernWall_404.Painter.API.Paint.Util.RenderUtil;
 import com.SouthernWall_404.Painter.Client.PaintRender;
 import com.SouthernWall_404.Painter.Common.Init.ModAttachments;
 import net.minecraft.client.Minecraft;
@@ -57,7 +58,7 @@ public class PaintInfo implements IAttachment {
         paints.put(pos, paint);
         PaintChunkInfo chunkInfo=level.getData(ModAttachments.PAINT_CHUNK_INFO);
         chunkInfo.addChunk(level.getChunkAt(pos).getPos());
-
+        PaintRender.addRender(pos,paint);
     }
 
     public void removeRender(BlockPos pos) {
@@ -167,8 +168,11 @@ public class PaintInfo implements IAttachment {
             AbstractPaint paint = createPaintByType(type, provider, data,pos);
             if (paint != null) {
                 paints.put(pos, paint);
+
+                PaintRender.addRender(pos,paint);
             }
         }
+
     }
 
     /**
