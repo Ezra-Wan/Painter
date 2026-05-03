@@ -22,6 +22,9 @@ import net.minecraft.world.level.block.state.properties.SlabType;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
+import net.neoforged.neoforge.network.PacketDistributor;
 
 import java.util.Map;
 
@@ -116,12 +119,10 @@ public final class PaintOperationHelper {
             return material;
     }
 
+
+    @OnlyIn(Dist.CLIENT)
     public static void cycleTextureUV(AbstractPaint paint, Direction direction) {
-        if(paint instanceof SlabBlockPaint slabBlock)//若为SlabBlockPaint
-        {
-            slabBlock.cycleTextureUV(direction);
-        }
-        else paint.cycleTextureUV(direction);
+        paint.cycleTextureUV(direction);
     }
 
     public static void cycleTextureDir(AbstractPaint paint, Direction direction) {

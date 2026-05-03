@@ -97,7 +97,7 @@ public class PaintChunkInfo implements IAttachment {
         {
             paintPoses.add(pos);
 
-            PaintRender.addChunk(pos);//TODO 可能需要检测
+            PaintRender.addChunk(pos);
 
             setChanged();
         }

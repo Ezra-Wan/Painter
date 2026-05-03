@@ -5,6 +5,7 @@ import com.SouthernWall_404.Painter.Common.Config.ModConfig;
 import com.SouthernWall_404.Painter.Common.Event.BlockRelativeEvent;
 import com.SouthernWall_404.Painter.Common.Event.PlayerJoinEvent;
 import com.SouthernWall_404.Painter.Common.Laplace.Network.ClientHandlers;
+import com.SouthernWall_404.Painter.Common.Laplace.Network.ServerHandlers;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;
@@ -33,7 +34,9 @@ public class Painter {
         // 初始化配置系统
         ModConfig.register(container);
 
+        // 注册网络处理器
         if(FMLEnvironment.dist== Dist.CLIENT)ClientHandlers.register();
+        ServerHandlers.register();
 
         NeoForge.EVENT_BUS.register(BlockRelativeEvent.class);
         NeoForge.EVENT_BUS.register(PlayerJoinEvent.class);
