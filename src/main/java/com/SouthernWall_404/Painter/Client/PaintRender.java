@@ -155,4 +155,9 @@ public class PaintRender {
     {
         renders.remove(pos);
     }
+
+    public static synchronized void clear()
+    {
+        renders.clear();
+    }
 }

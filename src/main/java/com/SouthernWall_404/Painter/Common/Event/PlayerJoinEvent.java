@@ -26,7 +26,7 @@ public class PlayerJoinEvent {
         if(!level.isClientSide) {
             NetworkSync.syncLevelAttachment(level,ModAttachments.PAINT_CHUNK_INFO.get(),player);
 
-            PaintRender.setChanged();//重绘以免出现渲染残留
+            PaintRender.clear();//重绘以免出现渲染残留
         }
     }
 
