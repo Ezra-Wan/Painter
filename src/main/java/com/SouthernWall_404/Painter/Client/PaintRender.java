@@ -112,7 +112,7 @@ public class PaintRender {
         done();
     }
 
-    public static void addChunk(ChunkPos pos)
+    public static synchronized void addChunk(ChunkPos pos)
     {
         Minecraft mc=Minecraft.getInstance();
         if(mc!=null)
@@ -128,12 +128,12 @@ public class PaintRender {
         }
     }
 
-    public static void addRender(BlockPos pos, AbstractRender<?, ?> render)
+    public static synchronized void addRender(BlockPos pos, AbstractRender<?, ?> render)
     {
         renders.put(pos,render);
     }
 
-    public static void removeChunk(ChunkPos pos)
+    public static synchronized void removeChunk(ChunkPos pos)
     {
         Minecraft mc=Minecraft.getInstance();
         if(mc!=null)
@@ -151,7 +151,7 @@ public class PaintRender {
         }
     }
 
-    public void removeRender(BlockPos pos)
+    public static synchronized void removeRender(BlockPos pos)
     {
         renders.remove(pos);
     }
