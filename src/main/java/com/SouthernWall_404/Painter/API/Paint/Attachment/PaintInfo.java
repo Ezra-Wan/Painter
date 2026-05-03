@@ -119,7 +119,6 @@ public class PaintInfo implements IAttachment {
      * 时域分布光照更新算法
      * 将区块中所有 AbstractPaint 的光照更新在时域中进行分布式计算，以降低每帧渲染压力
      * 目前作为技术储备
-     * TODO 考虑配置项启用
      * @param pos
      */
     public void TDDAO(ChunkPos pos) {
