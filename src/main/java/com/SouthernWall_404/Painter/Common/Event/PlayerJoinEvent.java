@@ -39,12 +39,12 @@ public class PlayerJoinEvent {
 
         ChunkPos pos=event.getChunk().getPos();
 
-//        PaintInfo paintInfo = chunk.getData(ModAttachments.PAINT_INFO);
+        PaintSyncHelper.sync(pos, mc.player);
 
-//        if (paintInfo.getPaints().isEmpty()) {
-//            // 需要向服务器请求
-            PaintSyncHelper.sync(pos, mc.player);
-//        }
+        PaintChunkInfo chunkInfo = level.getData(ModAttachments.PAINT_CHUNK_INFO);
+        if(chunkInfo.getPaintPoses().contains(pos)){
+            PaintRender.addChunk(pos);
+        }
     }
 
     @SubscribeEvent

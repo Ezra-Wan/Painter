@@ -3,6 +3,7 @@ package com.SouthernWall_404.Painter.API.Paint.Attachment;
 import com.SouthernWall_404.LaplaceAPI.VertinCore.IAttachment;
 import com.SouthernWall_404.LaplaceAPI.xNetwork.API.NetworkSync;
 import com.SouthernWall_404.Painter.API.Paint.API.AbstractRender;
+import com.SouthernWall_404.Painter.Client.PaintRender;
 import com.SouthernWall_404.Painter.Common.Init.ModAttachments;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
@@ -97,6 +98,8 @@ public class PaintChunkInfo implements IAttachment {
         {
             paintPoses.add(pos);
 
+            PaintRender.addChunk(pos);//TODO 可能需要检测
+
             setChanged();
         }
     }
@@ -104,6 +107,7 @@ public class PaintChunkInfo implements IAttachment {
     public void removeChunk(ChunkPos pos) {
         if (paintPoses.contains(pos)){
             paintPoses.remove(pos);
+            PaintRender.removeChunk(pos);
         }
 
         setChanged();

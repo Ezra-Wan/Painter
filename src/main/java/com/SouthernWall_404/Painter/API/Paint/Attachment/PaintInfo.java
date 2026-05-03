@@ -8,9 +8,11 @@ import com.SouthernWall_404.Painter.API.Paint.API.AbstractRender;
 import com.SouthernWall_404.Painter.API.Paint.PaintContent;
 import com.SouthernWall_404.Painter.API.Paint.Util.Paint.PaintSyncHelper;
 import com.SouthernWall_404.Painter.API.Paint.Util.RenderUtil;
-import com.SouthernWall_404.Painter.Client.PaintRender;
 import com.SouthernWall_404.Painter.Common.Init.ModAttachments;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
@@ -19,6 +21,10 @@ import net.minecraft.nbt.Tag;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LightLayer;
+import net.minecraft.world.phys.AABB;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 
 import javax.annotation.Nullable;
 import java.util.HashMap;
@@ -54,21 +60,59 @@ public class PaintInfo implements IAttachment {
         return copy;
     }
 
+    /**
+     * 渲染该区块内所有粉刷对象
+     * @param poseStack 姿态栈
+     * @param buffer 顶点缓冲区
+     * @param frustum 视锥体（用于剔除）
+     */
+    @OnlyIn(Dist.CLIENT)
+    public void render(PoseStack poseStack, VertexConsumer buffer, Frustum frustum) {
+        Minecraft mc = Minecraft.getInstance();
+        if (mc == null || mc.level == null) return;
+        
+        Level level = mc.level;
+        float partialTick = mc.getTimer().getGameTimeDeltaPartialTick(true);
+        
+        paints.forEach((blockPos, paint) -> {
+            // 视锥剔除
+            AABB aabb = new AABB(blockPos.getX(), blockPos.getY(), blockPos.getZ(), 
+                                 blockPos.getX() + 1, blockPos.getY() + 1, blockPos.getZ() + 1);
+            if (!frustum.isVisible(aabb)) {
+                return;
+            }
+            
+            // 初始化 origin（如果为空）
+            if (paint.getOrigin() == null) {
+                paint.setOrigin(level.getBlockState(blockPos));
+            }
+            
+            // 计算光照
+            int packedLight = calculatePackedLight(level, blockPos);
+            
+            // 调用渲染方法
+            paint.render(blockPos, poseStack, packedLight, 0, partialTick, buffer);
+        });
+    }
+    
+    /**
+     * 计算方块位置的光照值
+     */
+    private int calculatePackedLight(Level level, BlockPos pos) {
+        if (level == null) return 0;
+        int blockLight = level.getBrightness(LightLayer.BLOCK, pos);
+        int skyLight = level.getBrightness(LightLayer.SKY, pos);
+        return (skyLight << 20) | (blockLight << 4);
+    }
+
     public void putPaints(Level level, BlockPos pos, AbstractPaint paint) {
         paints.put(pos, paint);
         PaintChunkInfo chunkInfo=level.getData(ModAttachments.PAINT_CHUNK_INFO);
         chunkInfo.addChunk(level.getChunkAt(pos).getPos());
-        PaintRender.addRender(pos,paint);
     }
 
     public void removeRender(BlockPos pos) {
-
         paints.remove(pos);
-
-        if(Minecraft.getInstance()!=null)
-        {
-            PaintRender.removeRender(pos);
-        }
     }
 
     /**
@@ -168,8 +212,6 @@ public class PaintInfo implements IAttachment {
             AbstractPaint paint = createPaintByType(type, provider, data,pos);
             if (paint != null) {
                 paints.put(pos, paint);
-
-                PaintRender.addRender(pos,paint);
             }
         }
 

@@ -68,6 +68,20 @@ public abstract class AbstractRender<T, F extends Object> implements IRender<T> 
         }
     }
 
+    /**
+     * 获取 origin 字段
+     */
+    public BlockState getOrigin() {
+        return this.origin;
+    }
+
+    /**
+     * 设置 origin 字段
+     */
+    public void setOrigin(BlockState origin) {
+        this.origin = origin;
+    }
+
     //========业务方法========
     public int getFlag(F object) {
         return flags.getOrDefault(object, -1);
