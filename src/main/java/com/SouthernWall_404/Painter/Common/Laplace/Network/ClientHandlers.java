@@ -24,7 +24,7 @@ public class ClientHandlers {
     public static void register()
     {
         if (FMLEnvironment.dist == Dist.CLIENT) {
-            NetworkRegister.registerHandler(AO_FRESH_PACKET,((packet, context) -> aoRefreshHandler(packet,context)));
+            NetworkRegister.registerBlockPosSetHandler(AO_FRESH_PACKET,((packet, context) -> aoRefreshHandler(packet,context)));
         }
     }
 

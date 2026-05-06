@@ -108,15 +108,15 @@ public class PaintInfo implements IAttachment {
 
     public void putPaints(Level level, BlockPos pos, AbstractPaint paint) {
         paints.put(pos, paint);
-        // 直接添加到渲染缓存，不再依赖 PaintChunkInfo
+
         if (level.isClientSide()) {
             PaintRender.addChunk(level.getChunkAt(pos).getPos());
+        }else {
+            NetworkSync.syncChunkAttachmentToAll(level, new ChunkPos(pos),level.players(), ModAttachments.PAINT_INFO.get());
         }
     }
 
-    public void removeRender(BlockPos pos) {
-        paints.remove(pos);
-    }
+
 
     /**
      * 时域分布光照更新算法
@@ -160,23 +160,18 @@ public class PaintInfo implements IAttachment {
     /**
      * 用于处理服务器的单端移除，执行同步
      * @param level
-     * @param player
      * @param pos
      */
-    public void removeRender(Level level, Player player,BlockPos pos) {
 
-        removeRender(pos);
+    public void removeRender(Level level,BlockPos pos) {
 
-        // 如果该区块没有更多绘制数据，从渲染缓存中移除
-        if(paints.isEmpty() && level.isClientSide()){
-            com.SouthernWall_404.Painter.Client.PaintRender.removeChunk(new ChunkPos(pos));
-        }
+        paints.remove(pos);
 
-        PaintSyncHelper.sync(level.getChunkAt(pos).getPos(),player);
+        NetworkSync.syncChunkAttachmentToAll(level,new ChunkPos(pos),level.players(), ModAttachments.PAINT_INFO.get());
 
     }
 
-
+    //TODO 对于uv旋转，暂时还不能有效同步
     @Override
     public CompoundTag serializeNBT(HolderLookup.Provider provider) {
         CompoundTag result = new CompoundTag();
@@ -215,6 +210,9 @@ public class PaintInfo implements IAttachment {
             AbstractPaint paint = createPaintByType(type, provider, data,pos);
             if (paint != null) {
                 paints.put(pos, paint);
+
+                Minecraft mc=Minecraft.getInstance();
+                if(mc!=null)PaintRender.addChunk(new ChunkPos(pos));
             }
         }
 
