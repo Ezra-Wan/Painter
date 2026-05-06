@@ -8,6 +8,7 @@ import com.SouthernWall_404.Painter.API.Paint.API.AbstractRender;
 import com.SouthernWall_404.Painter.API.Paint.PaintContent;
 import com.SouthernWall_404.Painter.API.Paint.Util.Paint.PaintSyncHelper;
 import com.SouthernWall_404.Painter.API.Paint.Util.RenderUtil;
+import com.SouthernWall_404.Painter.Client.PaintRender;
 import com.SouthernWall_404.Painter.Common.Init.ModAttachments;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
@@ -107,8 +108,10 @@ public class PaintInfo implements IAttachment {
 
     public void putPaints(Level level, BlockPos pos, AbstractPaint paint) {
         paints.put(pos, paint);
-        PaintChunkInfo chunkInfo=level.getData(ModAttachments.PAINT_CHUNK_INFO);
-        chunkInfo.addChunk(level.getChunkAt(pos).getPos());
+        // 直接添加到渲染缓存，不再依赖 PaintChunkInfo
+        if (level.isClientSide()) {
+            PaintRender.addChunk(level.getChunkAt(pos).getPos());
+        }
     }
 
     public void removeRender(BlockPos pos) {
@@ -164,8 +167,9 @@ public class PaintInfo implements IAttachment {
 
         removeRender(pos);
 
-        if(paints.isEmpty()){//如果
-            level.getData(ModAttachments.PAINT_CHUNK_INFO).removeChunk(new ChunkPos(pos));
+        // 如果该区块没有更多绘制数据，从渲染缓存中移除
+        if(paints.isEmpty() && level.isClientSide()){
+            com.SouthernWall_404.Painter.Client.PaintRender.removeChunk(new ChunkPos(pos));
         }
 
         PaintSyncHelper.sync(level.getChunkAt(pos).getPos(),player);

@@ -1,7 +1,5 @@
 package com.SouthernWall_404.Painter.Common.Event;
 
-import com.SouthernWall_404.LaplaceAPI.xNetwork.API.NetworkSync;
-import com.SouthernWall_404.Painter.API.Paint.Attachment.PaintChunkInfo;
 import com.SouthernWall_404.Painter.API.Paint.Attachment.PaintInfo;
 import com.SouthernWall_404.Painter.API.Paint.Util.Paint.PaintSyncHelper;
 import com.SouthernWall_404.Painter.Client.PaintRender;
@@ -23,11 +21,7 @@ public class PlayerJoinEvent {
     {
         Player player=event.getEntity();
         Level level=player.level();
-        if(!level.isClientSide) {
-            NetworkSync.syncLevelAttachment(level,ModAttachments.PAINT_CHUNK_INFO.get(),player);
-
-            PaintRender.clear();//重绘以免出现渲染残留
-        }
+        PaintRender.clear();//重绘以免出现渲染残留
     }
 
     @SubscribeEvent
@@ -41,8 +35,9 @@ public class PlayerJoinEvent {
 
         PaintSyncHelper.sync(pos, mc.player);
 
-        PaintChunkInfo chunkInfo = level.getData(ModAttachments.PAINT_CHUNK_INFO);
-        if(chunkInfo.getPaintPoses().contains(pos)){
+        // 检查该区块是否有绘制数据，有则添加到渲染缓存
+        PaintInfo paintInfo = chunk.getData(ModAttachments.PAINT_INFO);
+        if(!paintInfo.getPaints().isEmpty()){
             PaintRender.addChunk(pos);
         }
     }
@@ -56,8 +51,8 @@ public class PlayerJoinEvent {
 
         ChunkPos pos=event.getChunk().getPos();
 
-        PaintChunkInfo chunkInfo = level.getData(ModAttachments.PAINT_CHUNK_INFO);
-        if(chunkInfo.getPaintPoses().contains(pos))PaintRender.removeChunk(pos);
+        // 直接从渲染缓存中移除，不再依赖 PaintChunkInfo
+        PaintRender.removeChunk(pos);
     }
 
 
