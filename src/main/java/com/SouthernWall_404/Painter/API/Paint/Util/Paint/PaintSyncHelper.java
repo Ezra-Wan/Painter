@@ -18,6 +18,11 @@ public class PaintSyncHelper {
         NetworkSync.syncChunkAttachment(level, pos,ModAttachments.PAINT_INFO.get(), player);
     }
 
+    public static void syncChunkToAll(Level level, ChunkPos pos)
+    {
+        NetworkSync.syncChunkAttachmentToAll(level, pos,level.players(),ModAttachments.PAINT_INFO.get());
+    }
+
     /**
      * 同步UV偏移数据到服务端
      * @param blockPos 方块位置
