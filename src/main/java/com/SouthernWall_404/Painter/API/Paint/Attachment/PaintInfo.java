@@ -9,7 +9,9 @@ import com.SouthernWall_404.Painter.API.Paint.PaintContent;
 import com.SouthernWall_404.Painter.API.Paint.Util.Paint.PaintSyncHelper;
 import com.SouthernWall_404.Painter.API.Paint.Util.RenderUtil;
 import com.SouthernWall_404.Painter.Client.PaintRender;
+import com.SouthernWall_404.Painter.Common.Event.ServerTick;
 import com.SouthernWall_404.Painter.Common.Init.ModAttachments;
+import com.SouthernWall_404.Painter.Painter;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.Minecraft;
@@ -113,10 +115,9 @@ public class PaintInfo implements IAttachment {
         paints.put(pos, paint);
 
         if (level.isClientSide()) {
-            PaintRender.addChunk(level.getChunkAt(pos).getPos());
+            PaintRender.addChunk(new ChunkPos(pos));
         }else {
-            PaintSyncHelper.syncChunkToAll(level,new ChunkPos(pos));
-//            NetworkSync.syncChunkAttachmentToAll(level, new ChunkPos(pos),level.players(), ModAttachments.PAINT_INFO.get());
+            ServerTick.update(new ChunkPos(pos));
         }
     }
 
@@ -170,10 +171,12 @@ public class PaintInfo implements IAttachment {
     public void removeRender(Level level,BlockPos pos) {
 
         paints.remove(pos);
-        PaintSyncHelper.syncChunkToAll(level,new ChunkPos(pos));
 
-//        NetworkSync.syncChunkAttachmentToAll(level,new ChunkPos(pos),level.players(), ModAttachments.PAINT_INFO.get());
-
+        if(level.isClientSide) {
+            if(paints.isEmpty()) PaintRender.removeChunk(new ChunkPos(pos));
+        }else {
+            ServerTick.update(new ChunkPos(pos));
+        }
     }
     /**
      * 循环切换指定位置指定方向的纹理UV
@@ -189,7 +192,6 @@ public class PaintInfo implements IAttachment {
             PaintSyncHelper.syncPaintUV(pos, direction, paint.getUvOffsets().get(paint.getFlag(direction)));
         }
     }
-//TODO 对于移除方法，似乎还不能有效同步
     /**
      * 设置指定位置指定方向的纹理UV偏移
      * @param pos 方块位置

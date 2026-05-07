@@ -24,7 +24,6 @@ public class PaintSyncHelper {
      * 仅在服务端执行，禁止在服务端执行
      * 用于将当前更新向所有玩家执行
      */
-    @OnlyIn(Dist.DEDICATED_SERVER)
     public static void syncChunkToAll(Level level, ChunkPos pos)
     {
         NetworkSync.syncChunkAttachmentToAll(level, pos,level.players(),ModAttachments.PAINT_INFO.get());
