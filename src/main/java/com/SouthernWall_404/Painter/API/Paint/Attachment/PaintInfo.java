@@ -15,6 +15,7 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -112,7 +113,8 @@ public class PaintInfo implements IAttachment {
         if (level.isClientSide()) {
             PaintRender.addChunk(level.getChunkAt(pos).getPos());
         }else {
-            NetworkSync.syncChunkAttachmentToAll(level, new ChunkPos(pos),level.players(), ModAttachments.PAINT_INFO.get());
+            PaintSyncHelper.syncChunkToAll(level,new ChunkPos(pos));
+//            NetworkSync.syncChunkAttachmentToAll(level, new ChunkPos(pos),level.players(), ModAttachments.PAINT_INFO.get());
         }
     }
 
@@ -165,13 +167,43 @@ public class PaintInfo implements IAttachment {
 
     public void removeRender(Level level,BlockPos pos) {
 
-        paints.remove(pos);
+        if(level.isClientSide) paints.remove(pos);
+        else PaintSyncHelper.syncChunkToAll(level,new ChunkPos(pos));
 
-        NetworkSync.syncChunkAttachmentToAll(level,new ChunkPos(pos),level.players(), ModAttachments.PAINT_INFO.get());
+//        NetworkSync.syncChunkAttachmentToAll(level,new ChunkPos(pos),level.players(), ModAttachments.PAINT_INFO.get());
 
     }
+    /**
+     * 循环切换指定位置指定方向的纹理UV
+     * @param pos 方块位置
+     * @param direction 方向
+     */
+    @OnlyIn(Dist.CLIENT)
+    public void cycleTextureUV(Level level,BlockPos pos, Direction direction) {
+        AbstractPaint paint = paints.get(pos);
+        if (paint != null) {
+            paint.cycleTextureUV(direction);
 
-    //TODO 对于uv旋转，暂时还不能有效同步
+            PaintSyncHelper.syncPaintUV(pos, direction, paint.getUvOffsets().get(paint.getFlag(direction)));
+        }
+    }
+//TODO 对于移除方法，似乎还不能有效同步
+    /**
+     * 设置指定位置指定方向的纹理UV偏移
+     * @param pos 方块位置
+     * @param direction 方向
+     * @param u U坐标偏移
+     * @param v V坐标偏移
+     */
+    public void setUVOffset(Level level,BlockPos pos, Direction direction, float u, float v) {
+        AbstractPaint paint = paints.get(pos);
+        if (paint != null) {
+            paint.setUVOffset(direction, u, v);
+            PaintSyncHelper.syncPaintUV(pos, direction, new float[]{u, v});
+        }
+    }
+
+
     @Override
     public CompoundTag serializeNBT(HolderLookup.Provider provider) {
         CompoundTag result = new CompoundTag();
