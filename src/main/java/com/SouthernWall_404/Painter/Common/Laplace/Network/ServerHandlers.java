@@ -56,7 +56,7 @@ public class ServerHandlers {
             chunk.setUnsaved(true);
             
             // 同步到所有加载该区块的玩家
-            PaintSyncHelper.sync(chunk.getPos(), player);
+            PaintSyncHelper.syncChunkToAll(level,chunk.getPos());
         });
     }
 }

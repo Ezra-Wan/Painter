@@ -140,7 +140,7 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>, Dire
 
         setUVOffset(direction, newU, newV);
 
-        PaintSyncHelper.syncPaintUV(blockPos, direction, new float[]{newU, newV});
+
 //        uvOffsets.put(flag, new float[]{newU, newV});
         refresh();
     }
@@ -221,6 +221,10 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>, Dire
             aoFace.calculate(level, state,blockPos, direction, shape, shapeFlags, true);
             aoFaces.put(flag, aoFace);
         }
+    }
+
+    public Map<Integer, float[]> getUvOffsets() {
+        return uvOffsets;
     }
 
     public void refresh() {
@@ -377,6 +381,7 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>, Dire
         off[0] = u;
         off[1] = v;
         uvOffsets.put(flag, off);
+
         refresh();
     }
 

@@ -8,12 +8,14 @@ import com.SouthernWall_404.Painter.API.Paint.API.AbstractRender;
 import com.SouthernWall_404.Painter.API.Paint.PaintContent;
 import com.SouthernWall_404.Painter.API.Paint.Util.Paint.PaintSyncHelper;
 import com.SouthernWall_404.Painter.API.Paint.Util.RenderUtil;
+import com.SouthernWall_404.Painter.Client.PaintRender;
 import com.SouthernWall_404.Painter.Common.Init.ModAttachments;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -107,13 +109,16 @@ public class PaintInfo implements IAttachment {
 
     public void putPaints(Level level, BlockPos pos, AbstractPaint paint) {
         paints.put(pos, paint);
-        PaintChunkInfo chunkInfo=level.getData(ModAttachments.PAINT_CHUNK_INFO);
-        chunkInfo.addChunk(level.getChunkAt(pos).getPos());
+
+        if (level.isClientSide()) {
+            PaintRender.addChunk(level.getChunkAt(pos).getPos());
+        }else {
+            PaintSyncHelper.syncChunkToAll(level,new ChunkPos(pos));
+//            NetworkSync.syncChunkAttachmentToAll(level, new ChunkPos(pos),level.players(), ModAttachments.PAINT_INFO.get());
+        }
     }
 
-    public void removeRender(BlockPos pos) {
-        paints.remove(pos);
-    }
+
 
     /**
      * 时域分布光照更新算法
@@ -157,19 +162,45 @@ public class PaintInfo implements IAttachment {
     /**
      * 用于处理服务器的单端移除，执行同步
      * @param level
-     * @param player
      * @param pos
      */
-    public void removeRender(Level level, Player player,BlockPos pos) {
 
-        removeRender(pos);
+    public void removeRender(Level level,BlockPos pos) {
 
-        if(paints.isEmpty()){//如果
-            level.getData(ModAttachments.PAINT_CHUNK_INFO).removeChunk(new ChunkPos(pos));
+        paints.remove(pos);
+        PaintSyncHelper.syncChunkToAll(level,new ChunkPos(pos));
+
+//        NetworkSync.syncChunkAttachmentToAll(level,new ChunkPos(pos),level.players(), ModAttachments.PAINT_INFO.get());
+
+    }
+    /**
+     * 循环切换指定位置指定方向的纹理UV
+     * @param pos 方块位置
+     * @param direction 方向
+     */
+    @OnlyIn(Dist.CLIENT)
+    public void cycleTextureUV(Level level,BlockPos pos, Direction direction) {
+        AbstractPaint paint = paints.get(pos);
+        if (paint != null) {
+            paint.cycleTextureUV(direction);
+
+            PaintSyncHelper.syncPaintUV(pos, direction, paint.getUvOffsets().get(paint.getFlag(direction)));
         }
-
-        PaintSyncHelper.sync(level.getChunkAt(pos).getPos(),player);
-
+    }
+//TODO 对于移除方法，似乎还不能有效同步
+    /**
+     * 设置指定位置指定方向的纹理UV偏移
+     * @param pos 方块位置
+     * @param direction 方向
+     * @param u U坐标偏移
+     * @param v V坐标偏移
+     */
+    public void setUVOffset(Level level,BlockPos pos, Direction direction, float u, float v) {
+        AbstractPaint paint = paints.get(pos);
+        if (paint != null) {
+            paint.setUVOffset(direction, u, v);
+            PaintSyncHelper.syncPaintUV(pos, direction, new float[]{u, v});
+        }
     }
 
 
@@ -211,6 +242,9 @@ public class PaintInfo implements IAttachment {
             AbstractPaint paint = createPaintByType(type, provider, data,pos);
             if (paint != null) {
                 paints.put(pos, paint);
+
+                Minecraft mc=Minecraft.getInstance();
+                if(mc!=null)PaintRender.addChunk(new ChunkPos(pos));
             }
         }
 

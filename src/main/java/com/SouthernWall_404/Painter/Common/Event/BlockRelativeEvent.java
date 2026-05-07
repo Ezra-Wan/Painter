@@ -66,7 +66,8 @@ public class BlockRelativeEvent {
         {
             LevelChunk chunk=level.getChunkAt(pos);
             PaintInfo paintInfo=chunk.getData(ModAttachments.PAINT_INFO);
-            paintInfo.removeRender(level, event.getPlayer(), pos);
+
+            if(!level.isClientSide) paintInfo.removeRender(level, pos);
         }
     }
 
