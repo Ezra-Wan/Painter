@@ -167,8 +167,8 @@ public class PaintInfo implements IAttachment {
 
     public void removeRender(Level level,BlockPos pos) {
 
-        if(level.isClientSide) paints.remove(pos);
-        else PaintSyncHelper.syncChunkToAll(level,new ChunkPos(pos));
+        paints.remove(pos);
+        PaintSyncHelper.syncChunkToAll(level,new ChunkPos(pos));
 
 //        NetworkSync.syncChunkAttachmentToAll(level,new ChunkPos(pos),level.players(), ModAttachments.PAINT_INFO.get());
 
