@@ -7,6 +7,7 @@ import com.SouthernWall_404.LaplaceAPI.RegulappleEngine.BakedQuad.VerticeInfo;
 import com.SouthernWall_404.LaplaceAPI.RegulappleEngine.BakedQuad.VerticesInfo;
 import com.SouthernWall_404.LaplaceAPI.RegulappleEngine.ModelRender;
 import com.SouthernWall_404.LaplaceAPI.VertinCore.Config.Configs;
+import com.SouthernWall_404.Painter.API.Paint.Util.Paint.PaintSyncHelper;
 import com.SouthernWall_404.Painter.API.Paint.Util.RenderUtil;
 import com.SouthernWall_404.LaplaceAPI.RegulappleEngine.BakedQuadRender;
 import com.SouthernWall_404.Painter.Client.Config.ClientConfig;
@@ -94,7 +95,10 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>, Dire
      * 使用origin面的xLength和yLength作为直接步长
      * 逻辑：先尝试增加U，如果U超出边界(1.0)，则尝试增加V；
      * 如果V也超出边界，则重置为(0,0)
+     * 
+     * 注意：此方法仅在客户端调用，通过数据包同步到服务端
      */
+    @OnlyIn(Dist.CLIENT)
     public void cycleTextureUV(Direction direction) {
         int flag = getFlag(direction);
         // 获取指定方向的原始四边形以读取其UV空间尺寸
@@ -135,6 +139,8 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>, Dire
         }
 
         setUVOffset(direction, newU, newV);
+
+
 //        uvOffsets.put(flag, new float[]{newU, newV});
         refresh();
     }
@@ -184,7 +190,7 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>, Dire
     @OnlyIn(Dist.CLIENT)
     public void refreshVisible() {
         Level level = Minecraft.getInstance().level;
-        if(level==null) {
+        if(level==null||origin==null) {
             visibles .clear();
             return;
         };
@@ -217,11 +223,15 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>, Dire
         }
     }
 
+    public Map<Integer, float[]> getUvOffsets() {
+        return uvOffsets;
+    }
+
     public void refresh() {
         visibles.clear();
         aoFaces.clear();
         objects.clear();
-        PaintRender.setChanged();
+//        PaintRender.setChanged();
     }
     @Override
     public void initFlags() {
@@ -371,6 +381,7 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>, Dire
         off[0] = u;
         off[1] = v;
         uvOffsets.put(flag, off);
+
         refresh();
     }
 

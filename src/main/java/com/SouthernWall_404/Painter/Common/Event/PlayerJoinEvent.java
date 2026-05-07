@@ -1,7 +1,5 @@
 package com.SouthernWall_404.Painter.Common.Event;
 
-import com.SouthernWall_404.LaplaceAPI.xNetwork.API.NetworkSync;
-import com.SouthernWall_404.Painter.API.Paint.Attachment.PaintChunkInfo;
 import com.SouthernWall_404.Painter.API.Paint.Attachment.PaintInfo;
 import com.SouthernWall_404.Painter.API.Paint.Util.Paint.PaintSyncHelper;
 import com.SouthernWall_404.Painter.Client.PaintRender;
@@ -23,10 +21,34 @@ public class PlayerJoinEvent {
     {
         Player player=event.getEntity();
         Level level=player.level();
-        if(!level.isClientSide) {
-            NetworkSync.syncLevelAttachment(level,ModAttachments.PAINT_CHUNK_INFO.get(),player);
-
-            PaintRender.setChanged();//重绘以免出现渲染残留
+        
+        // 只在客户端执行初始化逻辑
+        if(level.isClientSide) {
+            Minecraft mc = Minecraft.getInstance();
+            if(mc == null || mc.level == null) return;
+            
+            ClientLevel clientLevel = mc.level;
+            PaintRender.clear();//重绘以免出现渲染残留
+            
+            // 扫描玩家周围已加载的区块，将包含绘制数据的区块添加到渲染缓存
+            int renderDistance = mc.options.getEffectiveRenderDistance();
+            ChunkPos playerChunkPos = new ChunkPos(player.blockPosition());
+            
+            for(int dx = -renderDistance; dx <= renderDistance; dx++) {
+                for(int dz = -renderDistance; dz <= renderDistance; dz++) {
+                    int chunkX = playerChunkPos.x + dx;
+                    int chunkZ = playerChunkPos.z + dz;
+                    
+                    // 获取已加载的区块（如果未加载则返回null）
+                    LevelChunk chunk = clientLevel.getChunkSource().getChunkNow(chunkX, chunkZ);
+                    if(chunk != null) {
+                        PaintInfo paintInfo = chunk.getData(ModAttachments.PAINT_INFO);
+                        if(!paintInfo.getPaints().isEmpty()){
+                            PaintRender.addChunk(chunk.getPos());
+                        }
+                    }
+                }
+            }
         }
     }
 
@@ -39,15 +61,26 @@ public class PlayerJoinEvent {
 
         ChunkPos pos=event.getChunk().getPos();
 
-        PaintChunkInfo chunkInfo = level.getData(ModAttachments.PAINT_CHUNK_INFO);
-        if (!chunkInfo.getPaintPosesNearby(mc.player.getOnPos()).contains(pos)) return;
+        PaintSyncHelper.sync(pos, mc.player);
 
+        // 检查该区块是否有绘制数据，有则添加到渲染缓存
         PaintInfo paintInfo = chunk.getData(ModAttachments.PAINT_INFO);
-
-        if (paintInfo.getPaints().isEmpty()) {
-            // 需要向服务器请求
-            PaintSyncHelper.sync(pos, mc.player);
+        if(!paintInfo.getPaints().isEmpty()){
+            PaintRender.addChunk(pos);
         }
+    }
+
+    @SubscribeEvent
+    public static void ChunkEvent(ChunkEvent.Unload event)
+    {
+        if (!(event.getLevel() instanceof ClientLevel level)) return;
+        if (!(event.getChunk() instanceof LevelChunk chunk)) return;
+        Minecraft mc=Minecraft.getInstance();
+
+        ChunkPos pos=event.getChunk().getPos();
+
+        // 直接从渲染缓存中移除，不再依赖 PaintChunkInfo
+        PaintRender.removeChunk(pos);
     }
 
 

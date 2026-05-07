@@ -1,26 +1,17 @@
 package com.SouthernWall_404.Painter.API.Paint.Util;
 
-import com.SouthernWall_404.LaplaceAPI.Math37.Vector3f;
-import it.unimi.dsi.fastutil.objects.Object2ByteLinkedOpenHashMap;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.BlockRenderDispatcher;
-import net.minecraft.client.renderer.block.model.BakedQuad;
-import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.util.RandomSource;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.SlabBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 import net.neoforged.neoforge.client.model.data.ModelData;
-
-import javax.annotation.Nullable;
-import java.util.List;
 
 
 @OnlyIn(Dist.CLIENT)
@@ -72,25 +63,6 @@ public class RenderUtil {
 
 
     public static boolean shouldRenderFace(BlockGetter level, BlockPos pos,BlockState state, Direction face ) {
-        //远距剔除
-        Minecraft mc=Minecraft.getInstance();
-        if(mc!=null)
-        {
-
-            int distance=(mc.options.renderDistance().get()+1)*16;
-            int distanceSquared=distance*distance;
-
-            Vector3f camPos=new Vector3f(mc.gameRenderer.getMainCamera().getBlockPosition());//获取主视角位置
-            Vector3f blockPos=new Vector3f(pos);
-
-
-            float actualDistance=camPos.distanceSquaredTo(blockPos);
-            if(actualDistance>distanceSquared)
-            {
-                return false;
-            }
-
-        }
         // 计算相邻方块位置
         BlockPos neighborPos = pos.relative(face);
         // 调用原版标准面渲染判定逻辑

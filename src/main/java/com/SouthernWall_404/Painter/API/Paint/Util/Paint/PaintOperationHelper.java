@@ -5,6 +5,7 @@ import com.SouthernWall_404.Painter.API.Paint.Attachment.PaintInfo;
 import com.SouthernWall_404.Painter.API.Paint.Imply.SimpleBlockPaint;
 import com.SouthernWall_404.Painter.API.Paint.Imply.SlabBlockPaint;
 import com.SouthernWall_404.Painter.Common.Init.ModAttachments;
+import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.InteractionHand;
@@ -22,6 +23,9 @@ import net.minecraft.world.level.block.state.properties.SlabType;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
+import net.neoforged.neoforge.network.PacketDistributor;
 
 import java.util.Map;
 
@@ -116,16 +120,26 @@ public final class PaintOperationHelper {
             return material;
     }
 
-    public static void cycleTextureUV(AbstractPaint paint, Direction direction) {
-        if(paint instanceof SlabBlockPaint slabBlock)//若为SlabBlockPaint
+
+    @OnlyIn(Dist.CLIENT)
+    public static void cycleTextureUV(BlockPos blockPos, Direction direction) {
+
+        Minecraft mc=Minecraft.getInstance();
+        if(mc!=null)
         {
-            slabBlock.cycleTextureUV(direction);
+            Level level = mc.level;
+            if(level!= null)
+            {
+                LevelChunk chunk = level.getChunkAt(blockPos);
+                PaintInfo paintInfo = chunk.getData(ModAttachments.PAINT_INFO);
+                paintInfo.cycleTextureUV(level,blockPos, direction);
+            }
         }
-        else paint.cycleTextureUV(direction);
     }
 
     public static void cycleTextureDir(AbstractPaint paint, Direction direction) {
 
+        //TODO 应用起来
         if(paint instanceof SlabBlockPaint slabBlock)
         {
             slabBlock.cycleTextureDir(direction);
