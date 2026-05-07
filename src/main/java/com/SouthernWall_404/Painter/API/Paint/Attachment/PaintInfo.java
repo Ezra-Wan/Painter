@@ -236,21 +236,22 @@ public class PaintInfo implements IAttachment {
         paints.clear();
         ListTag rendersList = tag.getList("renders", Tag.TAG_COMPOUND);
 
+        BlockPos chunkPos=null;
         for (int i = 0; i < rendersList.size(); i++) {
             CompoundTag entryTag = rendersList.getCompound(i);
             CompoundTag posTag = entryTag.getCompound("pos");
             BlockPos pos = new BlockPos(posTag.getInt("x"), posTag.getInt("y"), posTag.getInt("z"));
+            chunkPos=pos;
             String type = entryTag.getString("type");
             CompoundTag data = entryTag.getCompound("data");
 
             AbstractPaint paint = createPaintByType(type, provider, data,pos);
             if (paint != null) {
                 paints.put(pos, paint);
-
-                Minecraft mc=Minecraft.getInstance();
-                if(mc!=null)PaintRender.addChunk(new ChunkPos(pos));
             }
         }
+        Minecraft mc=Minecraft.getInstance();
+        if(mc!=null)PaintRender.addChunk(new ChunkPos(chunkPos));
 
     }
 
