@@ -61,7 +61,7 @@ public class PlayerJoinEvent {
 
         ChunkPos pos=event.getChunk().getPos();
 
-        PaintSyncHelper.sync(pos, mc.player);
+        PaintSyncHelper.sync(pos, mc.player);//TODO 添加信息检查位图,如果不成，不更新，以免造成卡顿
 
         // 检查该区块是否有绘制数据，有则添加到渲染缓存
         PaintInfo paintInfo = chunk.getData(ModAttachments.PAINT_INFO);

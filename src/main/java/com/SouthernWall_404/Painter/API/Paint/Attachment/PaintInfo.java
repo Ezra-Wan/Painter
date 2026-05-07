@@ -251,7 +251,7 @@ public class PaintInfo implements IAttachment {
             }
         }
         Minecraft mc=Minecraft.getInstance();
-        if(mc!=null)PaintRender.addChunk(new ChunkPos(chunkPos));
+        if(mc!=null&&chunkPos!=null)PaintRender.addChunk(new ChunkPos(chunkPos));
 
     }
 
