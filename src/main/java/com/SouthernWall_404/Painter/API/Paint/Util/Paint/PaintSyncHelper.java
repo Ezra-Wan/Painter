@@ -10,8 +10,6 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
 
 public class PaintSyncHelper {
 
@@ -20,10 +18,6 @@ public class PaintSyncHelper {
         NetworkSync.syncChunkAttachment(level, pos,ModAttachments.PAINT_INFO.get(), player);
     }
 
-    /**
-     * 仅在服务端执行，禁止在服务端执行
-     * 用于将当前更新向所有玩家执行
-     */
     public static void syncChunkToAll(Level level, ChunkPos pos)
     {
         NetworkSync.syncChunkAttachmentToAll(level, pos,level.players(),ModAttachments.PAINT_INFO.get());

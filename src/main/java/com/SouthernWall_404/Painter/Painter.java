@@ -4,7 +4,6 @@ import com.SouthernWall_404.LaplaceAPI.VertinCore.Frame.CommonRegisterFrame;
 import com.SouthernWall_404.Painter.Common.Config.ModConfig;
 import com.SouthernWall_404.Painter.Common.Event.BlockRelativeEvent;
 import com.SouthernWall_404.Painter.Common.Event.PlayerJoinEvent;
-import com.SouthernWall_404.Painter.Common.Event.ServerTick;
 import com.SouthernWall_404.Painter.Common.Laplace.Network.ClientHandlers;
 import com.SouthernWall_404.Painter.Common.Laplace.Network.ServerHandlers;
 import net.neoforged.api.distmarker.Dist;
@@ -41,7 +40,6 @@ public class Painter {
 
         NeoForge.EVENT_BUS.register(BlockRelativeEvent.class);
         NeoForge.EVENT_BUS.register(PlayerJoinEvent.class);
-        NeoForge.EVENT_BUS.register(ServerTick.class);
 
     }
 }
