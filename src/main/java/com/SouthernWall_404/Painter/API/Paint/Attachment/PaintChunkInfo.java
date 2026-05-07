@@ -25,6 +25,13 @@ public class PaintChunkInfo implements IAttachment {
     private boolean isChanged=false;//记录是否有更新，有则触发全局更新
 
 
+    /**TODO 修复方案
+     *  1.移除掉略显冗余的PaintChunkInfo
+     *  2.添加对于PaintInfo的正确tick与更新方案
+     *  3.
+     */
+
+
     //TODO 需要应用起来
     /**
      * 统一进度
