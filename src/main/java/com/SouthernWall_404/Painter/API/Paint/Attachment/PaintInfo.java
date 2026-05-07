@@ -43,6 +43,8 @@ public class PaintInfo implements IAttachment {
     // 提供无参构造，供附件自动创建
     public PaintInfo() {}
 
+    //TODO 不要再使用变化即更新的方法，会造成巨大的GC压力
+    // 换用帧末统一
     /**
      * 获取原始 AbstractPaint 映射（类型安全）
      */
