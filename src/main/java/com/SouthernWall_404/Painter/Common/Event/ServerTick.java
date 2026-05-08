@@ -67,7 +67,7 @@ public class ServerTick {
 
             if(!ServerTick.toRefreshAO.isEmpty())
             {
-                PaintSyncHelper.syncAO(level, ServerTick.toRefreshAO);
+                PaintSyncHelper.syncAO(level,toRefreshAO);
                 ServerTick.toRefreshAO.clear();
             }
         }
