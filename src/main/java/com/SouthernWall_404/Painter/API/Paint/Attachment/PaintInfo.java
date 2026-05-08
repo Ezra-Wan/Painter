@@ -40,14 +40,13 @@ public class PaintInfo implements IAttachment {
 
     //========不需要持久化的数据========
     private int tick=0;
+    private boolean isChanged=false;
     //========需要持久化的数据=========
     private final Map<BlockPos, AbstractPaint> paints = new HashMap<>();
 
     // 提供无参构造，供附件自动创建
     public PaintInfo() {}
 
-    //TODO 不要再使用变化即更新的方法，会造成巨大的GC压力
-    // 换用帧末统一
     /**
      * 获取原始 AbstractPaint 映射（类型安全）
      */
@@ -67,6 +66,38 @@ public class PaintInfo implements IAttachment {
         return copy;
     }
 
+    public void setChanged() {
+        isChanged = true;
+    }
+
+    public void done()
+    {
+        isChanged=false;
+    }
+
+    @OnlyIn(Dist.CLIENT)
+    public void refreshAO() {
+        paints.forEach((blockPos, paint) -> {
+            paint.refreshAO();
+        });
+    }
+
+    @OnlyIn(Dist.CLIENT)
+    public void refreshVisibles() {
+        paints.forEach((blockPos, paint) -> {
+            paint.refreshVisible();
+        });
+    }
+
+    @OnlyIn(Dist.CLIENT)
+    public void refresh()
+    {
+        refreshAO();
+        refreshVisibles();
+
+        done();
+    }
+
     /**
      * 渲染该区块内所有粉刷对象
      * @param poseStack 姿态栈
@@ -80,7 +111,9 @@ public class PaintInfo implements IAttachment {
         
         Level level = mc.level;
         float partialTick = mc.getTimer().getGameTimeDeltaPartialTick(true);
-        
+
+        if(isChanged)refresh();
+
         paints.forEach((blockPos, paint) -> {
             // 视锥剔除
             AABB aabb = new AABB(blockPos.getX(), blockPos.getY(), blockPos.getZ(), 
