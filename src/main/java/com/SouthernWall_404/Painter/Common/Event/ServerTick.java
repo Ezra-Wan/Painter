@@ -10,6 +10,7 @@ import net.neoforged.neoforge.event.tick.LevelTickEvent;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.ConcurrentSkipListSet;
 
 /**
  * 服务端Level Tick事件处理器
@@ -18,14 +19,22 @@ import java.util.Set;
 @EventBusSubscriber(modid = Painter.MODID, bus = EventBusSubscriber.Bus.GAME)
 public class ServerTick {
 
+    private static Set<ChunkPos> toRefreshAO = new HashSet<>();
     private static Set<ChunkPos> toUpdate=new HashSet<>();
-    
+
+
+    public static void refreshAO(ChunkPos pos)
+    {
+        toRefreshAO.add(pos);
+    }
     /**
      * 添加需要同步的区块到待处理队列
      * 此方法可以在客户端或服务端调用，但只会在服务端生效
      * 
      * @param pos 需要同步的区块位置
      */
+
+
     public static void update(ChunkPos pos)
     {
         // 使用静态字段检查是否为客户端环境
@@ -42,14 +51,27 @@ public class ServerTick {
          * LevelTickEvent.Post 在服务端和客户端都会触发，
          * 必须通过 isClientSide 检查来区分
          */
+
+        //TODO 考虑添加时域分布发包
         if(level.isClientSide)return;
 
-        if (!level.isClientSide() && !toUpdate.isEmpty()) {
-            // 批量同步所有待处理的区块
-            toUpdate.forEach(pos -> PaintSyncHelper.syncChunkToAll(level, pos));
-            
-            // 清空待处理队列
-            toUpdate.clear();
+        if (!level.isClientSide()) {
+
+            if(!toUpdate.isEmpty()){
+                // 批量同步所有待处理的区块
+                toUpdate.forEach(pos -> PaintSyncHelper.syncChunkToAll(level, pos));
+
+                // 清空待处理队列
+                toUpdate.clear();
+            }
+
+            if(!ServerTick.toRefreshAO.isEmpty())
+            {
+                PaintSyncHelper.syncAO(level,toRefreshAO);
+                ServerTick.toRefreshAO.clear();
+            }
         }
+
+
     }
 }

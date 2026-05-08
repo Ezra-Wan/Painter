@@ -3,15 +3,20 @@ package com.SouthernWall_404.Painter.API.Paint.Util.Paint;
 import com.SouthernWall_404.LaplaceAPI.xNetwork.API.NetworkSync;
 import com.SouthernWall_404.LaplaceAPI.xNetwork.Packet.C2S.ClientRequestPacket;
 import com.SouthernWall_404.Painter.Common.Init.ModAttachments;
+import com.SouthernWall_404.Painter.Common.Laplace.Network.ClientHandlers;
 import com.SouthernWall_404.Painter.Common.Laplace.Network.ServerHandlers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
+
+import java.util.List;
+import java.util.Set;
 
 public class PaintSyncHelper {
 
@@ -46,5 +51,25 @@ public class PaintSyncHelper {
 
 
         NetworkSync.requireToServer(ServerHandlers.CYCLE_TEXTURE_UV_PACKET,tag);
+    }
+
+    public static void syncAO(Level level, Set<ChunkPos> poses)
+    {
+        CompoundTag tag = new CompoundTag();
+        ListTag chunkList = new ListTag();
+
+        for (ChunkPos pos : poses) {
+            CompoundTag chunkTag = new CompoundTag();
+            chunkTag.putInt("x", pos.x);
+            chunkTag.putInt("z", pos.z);
+            chunkList.add(chunkTag);
+        }
+
+        tag.put("chunks", chunkList);
+
+
+        //TODO 以后记得改用level.players
+        level.players().forEach(player ->
+                NetworkSync.sendNoticeToPlayer(tag,player,ClientHandlers.AO_FRESH_PACKET));
     }
 }
