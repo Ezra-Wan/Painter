@@ -2,18 +2,24 @@ package com.SouthernWall_404.Painter.Common.Laplace.Network;
 
 import com.SouthernWall_404.LaplaceAPI.xNetwork.API.NetworkRegister;
 import com.SouthernWall_404.LaplaceAPI.xNetwork.Packet.S2C.BlockSetPacket;
+import com.SouthernWall_404.LaplaceAPI.xNetwork.Packet.S2C.ServerNoticePacket;
 import com.SouthernWall_404.Painter.API.Paint.API.AbstractPaint;
 import com.SouthernWall_404.Painter.API.Paint.Util.Paint.PaintAttachmentHelper;
+import com.SouthernWall_404.Painter.Common.Init.ModAttachments;
 import com.SouthernWall_404.Painter.Painter;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 import net.neoforged.fml.loading.FMLEnvironment;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 
+import java.util.HashSet;
 import java.util.Set;
 
 public class ClientHandlers {
@@ -24,12 +30,11 @@ public class ClientHandlers {
     public static void register()
     {
         if (FMLEnvironment.dist == Dist.CLIENT) {
-            NetworkRegister.registerBlockPosSetHandler(AO_FRESH_PACKET,((packet, context) -> aoRefreshHandler(packet,context)));
+            NetworkRegister.registerServerNoticeHandler(AO_FRESH_PACKET,((packet, context) -> aoRefreshHandler(packet,context)));
         }
     }
-
     @OnlyIn(Dist.CLIENT)
-    public static void aoRefreshHandler(BlockSetPacket packet, IPayloadContext context) {
+    public static void aoRefreshHandler(ServerNoticePacket packet, IPayloadContext context) {
         // ctx.enqueueWork 保证在主线程执行
         context.enqueueWork(() -> {
             Minecraft mc=Minecraft.getInstance();
@@ -37,17 +42,16 @@ public class ClientHandlers {
                 Level level=mc.level;
                 if(level==null)return;
 
-                Set<BlockPos> freshPositions=packet.positions();
+                // 从CompoundTag中反序列化ChunkPos列表
+                ListTag chunkList = packet.data().getList("chunks", CompoundTag.TAG_COMPOUND);
 
-                freshPositions.forEach((blockPos -> {
-                    AbstractPaint paint= PaintAttachmentHelper.getPaint(level,blockPos);
-
-                    if(paint!=null)
-                    {
-                        paint.refreshVisible();
-                        paint.refreshAO();
-                    }
-                }));
+                for (int i = 0; i < chunkList.size(); i++) {
+                    CompoundTag chunkTag = chunkList.getCompound(i);
+                    int x = chunkTag.getInt("x");
+                    int z = chunkTag.getInt("z");
+                    ChunkPos chunkPos = new ChunkPos(x, z);
+                    level.getData(ModAttachments.PAINT_INFO.get()).refreshAO();
+                }
             }
         });
     }

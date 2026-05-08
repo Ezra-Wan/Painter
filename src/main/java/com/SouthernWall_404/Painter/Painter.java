@@ -39,6 +39,7 @@ public class Painter {
         if(FMLEnvironment.dist== Dist.CLIENT)ClientHandlers.register();
         ServerHandlers.register();
 
+        //TODO 这哥仨有人在偷吃内存
         NeoForge.EVENT_BUS.register(BlockRelativeEvent.class);
         NeoForge.EVENT_BUS.register(PlayerJoinEvent.class);
         NeoForge.EVENT_BUS.register(ServerTick.class);

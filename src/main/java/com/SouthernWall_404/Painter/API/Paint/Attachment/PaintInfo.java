@@ -67,6 +67,13 @@ public class PaintInfo implements IAttachment {
         return copy;
     }
 
+    @OnlyIn(Dist.CLIENT)
+    public void refreshAO() {
+        paints.forEach((blockPos, paint) -> {
+            paint.refreshAO();
+        });
+    }
+
     /**
      * 渲染该区块内所有粉刷对象
      * @param poseStack 姿态栈
