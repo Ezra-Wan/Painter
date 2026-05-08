@@ -18,7 +18,7 @@ public class LevelPaintInfo extends AbstractLevelAttachment {
     public static final ResourceLocation TYPE_ID = ResourceLocation.fromNamespaceAndPath(Painter.MODID, "level_paint_info");
     public Set<ChunkPos> paintChunks =new HashSet<>();
     public LevelPaintInfo() {
-        super(TYPE_ID);
+        super(TYPE_ID,200);
     }
 
     public void setPaintChunks(Set<ChunkPos> paintChunks) {
