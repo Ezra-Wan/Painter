@@ -29,6 +29,7 @@ import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.phys.AABB;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
+import net.neoforged.fml.common.Mod;
 
 import javax.annotation.Nullable;
 import java.util.HashMap;
@@ -112,11 +113,18 @@ public class PaintInfo implements IAttachment {
     }
 
     public void putPaints(Level level, BlockPos pos, AbstractPaint paint) {
-        paints.put(pos, paint);
+
 
         if (level.isClientSide()) {
+            paints.put(pos, paint);
             PaintRender.addChunk(new ChunkPos(pos));
         }else {
+            if(paints.isEmpty())
+            {
+                level.getData(ModAttachments.LEVEL_PAINT_INFO).add(new ChunkPos( pos));
+            }
+            paints.put(pos, paint);
+
             ServerTick.update(new ChunkPos(pos));
         }
     }
@@ -175,6 +183,7 @@ public class PaintInfo implements IAttachment {
         if(level.isClientSide) {
             if(paints.isEmpty()) PaintRender.removeChunk(new ChunkPos(pos));
         }else {
+            if(paints.isEmpty()) level.getData(ModAttachments.LEVEL_PAINT_INFO).remove(new ChunkPos(pos));
             ServerTick.update(new ChunkPos(pos));
         }
     }
