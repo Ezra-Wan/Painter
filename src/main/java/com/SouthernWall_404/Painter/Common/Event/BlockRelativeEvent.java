@@ -91,19 +91,13 @@ public class BlockRelativeEvent {
         // 收集周围15格内所有涉及的区块
         int radius = 15;
 
-        ChunkPos[] chunks=new ChunkPos[]{
-                new ChunkPos(originPos.relative(Direction.NORTH,radius)),
-                new ChunkPos(originPos.relative(Direction.SOUTH,radius)),
-                new ChunkPos(originPos.relative(Direction.EAST,radius)),
-                new ChunkPos(originPos.relative(Direction.WEST,radius)),
 
-        };
-
-        LevelPaintInfo paintInfo=level.getData(ModAttachments.LEVEL_PAINT_INFO);
-        for (ChunkPos chunkPos : chunks)
+        for(int x=-1;x<=1;x++)
         {
-//            if (paintInfo.contains(chunkPos))chunkToRefresh.add(chunkPos);
-            chunkToRefresh.add(chunkPos);
+            for (int z=-1;z<=1;z++)
+            {
+                chunkToRefresh.add(new ChunkPos(originPos.offset(x*radius,0,z*radius)));
+            }
         }
     }
 

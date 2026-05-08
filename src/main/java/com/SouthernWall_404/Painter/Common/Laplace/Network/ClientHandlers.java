@@ -50,7 +50,7 @@ public class ClientHandlers {
                     int x = chunkTag.getInt("x");
                     int z = chunkTag.getInt("z");
                     ChunkPos chunkPos = new ChunkPos(x, z);
-                    level.getData(ModAttachments.PAINT_INFO.get()).refreshAO();
+                    level.getChunk(chunkPos.x, chunkPos.z).getData(ModAttachments.PAINT_INFO.get()).refreshAO();
                 }
             }
         });
