@@ -1,6 +1,7 @@
 package com.SouthernWall_404.Painter.Common.Init;
 
 import com.SouthernWall_404.LaplaceAPI.VertinCore.World.Attachment.AttachmentRegistryHelper;
+import com.SouthernWall_404.Painter.API.Paint.Attachment.LevelPaintInfo;
 import com.SouthernWall_404.Painter.API.Paint.Attachment.PaintInfo;
 import com.SouthernWall_404.Painter.API.Tool.SelectedZone;
 import com.SouthernWall_404.Painter.Painter;
@@ -31,7 +32,7 @@ public class ModAttachments {
 //                            .build()
 
     public static final Supplier<AttachmentType<PaintInfo>> PAINT_INFO = AttachmentRegistryHelper.register(Painter.frame,"paint_info",()->new PaintInfo());
-    // PAINT_CHUNK_INFO 已移除，不再需要该附件类型
+    public static final Supplier<AttachmentType<LevelPaintInfo>> LEVEL_PAINT_INFO = AttachmentRegistryHelper.registerLevelAttachment(Painter.frame,"level_paint_info",()->new LevelPaintInfo());
     // public static final Supplier<AttachmentType<PaintChunkInfo>> PAINT_CHUNK_INFO = AttachmentRegistryHelper.register(Painter.frame,"paint_chunk_info",()->new PaintChunkInfo());
     public static final Supplier<AttachmentType<SelectedZone>> SELECTED_ZONE = AttachmentRegistryHelper.registerWithOutSerialize(Painter.frame,"selected_zone",()->new SelectedZone());
 
