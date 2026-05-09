@@ -90,7 +90,7 @@ public class PaintInfo implements IAttachment {
     /**
      * 渲染该区块内所有粉刷对象
      * @param poseStack 姿态栈
-     * @param buffer 顶点缓冲区
+     * @param buffer 顶点缓冲区0
      * @param frustum 视锥体（用于剔除）
      */
     @OnlyIn(Dist.CLIENT)
