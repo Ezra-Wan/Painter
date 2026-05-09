@@ -20,6 +20,6 @@ public interface IRender<T extends Object> extends INBTSerializable<CompoundTag>
     String getType();
 
 
-    void render(BlockPos blockPos, PoseStack poseStack, int packedLight, int packedOverlay, float partialTick, VertexConsumer vertexConsumer);//用于渲染内容
+    void render(BlockPos blockPos, PoseStack poseStack, VertexConsumer vertexConsumer);//用于渲染内容
 
 }
