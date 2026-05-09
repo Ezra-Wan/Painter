@@ -1,7 +1,6 @@
 package com.SouthernWall_404.Painter.API.Paint.Util.Paint;
 
 import com.SouthernWall_404.LaplaceAPI.xNetwork.API.NetworkSync;
-import com.SouthernWall_404.LaplaceAPI.xNetwork.Packet.C2S.ClientRequestPacket;
 import com.SouthernWall_404.Painter.Common.Init.ModAttachments;
 import com.SouthernWall_404.Painter.Common.Laplace.Network.ClientHandlers;
 import com.SouthernWall_404.Painter.Common.Laplace.Network.ServerHandlers;
@@ -12,10 +11,7 @@ import net.minecraft.nbt.ListTag;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
 
-import java.util.List;
 import java.util.Set;
 
 public class PaintSyncHelper {
@@ -53,7 +49,7 @@ public class PaintSyncHelper {
         NetworkSync.requireToServer(ServerHandlers.CYCLE_TEXTURE_UV_PACKET,tag);
     }
 
-    public static void syncAO(Level level, Set<ChunkPos> poses)
+    public static void syncRefresh(Level level, Set<ChunkPos> poses)
     {
         CompoundTag tag = new CompoundTag();
         ListTag chunkList = new ListTag();

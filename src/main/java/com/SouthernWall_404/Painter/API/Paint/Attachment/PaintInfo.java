@@ -7,6 +7,7 @@ import com.SouthernWall_404.Painter.API.Paint.API.AbstractPaint;
 import com.SouthernWall_404.Painter.API.Paint.API.AbstractRender;
 import com.SouthernWall_404.Painter.API.Paint.PaintContent;
 import com.SouthernWall_404.Painter.API.Paint.Util.Paint.PaintSyncHelper;
+import com.SouthernWall_404.Painter.API.Paint.Util.Paint.PaintValidHelper;
 import com.SouthernWall_404.Painter.API.Paint.Util.RenderUtil;
 import com.SouthernWall_404.Painter.Client.PaintRender;
 import com.SouthernWall_404.Painter.Common.Event.ServerTick;
@@ -83,8 +84,17 @@ public class PaintInfo implements IAttachment {
     {
         refreshAO();
         refreshVisibles();
-
         done();
+    }
+
+
+    public void checkValid(Level level,BlockPos pos)
+    {
+        if(!PaintValidHelper.isPaintable(level,pos))
+        {
+            removeRender(level,pos);
+        }
+
     }
 
     /**

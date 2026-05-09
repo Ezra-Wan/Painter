@@ -73,16 +73,19 @@ public class BlockRelativeEvent {
 
         BlockPos originPos = event.getPos();
         Level level = (Level) event.getLevel();
-        
+
         // 收集周围15格内所有涉及的区块
         int radius = 15;
+
+        ServerTick.check(originPos);
+//        level.getChunk(originPos).getData(ModAttachments.PAINT_INFO).checkValid(level,originPos);
 
         for(int x = -1; x <= 1; x++) {
             for (int z = -1; z <= 1; z++) {
                 ChunkPos chunkPos = new ChunkPos(originPos.offset(x * radius, 0, z * radius));
                 // 只有当区块包含粉刷数据时才加入刷新队列
                 if (level.getData(ModAttachments.LEVEL_PAINT_INFO).contains(chunkPos)) {
-                    ServerTick.refreshAO(chunkPos);
+                    ServerTick.refresh(chunkPos);
                 }
             }
         }
