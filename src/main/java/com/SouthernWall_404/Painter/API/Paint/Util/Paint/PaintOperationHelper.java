@@ -68,7 +68,7 @@ public final class PaintOperationHelper {
             paint.paint(direction,material);
 
             paintInfo.putPaints(level,blockPos, paint);
-            chunk.setUnsaved(true);
+
 
 
         }else {
@@ -94,10 +94,6 @@ public final class PaintOperationHelper {
             }
             //        AbstractRender render = new SimpleBlockPaint();//默认普通方块
         }
-
-        chunk.setData(ModAttachments.PAINT_INFO, paintInfo);
-
-        chunk.setUnsaved(true);
     }
 
 
@@ -135,15 +131,5 @@ public final class PaintOperationHelper {
                 paintInfo.cycleTextureUV(level,blockPos, direction);
             }
         }
-    }
-
-    public static void cycleTextureDir(AbstractPaint paint, Direction direction) {
-
-        //TODO 应用起来
-        if(paint instanceof SlabBlockPaint slabBlock)
-        {
-            slabBlock.cycleTextureDir(direction);
-        }
-        else paint.cycleTextureDir(direction);
     }
 }

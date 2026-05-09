@@ -157,6 +157,7 @@ public class PaintInfo implements IAttachment {
                 level.getData(ModAttachments.LEVEL_PAINT_INFO).add(new ChunkPos( pos));
             }
             paints.put(pos, paint);
+            level.getChunk( pos).setUnsaved(true);
 
             ServerTick.update(new ChunkPos(pos));
         }
@@ -217,6 +218,8 @@ public class PaintInfo implements IAttachment {
             if(paints.isEmpty()) PaintRender.removeChunk(new ChunkPos(pos));
         }else {
             if(paints.isEmpty()) level.getData(ModAttachments.LEVEL_PAINT_INFO).remove(new ChunkPos(pos));
+
+            level.getChunk( pos).setUnsaved(true);
             ServerTick.update(new ChunkPos(pos));
         }
     }
