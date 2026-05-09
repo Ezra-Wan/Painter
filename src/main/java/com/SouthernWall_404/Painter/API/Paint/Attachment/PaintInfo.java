@@ -41,8 +41,9 @@ public class PaintInfo implements IAttachment {
     //========不需要持久化的数据========
     private int tick=0;
     private boolean isChanged=false;
+    private Map<BlockPos,AABB> aabbMap = new HashMap<>();//注意，只是客户端缓存，禁止服务器调用
     //========需要持久化的数据=========
-    private final Map<BlockPos, AbstractPaint> paints = new HashMap<>();
+    private Map<BlockPos, AbstractPaint> paints = new HashMap<>();
 
     // 提供无参构造，供附件自动创建
     public PaintInfo() {}
@@ -52,18 +53,6 @@ public class PaintInfo implements IAttachment {
      */
     public Map<BlockPos, AbstractPaint> getPaints() {
         return paints;
-    }
-
-    /**
-     * 获取 AbstractRender 视图（兼容旧代码）
-     */
-    public Map<BlockPos, AbstractRender<?, ?>> getRenders() {
-        // 复制一份，避免外部修改原 Map，同时满足泛型要求
-        Map<BlockPos, AbstractRender<?, ?>> copy = new HashMap<>();
-        for (Map.Entry<BlockPos, AbstractPaint> entry : paints.entrySet()) {
-            copy.put(entry.getKey(), entry.getValue());
-        }
-        return copy;
     }
 
     public void setChanged() {
@@ -116,11 +105,11 @@ public class PaintInfo implements IAttachment {
 
         paints.forEach((blockPos, paint) -> {
             // 视锥剔除
-            AABB aabb = new AABB(blockPos.getX(), blockPos.getY(), blockPos.getZ(), 
-                                 blockPos.getX() + 1, blockPos.getY() + 1, blockPos.getZ() + 1);
+            AABB aabb = aabbMap.computeIfAbsent(blockPos, pos -> new AABB(pos));
             if (!frustum.isVisible(aabb)) {
                 return;
             }
+
             
             // 初始化 origin（如果为空）
             if (paint.getOrigin() == null) {
@@ -150,6 +139,7 @@ public class PaintInfo implements IAttachment {
 
         if (level.isClientSide()) {
             paints.put(pos, paint);
+            aabbMap.put(pos,new AABB(pos));
             PaintRender.addChunk(new ChunkPos(pos));
         }else {
             if(paints.isEmpty())
@@ -215,6 +205,7 @@ public class PaintInfo implements IAttachment {
         paints.remove(pos);
 
         if(level.isClientSide) {
+            aabbMap.remove(pos);
             if(paints.isEmpty()) PaintRender.removeChunk(new ChunkPos(pos));
         }else {
             if(paints.isEmpty()) level.getData(ModAttachments.LEVEL_PAINT_INFO).remove(new ChunkPos(pos));
@@ -279,6 +270,7 @@ public class PaintInfo implements IAttachment {
     @Override
     public void deserializeNBT(HolderLookup.Provider provider, CompoundTag tag) {
         paints.clear();
+        aabbMap.clear();
         ListTag rendersList = tag.getList("renders", Tag.TAG_COMPOUND);
 
         BlockPos chunkPos=null;
@@ -293,6 +285,7 @@ public class PaintInfo implements IAttachment {
             AbstractPaint paint = createPaintByType(type, provider, data,pos);
             if (paint != null) {
                 paints.put(pos, paint);
+                aabbMap.put(pos,new AABB( pos));
             }
         }
         Minecraft mc=Minecraft.getInstance();
