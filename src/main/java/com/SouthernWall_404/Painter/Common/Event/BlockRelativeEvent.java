@@ -4,15 +4,19 @@ import com.SouthernWall_404.Painter.API.Paint.Attachment.PaintInfo;
 import com.SouthernWall_404.Painter.API.Paint.Util.Paint.PaintValidHelper;
 import com.SouthernWall_404.Painter.Common.Init.ModAttachments;
 import com.SouthernWall_404.Painter.Common.World.Item.BlockInteractItem;
+import com.SouthernWall_404.Painter.Painter;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 import net.neoforged.neoforge.event.level.BlockEvent;
 
+
+@EventBusSubscriber(modid = Painter.MODID, bus = EventBusSubscriber.Bus.GAME)
 public class BlockRelativeEvent {
 
     //========放置失败的原因注册字段========
