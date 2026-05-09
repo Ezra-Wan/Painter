@@ -26,24 +26,22 @@ public class ServerTick {
     private static Set<ChunkPos> toUpdate=new HashSet<>();
     private static Set<BlockPos> toCheck=new HashSet<>();
 
-    private static Set<BlockPos> waitToCheck=new HashSet<>();
 
     public static synchronized void check(BlockPos pos)
     {
-        waitToCheck.add(pos);
+        toCheck.add(pos);
     }
     public static synchronized void refresh(ChunkPos pos)
     {
         toRefresh.add(pos);
     }
+
     /**
      * 添加需要同步的区块到待处理队列
      * 此方法可以在客户端或服务端调用，但只会在服务端生效
      * 
      * @param pos 需要同步的区块位置
      */
-
-
     public static synchronized void update(ChunkPos pos)
     {
         // 使用静态字段检查是否为客户端环境
@@ -65,14 +63,6 @@ public class ServerTick {
         if(level.isClientSide)return;
 
         if (!level.isClientSide()) {
-
-            Set<BlockPos> checkSnapshot;
-            synchronized (waitToCheck) {
-                checkSnapshot = new HashSet<>(waitToCheck);
-                waitToCheck.clear();
-                toCheck.addAll(checkSnapshot);
-            }//TODO考虑直接扔到添加方法中
-
             Set<BlockPos> toCheckSnapshot;
             synchronized (toCheck) {
                 toCheckSnapshot = new HashSet<>(toCheck);
@@ -90,18 +80,26 @@ public class ServerTick {
             }
 
 
-            if(!toUpdate.isEmpty()){
-                // 批量同步所有待处理的区块
-                toUpdate.forEach(pos -> PaintSyncHelper.syncChunkToAll(level, pos));
-
-                // 清空待处理队列
-                toUpdate.clear();
+            Set<ChunkPos> toUpdateSnapshot;
+            synchronized (toUpdate) {
+                toUpdateSnapshot = new HashSet<>(toUpdate);
+                toUpdate.clear();//创建副本并清空原有，以免冲突
             }
 
-            if(!ServerTick.toRefresh.isEmpty())
+            if(!toUpdateSnapshot.isEmpty()){
+                // 批量同步所有待处理的区块
+                toUpdateSnapshot.forEach(pos -> PaintSyncHelper.syncChunkToAll(level, pos));
+            }
+
+            Set<ChunkPos> toRefreshSnapshot;
+            synchronized (toRefresh) {
+                toRefreshSnapshot = new HashSet<>(toRefresh);
+                toRefresh.clear();//创建副本并清空原有，以免冲突
+            }
+
+            if(!toRefreshSnapshot.isEmpty())
             {
-                PaintSyncHelper.syncRefresh(level, toRefresh);
-                ServerTick.toRefresh.clear();
+                PaintSyncHelper.syncRefresh(level, toRefreshSnapshot);
             }
 
 
