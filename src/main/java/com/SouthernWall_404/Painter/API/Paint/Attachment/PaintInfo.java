@@ -115,23 +115,9 @@ public class PaintInfo implements IAttachment {
             if (paint.getOrigin() == null) {
                 paint.setOrigin(level.getBlockState(blockPos));
             }
-            
-            // 计算光照
-            int packedLight = calculatePackedLight(level, blockPos);
-            
             // 调用渲染方法
-            paint.render(blockPos, poseStack, packedLight, 0, partialTick, buffer);
+            paint.render(blockPos, poseStack, buffer);
         });
-    }
-    
-    /**
-     * 计算方块位置的光照值
-     */
-    private int calculatePackedLight(Level level, BlockPos pos) {
-        if (level == null) return 0;
-        int blockLight = level.getBrightness(LightLayer.BLOCK, pos);
-        int skyLight = level.getBrightness(LightLayer.SKY, pos);
-        return (skyLight << 20) | (blockLight << 4);
     }
 
     public void putPaints(Level level, BlockPos pos, AbstractPaint paint) {

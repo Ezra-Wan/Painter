@@ -211,7 +211,6 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>, Dire
         return Direction.NORTH;
     }
 
-    //TODO 解决水下渲染的问题
     @OnlyIn(Dist.CLIENT)
     public void refreshVisible() {
         Level level = Minecraft.getInstance().level;
@@ -350,7 +349,7 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>, Dire
 
     @Override
     @OnlyIn(Dist.CLIENT)
-    public void render(BlockPos blockPos, PoseStack poseStack, int packedLight, int packedOverlay, float partialTick, VertexConsumer buffer) {
+    public void render(BlockPos blockPos, PoseStack poseStack, VertexConsumer buffer) {
         Minecraft mc = Minecraft.getInstance();
         Level level = mc.level;
         double offset= (double)Configs.getValue(Painter.MODID, ClientConfig.PAINT_OFFSET).get();
