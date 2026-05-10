@@ -21,6 +21,12 @@ public class PaintThinnerItem extends BlockInteractItem{
 
     @Override
     public void dealRightClick(PlayerInteractEvent.RightClickBlock event, boolean isInMainHand) {
+
+        if(handCheck(event,isInMainHand))return;//防止副手故障
+
+        if(isInMainHand)event.setCanceled(true);//位于主手，则正常运行
+        else return;//位于副手，停止
+
         Player player = event.getEntity();
         SelectedZone zone = player.getData(ModAttachments.SELECTED_ZONE);
         Level level = event.getLevel();
