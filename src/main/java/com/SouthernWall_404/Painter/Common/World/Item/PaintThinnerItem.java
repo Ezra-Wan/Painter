@@ -28,12 +28,10 @@ public class PaintThinnerItem extends BlockInteractItem{
 
         if (zone.isSelecting()) {
             // 执行大面积移除操作
-            // TODO 待实现
+            PaintOperationHelper.thinPaint(level, zone.getPositions(), event.getFace());
         } else {
             // 执行单点移除操作
             PaintOperationHelper.thinPaint(level, pos,event.getFace());
-
-
         }
     }
 }
