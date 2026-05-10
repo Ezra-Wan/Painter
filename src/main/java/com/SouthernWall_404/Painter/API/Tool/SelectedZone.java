@@ -144,6 +144,11 @@ public class SelectedZone {
         return quads.containsKey(pos);
     }
 
+    public boolean hasCacheSquad()
+    {
+        return cacheSquad != null;
+    }
+
     public void clear()
     {
 //        A=null;
