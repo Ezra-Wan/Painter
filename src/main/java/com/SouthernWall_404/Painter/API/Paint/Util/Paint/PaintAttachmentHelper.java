@@ -37,12 +37,4 @@ public final class PaintAttachmentHelper {
         if(render instanceof AbstractPaint paint)return paint;
         return null;
     }
-
-    public static void putRender(Level level, BlockPos pos, AbstractPaint paint) {
-        PaintInfo info = getPaintInfo(level, pos);
-        if (info != null) {
-            info.putPaints(level, pos, paint);
-            level.getChunkAt(pos).setUnsaved(true);
-        }
-    }
 }

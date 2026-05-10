@@ -2,12 +2,10 @@ package com.SouthernWall_404.Painter.Client;
 
 import com.SouthernWall_404.LaplaceAPI.RegulappleEngine.OutLine.LineRenderType;
 import com.SouthernWall_404.LaplaceAPI.RegulappleEngine.Quad.Quad;
+import com.SouthernWall_404.Painter.API.Paint.Util.Paint.PaintValidHelper;
 import com.SouthernWall_404.Painter.API.Tool.SelectedZone;
 import com.SouthernWall_404.Painter.API.Tool.Wall.Edge;
 import com.SouthernWall_404.Painter.Common.Init.ModAttachments;
-import com.SouthernWall_404.Painter.Common.World.Item.ChulkItem;
-import com.SouthernWall_404.Painter.Common.World.Item.PaintBucketItem;
-import com.SouthernWall_404.Painter.Common.World.Item.PaintItem;
 import com.SouthernWall_404.Painter.Painter;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
@@ -46,11 +44,7 @@ public class SelectedRenderer {
         if (player == null || level == null) return;
 
         ItemStack itemStack=player.getItemInHand(InteractionHand.MAIN_HAND);//主手若为渲染物品
-        if(itemStack.getItem()instanceof PaintItem||
-                itemStack.getItem()instanceof ChulkItem||itemStack.getItem() instanceof PaintBucketItem)//TODO 这里代码太拉跨了，有空改
-        {
-
-        }else return;
+        if(!PaintValidHelper.shouldRenderSelected(itemStack)) return;
 
         SelectedZone selectedZone=player.getData(ModAttachments.SELECTED_ZONE);
 
@@ -97,8 +91,6 @@ public class SelectedRenderer {
 
     public static void renderFace(Quad quad,Vec3 camPos,BlockPos pos, VertexConsumer buffer, PoseStack poseStack)
     {
-
-
         quad.render(pos,camPos,buffer,poseStack);
     }
 

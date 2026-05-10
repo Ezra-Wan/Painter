@@ -23,12 +23,6 @@ public class Painter {
 
     public Painter(IEventBus modEventBus, ModContainer container)
     {
-//        ModBlock.BLOCKS.register(modEventBus);
-//        ModBlockEntities.BLOCK_ENTITY_TYPE.register(modEventBus);
-
-//        ModItems.ITEMS.register(modEventBus);
-//        ModCreativeModeTab.CREATIVE_TABS.register(modEventBus);
-//        ModAttachments.ATTACHMENT_TYPES.register(modEventBus);
 
         frame.register(modEventBus);
 
@@ -38,10 +32,6 @@ public class Painter {
         // 注册网络处理器
         if(FMLEnvironment.dist== Dist.CLIENT)ClientHandlers.register();
         ServerHandlers.register();
-
-        NeoForge.EVENT_BUS.register(BlockRelativeEvent.class);
-        NeoForge.EVENT_BUS.register(PlayerJoinEvent.class);
-        NeoForge.EVENT_BUS.register(ServerTick.class);
 
     }
 }

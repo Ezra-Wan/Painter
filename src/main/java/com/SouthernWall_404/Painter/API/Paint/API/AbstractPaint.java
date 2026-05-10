@@ -57,6 +57,7 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>, Dire
     private final BitSet shapeFlags = new BitSet(3);
     protected Map<Integer, ModelRender.AmbientOcclusionFace> aoFaces = new HashMap<>();
     protected Map<Integer,Boolean> visibles =new HashMap<>();
+    protected Map<Integer, Vec3> renderVec=new HashMap<>();
     //========需要持久化的数据========
     protected Map<Integer, BlockState> materials = new HashMap<>();
     protected Map<Integer,float[]> uvOffsets =new HashMap<>();
@@ -66,6 +67,29 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>, Dire
         super(blockPos,type);
 
         registerUVs();
+        registerRenderVec();
+
+    }
+
+    protected void registerRenderVec()
+    {
+        if(renderVec==null)
+        {
+            renderVec=new HashMap<>();
+        }
+        renderVec.clear();
+
+        flags.forEach((direction,flag)->{
+            Vector3f normal = normals.get(flag);
+            double offset = (double)Configs.getValue(Painter.MODID, ClientConfig.PAINT_OFFSET).get();
+            Vec3 vec = new Vec3(
+                blockPos.getX() + offset * normal.getX(),
+                blockPos.getY() + offset * normal.getY(),
+                blockPos.getZ() + offset * normal.getZ()
+            );
+            renderVec.put(flag, vec);
+            renderVec.put(-flag, vec);
+        });
     }
 
     @Override
@@ -230,7 +254,7 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>, Dire
     public void refresh() {
         visibles.clear();
         aoFaces.clear();
-        objects.clear();
+        objects.clear();;
 //        PaintRender.setChanged();
     }
     @Override
@@ -325,10 +349,8 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>, Dire
 
     @Override
     @OnlyIn(Dist.CLIENT)
-    public void render(BlockPos blockPos, PoseStack poseStack, int packedLight, int packedOverlay, float partialTick, VertexConsumer buffer) {
+    public void render(BlockPos blockPos, PoseStack poseStack, VertexConsumer buffer) {
         Minecraft mc = Minecraft.getInstance();
-        Level level = mc.level;
-        double offset= (double)Configs.getValue(Painter.MODID, ClientConfig.PAINT_OFFSET).get();
 
         if (objects.isEmpty())createQuads();
         if(visibles.isEmpty())refreshVisible();
@@ -337,17 +359,16 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>, Dire
         for (Map.Entry<Integer, List<BakedQuad>> entry : objects.entrySet()) {
             List<BakedQuad> quads = entry.getValue();
             int flag = entry.getKey();
-            Vector3f normal=normals.get(flag);
 
             BlockState material = materials.get(flag);
-            Direction direction = getDirection(flag);
-
 
             if (!visibles.getOrDefault(flag,false))continue;
 
-            Vec3 renderVec3 = new Vec3(blockPos.getX() + offset * normal.getX(),
-                    blockPos.getY() + offset * normal.getY(),
-                    blockPos.getZ() + offset * normal.getZ());
+            Vec3 renderVec3 = renderVec.get(flag);
+            if (renderVec3 == null) {
+                registerRenderVec();
+            }
+            
             for (BakedQuad quad : quads) {
                 if (aoFaces.containsKey(flag)) {
                     BakedQuadRender.renderInOfferredAO(quad, material, renderVec3, poseStack, buffer, aoFaces.get(flag));

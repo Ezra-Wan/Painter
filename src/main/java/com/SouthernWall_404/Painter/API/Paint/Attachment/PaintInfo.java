@@ -7,6 +7,7 @@ import com.SouthernWall_404.Painter.API.Paint.API.AbstractPaint;
 import com.SouthernWall_404.Painter.API.Paint.API.AbstractRender;
 import com.SouthernWall_404.Painter.API.Paint.PaintContent;
 import com.SouthernWall_404.Painter.API.Paint.Util.Paint.PaintSyncHelper;
+import com.SouthernWall_404.Painter.API.Paint.Util.Paint.PaintValidHelper;
 import com.SouthernWall_404.Painter.API.Paint.Util.RenderUtil;
 import com.SouthernWall_404.Painter.Client.PaintRender;
 import com.SouthernWall_404.Painter.Common.Event.ServerTick;
@@ -41,8 +42,9 @@ public class PaintInfo implements IAttachment {
     //========不需要持久化的数据========
     private int tick=0;
     private boolean isChanged=false;
+    private Map<BlockPos,AABB> aabbMap = new HashMap<>();//注意，只是客户端缓存，禁止服务器调用
     //========需要持久化的数据=========
-    private final Map<BlockPos, AbstractPaint> paints = new HashMap<>();
+    private Map<BlockPos, AbstractPaint> paints = new HashMap<>();
 
     // 提供无参构造，供附件自动创建
     public PaintInfo() {}
@@ -52,18 +54,6 @@ public class PaintInfo implements IAttachment {
      */
     public Map<BlockPos, AbstractPaint> getPaints() {
         return paints;
-    }
-
-    /**
-     * 获取 AbstractRender 视图（兼容旧代码）
-     */
-    public Map<BlockPos, AbstractRender<?, ?>> getRenders() {
-        // 复制一份，避免外部修改原 Map，同时满足泛型要求
-        Map<BlockPos, AbstractRender<?, ?>> copy = new HashMap<>();
-        for (Map.Entry<BlockPos, AbstractPaint> entry : paints.entrySet()) {
-            copy.put(entry.getKey(), entry.getValue());
-        }
-        return copy;
     }
 
     public void setChanged() {
@@ -94,14 +84,23 @@ public class PaintInfo implements IAttachment {
     {
         refreshAO();
         refreshVisibles();
-
         done();
+    }
+
+
+    public void checkValid(Level level,BlockPos pos)
+    {
+        if(!PaintValidHelper.isPaintable(level,pos))
+        {
+            removeRender(level,pos);
+        }
+
     }
 
     /**
      * 渲染该区块内所有粉刷对象
      * @param poseStack 姿态栈
-     * @param buffer 顶点缓冲区
+     * @param buffer 顶点缓冲区0
      * @param frustum 视锥体（用于剔除）
      */
     @OnlyIn(Dist.CLIENT)
@@ -116,33 +115,19 @@ public class PaintInfo implements IAttachment {
 
         paints.forEach((blockPos, paint) -> {
             // 视锥剔除
-            AABB aabb = new AABB(blockPos.getX(), blockPos.getY(), blockPos.getZ(), 
-                                 blockPos.getX() + 1, blockPos.getY() + 1, blockPos.getZ() + 1);
+            AABB aabb = aabbMap.computeIfAbsent(blockPos, pos -> new AABB(pos));
             if (!frustum.isVisible(aabb)) {
                 return;
             }
+
             
             // 初始化 origin（如果为空）
             if (paint.getOrigin() == null) {
                 paint.setOrigin(level.getBlockState(blockPos));
             }
-            
-            // 计算光照
-            int packedLight = calculatePackedLight(level, blockPos);
-            
             // 调用渲染方法
-            paint.render(blockPos, poseStack, packedLight, 0, partialTick, buffer);
+            paint.render(blockPos, poseStack, buffer);
         });
-    }
-    
-    /**
-     * 计算方块位置的光照值
-     */
-    private int calculatePackedLight(Level level, BlockPos pos) {
-        if (level == null) return 0;
-        int blockLight = level.getBrightness(LightLayer.BLOCK, pos);
-        int skyLight = level.getBrightness(LightLayer.SKY, pos);
-        return (skyLight << 20) | (blockLight << 4);
     }
 
     public void putPaints(Level level, BlockPos pos, AbstractPaint paint) {
@@ -150,6 +135,7 @@ public class PaintInfo implements IAttachment {
 
         if (level.isClientSide()) {
             paints.put(pos, paint);
+            aabbMap.put(pos,new AABB(pos));
             PaintRender.addChunk(new ChunkPos(pos));
         }else {
             if(paints.isEmpty())
@@ -157,6 +143,7 @@ public class PaintInfo implements IAttachment {
                 level.getData(ModAttachments.LEVEL_PAINT_INFO).add(new ChunkPos( pos));
             }
             paints.put(pos, paint);
+            level.getChunk( pos).setUnsaved(true);
 
             ServerTick.update(new ChunkPos(pos));
         }
@@ -214,9 +201,12 @@ public class PaintInfo implements IAttachment {
         paints.remove(pos);
 
         if(level.isClientSide) {
+            aabbMap.remove(pos);
             if(paints.isEmpty()) PaintRender.removeChunk(new ChunkPos(pos));
         }else {
             if(paints.isEmpty()) level.getData(ModAttachments.LEVEL_PAINT_INFO).remove(new ChunkPos(pos));
+
+            level.getChunk( pos).setUnsaved(true);
             ServerTick.update(new ChunkPos(pos));
         }
     }
@@ -276,6 +266,7 @@ public class PaintInfo implements IAttachment {
     @Override
     public void deserializeNBT(HolderLookup.Provider provider, CompoundTag tag) {
         paints.clear();
+        aabbMap.clear();
         ListTag rendersList = tag.getList("renders", Tag.TAG_COMPOUND);
 
         BlockPos chunkPos=null;
@@ -290,6 +281,7 @@ public class PaintInfo implements IAttachment {
             AbstractPaint paint = createPaintByType(type, provider, data,pos);
             if (paint != null) {
                 paints.put(pos, paint);
+                aabbMap.put(pos,new AABB( pos));
             }
         }
         Minecraft mc=Minecraft.getInstance();

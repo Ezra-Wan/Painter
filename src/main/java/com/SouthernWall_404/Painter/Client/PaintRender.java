@@ -13,6 +13,7 @@ import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.chunk.LevelChunk;
+import net.minecraft.world.phys.AABB;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -32,7 +33,7 @@ public class PaintRender {
 
     @SubscribeEvent
     public static void onRenderLevelStage(RenderLevelStageEvent event) {
-        if (event.getStage() != RenderLevelStageEvent.Stage.AFTER_TRANSLUCENT_BLOCKS) {
+        if (event.getStage() != RenderLevelStageEvent.Stage.AFTER_BLOCK_ENTITIES) {
             return;
         }
 
@@ -51,6 +52,18 @@ public class PaintRender {
         // 遍历缓存的区块，调用每个 PaintInfo 的 render 方法
         cachedChunks.forEach(chunkPos -> {
             LevelChunk chunk = level.getChunkSource().getChunkNow(chunkPos.x, chunkPos.z);
+
+            // 2. 区块级别视锥剔除
+            int minX = chunkPos.getMinBlockX();
+            int minZ = chunkPos.getMinBlockZ();
+            int maxX = chunkPos.getMaxBlockX();
+            int maxZ = chunkPos.getMaxBlockZ();
+            AABB chunkAABB = new AABB(minX, -64, minZ, maxX + 1, 320, maxZ + 1);
+
+            if (!frustum.isVisible(chunkAABB)) {
+                return; // 整个区块在视野外
+            }
+
             if (chunk != null) {
                 PaintInfo paintInfo = chunk.getData(ModAttachments.PAINT_INFO);
                 paintInfo.render(event.getPoseStack(), buffer, frustum);
