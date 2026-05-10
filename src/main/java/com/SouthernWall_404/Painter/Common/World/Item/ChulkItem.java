@@ -29,25 +29,39 @@ public class ChulkItem extends BlockInteractItem {
 
     @Override
     public void dealRightClick(PlayerInteractEvent.RightClickBlock event,boolean isInMainHand) {
-
-
         event.setCanceled(true);//打断放置
         if(!handCheck(event,isInMainHand))return;//防止副手bug
 
         Player player = event.getEntity();
         SelectedZone selectedZone = player.getData(ModAttachments.SELECTED_ZONE);//获取选区情况
-        if (selectedZone != null) {
-            //清理选区
-            if (player.isShiftKeyDown()) {
-                selectedZone.clear();
-                player.displayClientMessage(ToolContent.getMessage(ToolContent.CLEAR, Style.EMPTY.withColor(ChatFormatting.YELLOW)), true);
-                return;
-            }
+        
+        if (selectedZone == null) return;
 
+        // 如果按下 Shift，清除选区
+        if (player.isShiftKeyDown()) {
+            selectedZone.clear();
+            player.displayClientMessage(ToolContent.getMessage(ToolContent.CLEAR, Style.EMPTY.withColor(ChatFormatting.YELLOW)), true);
+            return;
+        }
 
-            String result = selectedZone.setB(event.getPos());//设定B点，若不成功，则反馈
+        // 判断当前是设置A点还是B点
+        if (!selectedZone.hasCacheSquad()) {
+            // 第一次右键：设置A点
+            selectedZone.setA(event.getPos(), event.getFace());
+            player.displayClientMessage(Component.translatable(
+                            ToolContent.getMessagePath(ToolContent.SELECT_POSA),
+                            event.getPos().getX(),
+                            event.getPos().getY(),
+                            event.getPos().getZ(),
+                            ToolContent.getFaceTranslation(event.getFace())
+                    ).withStyle(style -> style.withColor(ChatFormatting.YELLOW)),
+                    true);
+        } else {
+            // 第二次右键：设置B点并形成选区
+            String result = selectedZone.setB(event.getPos());
             Style style = Style.EMPTY;
-            if (result == ToolContent.PASS) {
+            
+            if (result.equals(ToolContent.PASS)) {
                 style = style.withColor(ChatFormatting.YELLOW);
             } else {
                 style = style.withColor(ChatFormatting.RED);
@@ -74,25 +88,11 @@ public class ChulkItem extends BlockInteractItem {
         Player player = event.getEntity();
         SelectedZone selectedZone = player.getData(ModAttachments.SELECTED_ZONE);
 
-        //处理选区清理
-        if (selectedZone != null) {
-            if (player.isShiftKeyDown()) {
-                selectedZone.clear();
-                player.displayClientMessage(ToolContent.getMessage(ToolContent.CLEAR, Style.EMPTY.withColor(ChatFormatting.YELLOW)), true);
-                event.setCanceled(true);
-                return;
-            }
+        if (selectedZone == null) return;
 
-            selectedZone.setA(event.getPos(), event.getFace());
-            player.displayClientMessage(Component.translatable(
-                            ToolContent.getMessagePath(ToolContent.SELECT_POSA),
-                            event.getPos().getX(),
-                            event.getPos().getY(),
-                            event.getPos().getZ(),
-                            ToolContent.getFaceTranslation(event.getFace())
-                    ).withStyle(style -> style.withColor(ChatFormatting.YELLOW)),
-                    true);
-        }
+        // 左键清除选区
+        selectedZone.clear();
+        player.displayClientMessage(ToolContent.getMessage(ToolContent.CLEAR, Style.EMPTY.withColor(ChatFormatting.YELLOW)), true);
         event.setCanceled(true);
     }
 }

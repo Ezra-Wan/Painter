@@ -27,8 +27,8 @@
   "painter.tooltip.brush_3": "-当前版本兼容：完整方块 台阶",
 
   "painter.tooltip.chulk_1": "可以选定粉刷区域",
-  "painter.tooltip.chulk_2": "左键确定第一点，右键确认第二点",
-  "painter.tooltip.chulk_3": "下蹲加任意鼠标按键可以清除选区",
+  "painter.tooltip.chulk_2": "右键确定第一点和第二点",
+  "painter.tooltip.chulk_3": "左键清除选区，下蹲加右键也可清除",
 
   "painter.tooltip.bucket_1": "可以大面积填充染料，方法同刷子",
   "painter.tooltip.bucket_2": "以墙面为单位进行喷涂，可以用选区进行范围控制"
