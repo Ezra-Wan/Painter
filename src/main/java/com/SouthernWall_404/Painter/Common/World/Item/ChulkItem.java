@@ -37,13 +37,6 @@ public class ChulkItem extends BlockInteractItem {
         
         if (selectedZone == null) return;
 
-        // 如果按下 Shift，清除选区
-        if (player.isShiftKeyDown()) {
-            selectedZone.clear();
-            player.displayClientMessage(ToolContent.getMessage(ToolContent.CLEAR, Style.EMPTY.withColor(ChatFormatting.YELLOW)), true);
-            return;
-        }
-
         // 判断当前是设置A点还是B点
         if (!selectedZone.hasCacheSquad()) {
             // 第一次右键：设置A点
