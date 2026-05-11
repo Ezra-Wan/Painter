@@ -14,10 +14,12 @@ public class ComponentContent {
     public static String BRUSH="brush";
     public static String CHULK="chulk";
     public static String BUCKET="bucket";
+    public static String THINNER="thinner";
 
     public static int BRUSH_ROW=3;
     public static int CHULK_ROW=3;
     public static int BUCKET_ROW=2;
+    public static int THINNER_ROW=2;
 
     public static List<Component> getTooltip(String type, int row, Style style) {
         List<Component> tooltip = new ArrayList<>();

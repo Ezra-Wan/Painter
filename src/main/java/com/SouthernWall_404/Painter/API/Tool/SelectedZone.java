@@ -58,6 +58,10 @@ public class SelectedZone {
         }
     }
 
+    public Set<BlockPos> getPositions() {
+        return quads.keySet();
+    }
+
     public boolean isSelecting()
     {
         if(!quads.isEmpty()&&face!=null)

@@ -149,6 +149,24 @@ public class PaintInfo implements IAttachment {
         }
     }
 
+    public void removePaintMaterial(Level level, BlockPos pos, Direction direction)
+    {
+        if (level.isClientSide()) {
+            AbstractPaint paint = paints.get(pos);
+            if (paint != null) {
+                paint.removeMaterial(direction);
+            }
+        } else {
+            AbstractPaint paint = paints.get(pos);
+            if (paint != null) {
+                paint.removeMaterial(direction);
+                level.getChunk( pos).setUnsaved(true);
+
+                ServerTick.update(new ChunkPos(pos));
+            }
+        }
+    }
+
 
 
     /**
