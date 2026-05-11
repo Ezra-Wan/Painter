@@ -2,16 +2,30 @@ package com.SouthernWall_404.Painter.Common.World.Item;
 
 import com.SouthernWall_404.Painter.API.Paint.Util.Paint.PaintOperationHelper;
 import com.SouthernWall_404.Painter.API.Tool.SelectedZone;
+import com.SouthernWall_404.Painter.Common.Content.ComponentContent;
 import com.SouthernWall_404.Painter.Common.Init.ModAttachments;
+import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.Style;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
+
+import java.util.List;
 
 public class PaintThinnerItem extends BlockInteractItem{
 
     public PaintThinnerItem(Properties properties) {
         super(properties);
+    }
+
+    @Override
+    public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltipComponents, TooltipFlag tooltipFlag) {
+        tooltipComponents.addAll(ComponentContent.getTooltip(ComponentContent.THINNER, ComponentContent.THINNER_ROW, Style.EMPTY.withColor(ChatFormatting.GRAY)));
+        super.appendHoverText(stack, context, tooltipComponents, tooltipFlag);
     }
 
     @Override
