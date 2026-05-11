@@ -415,12 +415,33 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>, Dire
 
     }
 
+    /**
+     * 移除指定方向的材质
+     * @param f 方向
+     */
+    public void removeMaterial(Direction f) {
+        int flag = getFlag(f);
+        materials.remove(flag);
+        materials.remove(-flag);
+        uvOffsets.remove(flag);
+        uvOffsets.remove(-flag);
+        refresh();
+    }
+
     public abstract boolean hasNullInDirection(Direction f);
 
 
     public BlockState getMaterial(Direction f) {
         int flag = getFlag(f);
         return materials.get(flag);
+    }
+
+    /**
+     * 获取所有材质的映射
+     * @return 材质映射
+     */
+    public Map<Integer, BlockState> getMaterials() {
+        return materials;
     }
 
     @Override

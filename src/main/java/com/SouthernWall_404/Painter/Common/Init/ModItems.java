@@ -6,6 +6,7 @@ import com.SouthernWall_404.LaplaceAPI.VertinCore.World.Item.ItemRegistry;
 import com.SouthernWall_404.Painter.Common.World.Item.ChulkItem;
 import com.SouthernWall_404.Painter.Common.World.Item.PaintBucketItem;
 import com.SouthernWall_404.Painter.Common.World.Item.PaintItem;
+import com.SouthernWall_404.Painter.Common.World.Item.PaintThinnerItem;
 import com.SouthernWall_404.Painter.Painter;
 import com.google.common.collect.Sets;
 import net.minecraft.world.item.BrushItem;
@@ -50,6 +51,18 @@ public class ModItems {
                     Painter.frame,
                     ModCreativeModeTab.TAB_PAINTER,
                     ItemRegistry.builder("paint_bucket",PaintBucketItem::new)
+                            .apply(properties ->
+                                    properties
+                                            .rarity(Rarity.UNCOMMON)
+                                            .stacksTo(1)
+                            )
+                            .build()
+            );
+    public static final DeferredItem<Item> PAINT_THINNER=
+            ItemRegisterHelper.registerToCreativeTab(
+                    Painter.frame,
+                    ModCreativeModeTab.TAB_PAINTER,
+                    ItemRegistry.builder("paint_thinner", PaintThinnerItem::new)
                             .apply(properties ->
                                     properties
                                             .rarity(Rarity.UNCOMMON)

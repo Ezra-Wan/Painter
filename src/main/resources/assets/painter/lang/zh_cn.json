@@ -13,6 +13,7 @@
   "item.painter.brush": "油漆刷",
   "item.painter.chulk": "粉笔",
   "item.painter.paint_bucket": "油漆桶",
+  "item.painter.paint_thinner": "油漆稀释剂",
 
   "painter.message.clear": "选区已清除！",
   "painter.message.select_a": "第一选取点设置为[%s,%s,%s]，方向为%s",
@@ -31,5 +32,8 @@
   "painter.tooltip.chulk_3": "下蹲加任意鼠标按键可以清除选区",
 
   "painter.tooltip.bucket_1": "可以大面积填充染料，方法同刷子",
-  "painter.tooltip.bucket_2": "以墙面为单位进行喷涂，可以用选区进行范围控制"
+  "painter.tooltip.bucket_2": "以墙面为单位进行喷涂，可以用选区进行范围控制",
+
+  "painter.tooltip.thinner_1": "可以移除已粉刷的油漆",
+  "painter.tooltip.thinner_2": "右键点击已粉刷的面即可移除，支持选区批量操作"
 }
