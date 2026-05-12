@@ -3,8 +3,12 @@ package com.SouthernWall_404.Painter.API.Paint.Util.Paint;
 import com.SouthernWall_404.LaplaceAPI.VertinCore.Util.BlockUtil;
 import com.SouthernWall_404.Painter.API.Paint.API.AbstractPaint;
 import com.SouthernWall_404.Painter.API.Paint.API.AbstractRender;
+import com.SouthernWall_404.Painter.Common.World.Item.ChulkItem;
+import com.SouthernWall_404.Painter.Common.World.Item.PaintBucketItem;
+import com.SouthernWall_404.Painter.Common.World.Item.PaintItem;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
@@ -72,5 +76,17 @@ public class PaintValidHelper {
         }
 
         return false;
+    }
+
+    /**
+     * 判断是否应该渲染选中区域
+     * @param itemStack 要检查的物品堆
+     * @return 如果物品是 PaintItem、ChulkItem 或 PaintBucketItem 则返回 true
+     */
+    public static boolean shouldRenderSelected(ItemStack itemStack) {
+        Item item=itemStack.getItem();
+        return item instanceof PaintItem ||
+                item instanceof ChulkItem ||
+                item instanceof PaintBucketItem;
     }
 }

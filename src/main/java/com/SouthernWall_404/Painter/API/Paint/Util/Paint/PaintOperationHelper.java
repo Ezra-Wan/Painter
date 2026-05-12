@@ -13,6 +13,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
+import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.SlabBlock;
@@ -27,10 +28,22 @@ import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 import net.neoforged.neoforge.network.PacketDistributor;
 
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public final class PaintOperationHelper {
 
+    public static void thinPaint(Level level, BlockPos blockPos, Direction direction)
+    {
+        thinPaint(level,Set.of(blockPos),direction);
+    }
+    public static void thinPaint(Level level,  Set<BlockPos> blockPoses, Direction direction)
+    {
+        blockPoses.forEach(blockPos ->{
+            PaintInfo paintInfo = level.getChunkAt(blockPos).getData(ModAttachments.PAINT_INFO);
+            paintInfo.removePaintMaterial(level,blockPos, direction);
+        } );}
 
     public static void paint(Level level, BlockPos blockPos, Player player, Direction direction) {
         ItemStack itemStack = player.getItemInHand(InteractionHand.OFF_HAND);//添加副手的方块
@@ -68,7 +81,7 @@ public final class PaintOperationHelper {
             paint.paint(direction,material);
 
             paintInfo.putPaints(level,blockPos, paint);
-            chunk.setUnsaved(true);
+
 
 
         }else {
@@ -94,10 +107,6 @@ public final class PaintOperationHelper {
             }
             //        AbstractRender render = new SimpleBlockPaint();//默认普通方块
         }
-
-        chunk.setData(ModAttachments.PAINT_INFO, paintInfo);
-
-        chunk.setUnsaved(true);
     }
 
 
@@ -135,15 +144,5 @@ public final class PaintOperationHelper {
                 paintInfo.cycleTextureUV(level,blockPos, direction);
             }
         }
-    }
-
-    public static void cycleTextureDir(AbstractPaint paint, Direction direction) {
-
-        //TODO 应用起来
-        if(paint instanceof SlabBlockPaint slabBlock)
-        {
-            slabBlock.cycleTextureDir(direction);
-        }
-        else paint.cycleTextureDir(direction);
     }
 }
