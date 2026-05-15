@@ -1,6 +1,6 @@
 package com.SouthernWall_404.Painter.Common.World.Item;
 
-import com.SouthernWall_404.Painter.API.Tool.SelectedZone;
+import com.SouthernWall_404.Painter.API.Tool.SelectedZoneForSwap;
 import com.SouthernWall_404.Painter.API.Tool.ToolContent;
 import com.SouthernWall_404.Painter.Common.Content.ComponentContent;
 import com.SouthernWall_404.Painter.Common.Init.ModAttachments;
@@ -33,14 +33,14 @@ public class ChulkItem extends BlockInteractItem {
         if(!handCheck(event,isInMainHand))return;//防止副手bug
 
         Player player = event.getEntity();
-        SelectedZone selectedZone = player.getData(ModAttachments.SELECTED_ZONE);//获取选区情况
-        
-        if (selectedZone == null) return;
+        SelectedZoneForSwap zone = player.getData(ModAttachments.SELECTED_ZONE_FOR_SWAP);//获取选区情况
+
+        if (zone == null) return;
 
         // 判断当前是设置A点还是B点
-        if (!selectedZone.hasCacheSquad()) {
+        if (!zone.isCreating()) {
             // 第一次右键：设置A点
-            selectedZone.setA(event.getPos(), event.getFace());
+            zone.setA(event.getPos(), event.getFace());
             player.displayClientMessage(Component.translatable(
                             ToolContent.getMessagePath(ToolContent.SELECT_POSA),
                             event.getPos().getX(),
@@ -51,22 +51,9 @@ public class ChulkItem extends BlockInteractItem {
                     true);
         } else {
             // 第二次右键：设置B点并形成选区
-            String result = selectedZone.setB(event.getPos());
-            Style style = Style.EMPTY;
-            
-            if (result.equals(ToolContent.PASS)) {
-                style = style.withColor(ChatFormatting.YELLOW);
-            } else {
-                style = style.withColor(ChatFormatting.RED);
-            }
+            zone.setB(event.getPos());
 
-            player.displayClientMessage(Component.translatable(
-                                    ToolContent.getMessagePath(ToolContent.parentString(ToolContent.SELECT_POSB, result)),
-                                    event.getPos().getX(),
-                                    event.getPos().getY(),
-                                    event.getPos().getZ())
-                            .withStyle(style),
-                    true);
+            //TODO 记得加反馈信息
         }
         player.swing(InteractionHand.MAIN_HAND);
     }
@@ -79,12 +66,10 @@ public class ChulkItem extends BlockInteractItem {
         }
 
         Player player = event.getEntity();
-        SelectedZone selectedZone = player.getData(ModAttachments.SELECTED_ZONE);
-
-        if (selectedZone == null) return;
+        SelectedZoneForSwap zone = player.getData(ModAttachments.SELECTED_ZONE_FOR_SWAP);
 
         // 左键清除选区
-        selectedZone.clear();
+        zone.clear();
         player.displayClientMessage(ToolContent.getMessage(ToolContent.CLEAR, Style.EMPTY.withColor(ChatFormatting.YELLOW)), true);
         event.setCanceled(true);
     }

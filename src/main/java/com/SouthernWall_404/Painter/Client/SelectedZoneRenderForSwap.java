@@ -112,11 +112,12 @@ public class SelectedZoneRenderForSwap{
 
     }
 
+    @SubscribeEvent
     public static void onJoinWorld(PlayerEvent.PlayerLoggedInEvent event)
     {
         int alpha= ConfigAPI.getValue(ResourceLocation.fromNamespaceAndPath(Painter.MODID,ClientConfig.QUAD_COLOR_ALPHA));
         int rgb= ConfigAPI.getValue(ResourceLocation.fromNamespaceAndPath(Painter.MODID,ClientConfig.QUAD_COLOR));
-        float offset= ConfigAPI.getValue(ResourceLocation.fromNamespaceAndPath(Painter.MODID,ClientConfig.PAINT_OFFSET));
+        float offset=0.02f;
         for (Direction face : Direction.values())
         {
             float[][] positions= RenderHelper.getSimpleQuadVertex(face);

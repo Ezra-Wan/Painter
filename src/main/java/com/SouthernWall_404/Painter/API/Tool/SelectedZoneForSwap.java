@@ -16,7 +16,7 @@ import java.util.*;
  */
 public class SelectedZoneForSwap implements IAttachment {
 
-    private List<SelectedQuad> quads;//建立的所有选区
+    private List<SelectedQuad> quads=new ArrayList<>();//建立的所有选区
     private Map<Direction, Set<BlockPos>> contains=new HashMap<>();//所有被选中的位置
 
     private BlockPos cachedA;//缓存的选区A位置
@@ -24,7 +24,7 @@ public class SelectedZoneForSwap implements IAttachment {
 
 
     //========业务方法========
-    public void setCachedA(BlockPos a, Direction face)
+    public void setA(BlockPos a, Direction face)
     {
         cachedA=a;
         cachedFace=face;
@@ -36,6 +36,11 @@ public class SelectedZoneForSwap implements IAttachment {
             addQuad(b);//添加选区
         }else throw new RuntimeException("The two points are not on the same plane.");
 
+    }
+
+    public boolean isCreating()
+    {
+        return cachedA!=null;
     }
 
     public void addQuad(BlockPos blockPos,Direction face)
@@ -95,7 +100,9 @@ public class SelectedZoneForSwap implements IAttachment {
 
     public void update(SelectedQuad quad)
     {
-        contains.getOrDefault(quad.face,new HashSet<>()).addAll(quad.getSelectedPos());
+        Set<BlockPos> set=contains.getOrDefault(quad.face,new HashSet<>());
+        set.addAll(quad.getSelectedPos());
+        contains.put(quad.face,set);
         SelectedZoneRenderForSwap.setChanged();
     }
 
