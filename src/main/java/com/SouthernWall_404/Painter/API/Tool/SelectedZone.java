@@ -40,9 +40,6 @@ public class SelectedZone {
         return quads;
     }
 
-    public Direction getFace() {
-        return face;
-    }
 //    private final static float offset=0.02f;
 //    public void addAPosition(BlockPos pos) {
 //        if(!quads.containsKey(pos)){
@@ -64,10 +61,6 @@ public class SelectedZone {
 //        }
 //    }
 
-    public Set<BlockPos> getPositions() {
-        return quads.keySet();
-    }
-
     public boolean isSelecting()
     {
         if(!quads.isEmpty())
@@ -85,22 +78,5 @@ public class SelectedZone {
     public boolean isInSurface(BlockPos pos, Direction direction)
     {
         return direction==face&& quads.containsKey(pos);
-    }
-
-    public boolean contains(BlockPos pos)
-    {
-        return quads.containsKey(pos);
-    }
-
-
-    public void clear()
-    {
-//        A=null;
-        squads.clear();
-        cacheSquad=null;
-        edges.clear();
-        quads.clear();
-
-
     }
 }
