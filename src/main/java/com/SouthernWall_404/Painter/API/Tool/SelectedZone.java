@@ -17,9 +17,15 @@ import java.util.*;
 
 public class SelectedZone {
 
+    //TODO 需要移除
+    //========等待弃用========
     private Direction face;
 
+
+
+    //=========数据缓存========
     private Set<Squad> squads=new HashSet<>();
+
     private Squad cacheSquad;
 
     //========渲染缓存========
@@ -64,7 +70,7 @@ public class SelectedZone {
 
     public boolean isSelecting()
     {
-        if(!quads.isEmpty()&&face!=null)
+        if(!quads.isEmpty())
         {
             return true;
         }
@@ -107,17 +113,6 @@ public class SelectedZone {
     }
     public void setA(BlockPos a, Direction face)
     {
-        if(this.face==null)
-        {
-            this.face=face;
-        }
-        else {
-            if(!this.squads.isEmpty()&&face!=this.getFace())
-            {
-                return;
-            }
-        }
-
         cacheSquad=new Squad(a,face);
     }
     public String setB(BlockPos b) {
@@ -152,7 +147,6 @@ public class SelectedZone {
     public void clear()
     {
 //        A=null;
-        face=null;
         squads.clear();
         cacheSquad=null;
         edges.clear();

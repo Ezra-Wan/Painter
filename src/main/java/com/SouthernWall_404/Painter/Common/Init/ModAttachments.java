@@ -4,6 +4,7 @@ import com.SouthernWall_404.LaplaceAPI.VertinCore.World.Attachment.AttachmentReg
 import com.SouthernWall_404.Painter.API.Paint.Attachment.LevelPaintInfo;
 import com.SouthernWall_404.Painter.API.Paint.Attachment.PaintInfo;
 import com.SouthernWall_404.Painter.API.Tool.SelectedZone;
+import com.SouthernWall_404.Painter.API.Tool.SelectedZoneForSwap;
 import com.SouthernWall_404.Painter.Painter;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.neoforge.attachment.AttachmentType;
@@ -35,5 +36,6 @@ public class ModAttachments {
     public static final Supplier<AttachmentType<LevelPaintInfo>> LEVEL_PAINT_INFO = AttachmentRegistryHelper.registerLevelAttachment(Painter.frame,"level_paint_info",()->new LevelPaintInfo());
     // public static final Supplier<AttachmentType<PaintChunkInfo>> PAINT_CHUNK_INFO = AttachmentRegistryHelper.register(Painter.frame,"paint_chunk_info",()->new PaintChunkInfo());
     public static final Supplier<AttachmentType<SelectedZone>> SELECTED_ZONE = AttachmentRegistryHelper.registerWithOutSerialize(Painter.frame,"selected_zone",()->new SelectedZone());
+    public static final Supplier<AttachmentType<SelectedZoneForSwap>> SELECTED_ZONE_FOR_SWAP = AttachmentRegistryHelper.registerWithOutSerialize(Painter.frame,"selected_zone_for_swap",()->new SelectedZoneForSwap());
 
 }
