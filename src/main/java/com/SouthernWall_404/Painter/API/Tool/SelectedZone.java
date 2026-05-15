@@ -87,62 +87,11 @@ public class SelectedZone {
         return direction==face&& quads.containsKey(pos);
     }
 
-    public void update()
-    {
-        edges.clear();
-        squads.forEach((squad -> {
-            List<BlockPos> squadContains=squad.getContians();
-
-            squadContains.forEach(
-                    (blockpos)->{
-                        addAPosition(blockpos);//将位置缓存
-                    }
-            );
-        }));
-
-        squads.forEach((squad)->{
-            edges.addAll(squad.getEdges(quads));//更新边框
-        });
-
-    }
-    public void addSquad(Squad squad)
-    {
-        squads.add(squad);
-
-        update();
-    }
-    public void setA(BlockPos a, Direction face)
-    {
-        cacheSquad=new Squad(a,face);
-    }
-    public String setB(BlockPos b) {
-
-        if(cacheSquad==null)
-        {
-            return ToolContent.EMPTY_POSA;
-        }
-        String result=cacheSquad.setB(b);
-
-        if(result.equals(ToolContent.PASS))
-        {
-            addSquad(cacheSquad);
-
-            cacheSquad=null;
-
-            return result;
-        }
-        return result;
-    }
-
     public boolean contains(BlockPos pos)
     {
         return quads.containsKey(pos);
     }
 
-    public boolean hasCacheSquad()
-    {
-        return cacheSquad != null;
-    }
 
     public void clear()
     {

@@ -55,13 +55,7 @@ public class PaintItem extends BlockInteractItem {
 
     @Override
     public void dealLeftClick(PlayerInteractEvent.LeftClickBlock event) {
-        // 原 BlockEvent 中处理 PaintItem 左键的逻辑（清除选区）
-        var player = event.getEntity();
-        SelectedZone selectedZone = player.getData(ModAttachments.SELECTED_ZONE);
-        if (selectedZone != null) {
-            selectedZone.clear();
-            player.displayClientMessage(ToolContent.getMessage(ToolContent.CLEAR, Style.EMPTY.withColor(ChatFormatting.YELLOW)), true);
-        }
+
         event.setCanceled(true);
     }
 }
