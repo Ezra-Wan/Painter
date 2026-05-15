@@ -2,6 +2,7 @@ package com.SouthernWall_404.Painter.Common.World.Item;
 
 import com.SouthernWall_404.Painter.API.Paint.Util.Paint.PaintUtil;
 import com.SouthernWall_404.Painter.API.Tool.SelectedZone;
+import com.SouthernWall_404.Painter.API.Tool.SelectedZoneForSwap;
 import com.SouthernWall_404.Painter.API.Tool.ToolContent;
 import com.SouthernWall_404.Painter.Common.Content.ComponentContent;
 import com.SouthernWall_404.Painter.Common.Event.BlockRelativeEvent;
@@ -38,9 +39,9 @@ public class PaintItem extends BlockInteractItem {
         var player = event.getEntity();
 
         // 检查选区
-        SelectedZone selectedZone = player.getData(ModAttachments.SELECTED_ZONE);
+        SelectedZoneForSwap selectedZone = player.getData(ModAttachments.SELECTED_ZONE_FOR_SWAP);
         if (selectedZone != null && selectedZone.isSelecting()) {
-            if (!selectedZone.isInSurface(blockPos, event.getFace())) {
+            if (!selectedZone.contains(event.getFace(),blockPos )) {
                 player.displayClientMessage(
                         ToolContent.getMessage(ToolContent.parentString(ToolContent.FAILED_TO_PAINT, BlockRelativeEvent.OUT_OF_RANGE), Style.EMPTY.withColor(ChatFormatting.RED)),
                         true

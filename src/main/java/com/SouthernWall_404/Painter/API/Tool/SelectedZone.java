@@ -61,22 +61,8 @@ public class SelectedZone {
 //        }
 //    }
 
-    public boolean isSelecting()
-    {
-        if(!quads.isEmpty())
-        {
-            return true;
-        }
-        return false;
-    }
-
 
     public Set<Edge> getEdges() {
         return edges;
-    }
-
-    public boolean isInSurface(BlockPos pos, Direction direction)
-    {
-        return direction==face&& quads.containsKey(pos);
     }
 }
