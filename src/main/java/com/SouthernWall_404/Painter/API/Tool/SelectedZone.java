@@ -43,26 +43,26 @@ public class SelectedZone {
     public Direction getFace() {
         return face;
     }
-    private final static float offset=0.02f;
-    public void addAPosition(BlockPos pos) {
-        if(!quads.containsKey(pos)){
-            float[][] positions= RenderHelper.getSimpleQuadVertex(face);
-            // 使用ClientConfig的静态方法获取颜色值
-            ModConfigSpec.ConfigValue colorValue=Configs.getValue(Painter.MODID,ClientConfig.QUAD_COLOR);
-            ModConfigSpec.ConfigValue alphaValue=Configs.getValue(Painter.MODID,ClientConfig.QUAD_COLOR_ALPHA);
-            quads.put(
-                    pos,
-                    Quad.builder()
-                            .setColor(FastColor.ARGB32.color((int)alphaValue.get(),(int)colorValue.get()))
-                            .addVertex(new Vector3f(positions[0]).add(new Vector3f(face),offset))
-                            .addVertex(new Vector3f(positions[1]).add(new Vector3f(face),offset))
-                            .addVertex(new Vector3f(positions[2]).add(new Vector3f(face),offset))
-                            .addVertex(new Vector3f(positions[3]).add(new Vector3f(face),offset))
-                            .build()
-            );
-
-        }
-    }
+//    private final static float offset=0.02f;
+//    public void addAPosition(BlockPos pos) {
+//        if(!quads.containsKey(pos)){
+//            float[][] positions= RenderHelper.getSimpleQuadVertex(face);
+//            // 使用ClientConfig的静态方法获取颜色值
+//            ModConfigSpec.ConfigValue colorValue=Configs.getValue(Painter.MODID,ClientConfig.QUAD_COLOR);
+//            ModConfigSpec.ConfigValue alphaValue=Configs.getValue(Painter.MODID,ClientConfig.QUAD_COLOR_ALPHA);
+//            quads.put(
+//                    pos,
+//                    Quad.builder()
+//                            .setColor(FastColor.ARGB32.color((int)alphaValue.get(),(int)colorValue.get()))
+//                            .addVertex(new Vector3f(positions[0]).add(new Vector3f(face),offset))
+//                            .addVertex(new Vector3f(positions[1]).add(new Vector3f(face),offset))
+//                            .addVertex(new Vector3f(positions[2]).add(new Vector3f(face),offset))
+//                            .addVertex(new Vector3f(positions[3]).add(new Vector3f(face),offset))
+//                            .build()
+//            );
+//
+//        }
+//    }
 
     public Set<BlockPos> getPositions() {
         return quads.keySet();

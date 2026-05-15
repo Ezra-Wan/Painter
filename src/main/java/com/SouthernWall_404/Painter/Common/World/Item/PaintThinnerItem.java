@@ -2,10 +2,12 @@ package com.SouthernWall_404.Painter.Common.World.Item;
 
 import com.SouthernWall_404.Painter.API.Paint.Util.Paint.PaintOperationHelper;
 import com.SouthernWall_404.Painter.API.Tool.SelectedZone;
+import com.SouthernWall_404.Painter.API.Tool.SelectedZoneForSwap;
 import com.SouthernWall_404.Painter.Common.Content.ComponentContent;
 import com.SouthernWall_404.Painter.Common.Init.ModAttachments;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.world.entity.player.Player;
@@ -15,6 +17,8 @@ import net.minecraft.world.level.Level;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public class PaintThinnerItem extends BlockInteractItem{
 
@@ -42,13 +46,17 @@ public class PaintThinnerItem extends BlockInteractItem{
         else return;//位于副手，停止
 
         Player player = event.getEntity();
-        SelectedZone zone = player.getData(ModAttachments.SELECTED_ZONE);
+        SelectedZoneForSwap zone = player.getData(ModAttachments.SELECTED_ZONE_FOR_SWAP);
         Level level = event.getLevel();
         BlockPos pos = event.getPos();
 
         if (zone.isSelecting()) {
             // 执行大面积移除操作
-            PaintOperationHelper.thinPaint(level, zone.getPositions(), event.getFace());
+            Map<Direction, Set<BlockPos>> selected=zone.getContains();
+            selected.forEach((direction, blockPosSet) -> {
+                PaintOperationHelper.thinPaint(level, blockPosSet, direction);
+            });
+
         } else {
             // 执行单点移除操作
             PaintOperationHelper.thinPaint(level, pos,event.getFace());
