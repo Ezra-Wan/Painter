@@ -7,19 +7,13 @@ import com.SouthernWall_404.LaplaceAPI.RegulappleEngine.OutLine.LineRenderType;
 import com.SouthernWall_404.LaplaceAPI.RegulappleEngine.Quad.Quad;
 import com.SouthernWall_404.LaplaceAPI.RegulappleEngine.RenderHelper;
 import com.SouthernWall_404.LaplaceAPI.VertinCore.Config.ConfigAPI;
-import com.SouthernWall_404.LaplaceAPI.VertinCore.ITickable;
 import com.SouthernWall_404.LaplaceAPI.VertinCore.Util.CommonUtil;
 import com.SouthernWall_404.Painter.API.Paint.Util.Paint.PaintValidHelper;
 import com.SouthernWall_404.Painter.API.Tool.SelectedZone;
-import com.SouthernWall_404.Painter.API.Tool.SelectedZoneForSwap;
-import com.SouthernWall_404.Painter.API.Tool.Wall.SelectedQuad;
 import com.SouthernWall_404.Painter.Client.Config.ClientConfig;
-import com.SouthernWall_404.Painter.Common.Config.ModConfig;
-import com.SouthernWall_404.Painter.Common.Event.PlayerJoinEvent;
 import com.SouthernWall_404.Painter.Common.Init.ModAttachments;
 import com.SouthernWall_404.Painter.Painter;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -50,7 +44,7 @@ import java.util.*;
 @OnlyIn(Dist.CLIENT)
 @EventBusSubscriber(modid = Painter.MODID, value = Dist.CLIENT, bus = EventBusSubscriber.Bus.GAME)
 
-public class SelectedZoneRenderForSwap{
+public class SelectedZoneRender {
 
 
     private static boolean isChanged=false;
@@ -121,7 +115,7 @@ public class SelectedZoneRenderForSwap{
             Player player=mc.player;
             if(player!=null)
             {
-                SelectedZoneForSwap zone=player.getData(ModAttachments.SELECTED_ZONE_FOR_SWAP);
+                SelectedZone zone=player.getData(ModAttachments.SELECTED_ZONE_FOR_SWAP);
                 
                 // 清空旧边缘
                 EDGES.clear();
@@ -328,7 +322,7 @@ public class SelectedZoneRenderForSwap{
                 Vec3 camPos = camera.getPosition();
 
 
-                SelectedZoneForSwap zone=player.getData(ModAttachments.SELECTED_ZONE_FOR_SWAP);
+                SelectedZone zone=player.getData(ModAttachments.SELECTED_ZONE_FOR_SWAP);
 
                 zone.getContains().forEach((face, poses)->{
 

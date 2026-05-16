@@ -1,6 +1,6 @@
 package com.SouthernWall_404.Painter.Common.World.Item;
 
-import com.SouthernWall_404.Painter.API.Tool.SelectedZoneForSwap;
+import com.SouthernWall_404.Painter.API.Tool.SelectedZone;
 import com.SouthernWall_404.Painter.API.Tool.ToolContent;
 import com.SouthernWall_404.Painter.Common.Content.ComponentContent;
 import com.SouthernWall_404.Painter.Common.Init.ModAttachments;
@@ -33,7 +33,7 @@ public class ChulkItem extends BlockInteractItem {
         if(!handCheck(event,isInMainHand))return;//防止副手bug
 
         Player player = event.getEntity();
-        SelectedZoneForSwap zone = player.getData(ModAttachments.SELECTED_ZONE_FOR_SWAP);//获取选区情况
+        SelectedZone zone = player.getData(ModAttachments.SELECTED_ZONE_FOR_SWAP);//获取选区情况
 
         if (zone == null) return;
 
@@ -66,7 +66,7 @@ public class ChulkItem extends BlockInteractItem {
         }
 
         Player player = event.getEntity();
-        SelectedZoneForSwap zone = player.getData(ModAttachments.SELECTED_ZONE_FOR_SWAP);
+        SelectedZone zone = player.getData(ModAttachments.SELECTED_ZONE_FOR_SWAP);
 
         // 左键清除选区
         zone.clear();

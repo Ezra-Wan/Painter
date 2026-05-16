@@ -1,68 +1,139 @@
 package com.SouthernWall_404.Painter.API.Tool;
 
-import com.SouthernWall_404.LaplaceAPI.Math37.Vector3f;
-import com.SouthernWall_404.LaplaceAPI.RegulappleEngine.Quad.Quad;
-import com.SouthernWall_404.LaplaceAPI.RegulappleEngine.RenderHelper;
-import com.SouthernWall_404.LaplaceAPI.VertinCore.Config.Configs;
-import com.SouthernWall_404.Painter.API.Tool.Wall.Edge;
-import com.SouthernWall_404.Painter.API.Tool.Wall.Squad;
-import com.SouthernWall_404.Painter.Client.Config.ClientConfig;
-import com.SouthernWall_404.Painter.Painter;
+import com.SouthernWall_404.LaplaceAPI.VertinCore.IAttachment;
+import com.SouthernWall_404.Painter.API.Tool.Wall.SelectedQuad;
+import com.SouthernWall_404.Painter.Client.SelectedZoneRender;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.util.FastColor;
-import net.neoforged.neoforge.common.ModConfigSpec;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.nbt.CompoundTag;
+import org.jetbrains.annotations.UnknownNullability;
 
 import java.util.*;
 
-public class SelectedZone {
+/**
+ * 数据交互类，会与各种外部方法交互
+ */
+public class SelectedZone implements IAttachment {
 
-    //TODO 需要移除
-    //========等待弃用========
-    private Direction face;
+    private List<SelectedQuad> quads=new ArrayList<>();//建立的所有选区
+    private Map<Direction, Set<BlockPos>> contains=new HashMap<>();//所有被选中的位置
+
+    private BlockPos cachedA;//缓存的选区A位置
+    private Direction cachedFace;//缓存选区的朝向
 
 
+    //========业务方法========
+    public void setA(BlockPos a, Direction face)
+    {
+        cachedA=a;
+        cachedFace=face;
+    }
 
-    //=========数据缓存========
-    private Set<Squad> squads=new HashSet<>();
-
-    private Squad cacheSquad;
-
-    //========渲染缓存========
-    private Set<Edge> edges =new HashSet<>();
-    private Map<BlockPos,Quad> quads =new HashMap<>();
-
-    public SelectedZone(){
+    public void setB(BlockPos b)
+    {
+        if(SelectedQuad.isSameSurface(cachedA,b,cachedFace)){//确保两个点在同一平面
+            addQuad(b);//添加选区
+        }else throw new RuntimeException("The two points are not on the same plane.");
 
     }
 
-    public Map<BlockPos, Quad> getQuads() {
+    public boolean isCreating()
+    {
+        return cachedA!=null;
+    }
+
+    public void addQuad(BlockPos blockPos,Direction face)
+    {
+        addQuad(blockPos,blockPos,face);
+    }
+    public void addQuad(BlockPos b)
+    {
+        addQuad(cachedA,b,cachedFace);
+        cachedA=null;
+        cachedFace=null;
+    }
+    public void addQuad(BlockPos a,BlockPos b, Direction face)
+    {
+        addQuad(new SelectedQuad(a, b, face));
+    }
+    public void addQuad(SelectedQuad quad)
+    {
+        quads.add(quad);
+        update(quad);
+    }
+
+    public boolean contains(Direction face,BlockPos pos)
+    {
+        return contains.getOrDefault(face,new HashSet<>()).contains(pos);
+    }
+
+    public boolean contains(BlockPos pos)
+    {
+        return quads.stream().anyMatch(quad->quad.getSelectedPos().contains(pos));
+    }
+
+
+    public void removeQuad(Direction face,BlockPos pos)
+    {
+        quads.reversed().forEach(quad->{
+            if(quad.face==face&&quad.getSelectedPos().contains(pos))
+                quads.remove(quad);
+        });
+        update();
+    }
+    public boolean isSelecting()
+    {
+        return !quads.isEmpty();
+    }
+
+
+    public void update()
+    {
+        contains.clear();
+        quads.forEach(quad->{
+            contains.getOrDefault(quad.face,new HashSet<>()).addAll(quad.getSelectedPos());//添加选区
+
+        });
+        SelectedZoneRender.setChanged();
+    }
+
+    public void update(SelectedQuad quad)
+    {
+        Set<BlockPos> set=contains.getOrDefault(quad.face,new HashSet<>());
+        set.addAll(quad.getSelectedPos());
+        contains.put(quad.face,set);
+        SelectedZoneRender.setChanged();
+    }
+
+
+
+    //TODO 建立面时记得加合法判定
+    public void clear()
+    {
+        quads.clear();
+        contains.clear();
+        cachedA=null;
+        cachedFace=null;
+    }
+
+    public Map<Direction, Set<BlockPos>> getContains() {
+        return contains;
+    }
+
+    public List<SelectedQuad> getQuads() {
         return quads;
     }
 
-//    private final static float offset=0.02f;
-//    public void addAPosition(BlockPos pos) {
-//        if(!quads.containsKey(pos)){
-//            float[][] positions= RenderHelper.getSimpleQuadVertex(face);
-//            // 使用ClientConfig的静态方法获取颜色值
-//            ModConfigSpec.ConfigValue colorValue=Configs.getValue(Painter.MODID,ClientConfig.QUAD_COLOR);
-//            ModConfigSpec.ConfigValue alphaValue=Configs.getValue(Painter.MODID,ClientConfig.QUAD_COLOR_ALPHA);
-//            quads.put(
-//                    pos,
-//                    Quad.builder()
-//                            .setColor(FastColor.ARGB32.color((int)alphaValue.get(),(int)colorValue.get()))
-//                            .addVertex(new Vector3f(positions[0]).add(new Vector3f(face),offset))
-//                            .addVertex(new Vector3f(positions[1]).add(new Vector3f(face),offset))
-//                            .addVertex(new Vector3f(positions[2]).add(new Vector3f(face),offset))
-//                            .addVertex(new Vector3f(positions[3]).add(new Vector3f(face),offset))
-//                            .build()
-//            );
-//
-//        }
-//    }
+    //缓存数据，不需要序列化
 
+    @Override
+    public @UnknownNullability CompoundTag serializeNBT(HolderLookup.Provider provider) {
+        return null;
+    }
 
-    public Set<Edge> getEdges() {
-        return edges;
+    @Override
+    public void deserializeNBT(HolderLookup.Provider provider, CompoundTag compoundTag) {
+
     }
 }

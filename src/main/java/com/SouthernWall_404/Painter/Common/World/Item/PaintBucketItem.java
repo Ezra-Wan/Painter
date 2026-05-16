@@ -2,7 +2,6 @@ package com.SouthernWall_404.Painter.Common.World.Item;
 
 import com.SouthernWall_404.Painter.API.Paint.Util.Paint.PaintUtil;
 import com.SouthernWall_404.Painter.API.Tool.SelectedZone;
-import com.SouthernWall_404.Painter.API.Tool.SelectedZoneForSwap;
 import com.SouthernWall_404.Painter.API.Tool.Wall.Filters.EmptyFilter;
 import com.SouthernWall_404.Painter.API.Tool.Wall.Filters.SelectFilter;
 import com.SouthernWall_404.Painter.API.Tool.Wall.IFilter;
@@ -42,7 +41,7 @@ public class PaintBucketItem extends BlockInteractItem {
         Level level = event.getLevel();
         BlockPos blockPos = event.getPos();
         Player player = event.getEntity();
-        SelectedZoneForSwap selectedZone = player.getData(ModAttachments.SELECTED_ZONE_FOR_SWAP);
+        SelectedZone selectedZone = player.getData(ModAttachments.SELECTED_ZONE_FOR_SWAP);
 
         if (selectedZone != null) {
             List<IFilter> filters = new ArrayList<>();

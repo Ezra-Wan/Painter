@@ -2,7 +2,6 @@ package com.SouthernWall_404.Painter.Common.World.Item;
 
 import com.SouthernWall_404.Painter.API.Paint.Util.Paint.PaintOperationHelper;
 import com.SouthernWall_404.Painter.API.Tool.SelectedZone;
-import com.SouthernWall_404.Painter.API.Tool.SelectedZoneForSwap;
 import com.SouthernWall_404.Painter.Common.Content.ComponentContent;
 import com.SouthernWall_404.Painter.Common.Init.ModAttachments;
 import net.minecraft.ChatFormatting;
@@ -46,7 +45,7 @@ public class PaintThinnerItem extends BlockInteractItem{
         else return;//位于副手，停止
 
         Player player = event.getEntity();
-        SelectedZoneForSwap zone = player.getData(ModAttachments.SELECTED_ZONE_FOR_SWAP);
+        SelectedZone zone = player.getData(ModAttachments.SELECTED_ZONE_FOR_SWAP);
         Level level = event.getLevel();
         BlockPos pos = event.getPos();
 
