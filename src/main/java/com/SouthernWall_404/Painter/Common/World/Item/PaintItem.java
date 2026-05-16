@@ -38,9 +38,9 @@ public class PaintItem extends BlockInteractItem {
         var player = event.getEntity();
 
         // 检查选区
-        SelectedZone selectedZone = player.getData(ModAttachments.SELECTED_ZONE);
+        SelectedZone selectedZone = player.getData(ModAttachments.SELECTED_ZONE_FOR_SWAP);
         if (selectedZone != null && selectedZone.isSelecting()) {
-            if (!selectedZone.isInSurface(blockPos, event.getFace())) {
+            if (!selectedZone.contains(event.getFace(),blockPos )) {
                 player.displayClientMessage(
                         ToolContent.getMessage(ToolContent.parentString(ToolContent.FAILED_TO_PAINT, BlockRelativeEvent.OUT_OF_RANGE), Style.EMPTY.withColor(ChatFormatting.RED)),
                         true
@@ -55,13 +55,7 @@ public class PaintItem extends BlockInteractItem {
 
     @Override
     public void dealLeftClick(PlayerInteractEvent.LeftClickBlock event) {
-        // 原 BlockEvent 中处理 PaintItem 左键的逻辑（清除选区）
-        var player = event.getEntity();
-        SelectedZone selectedZone = player.getData(ModAttachments.SELECTED_ZONE);
-        if (selectedZone != null) {
-            selectedZone.clear();
-            player.displayClientMessage(ToolContent.getMessage(ToolContent.CLEAR, Style.EMPTY.withColor(ChatFormatting.YELLOW)), true);
-        }
+
         event.setCanceled(true);
     }
 }
