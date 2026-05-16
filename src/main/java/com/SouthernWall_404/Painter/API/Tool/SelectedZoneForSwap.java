@@ -120,6 +120,10 @@ public class SelectedZoneForSwap implements IAttachment {
         return contains;
     }
 
+    public List<SelectedQuad> getQuads() {
+        return quads;
+    }
+
     //缓存数据，不需要序列化
 
     @Override

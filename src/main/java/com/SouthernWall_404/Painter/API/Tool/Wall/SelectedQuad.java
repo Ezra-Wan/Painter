@@ -1,10 +1,17 @@
 package com.SouthernWall_404.Painter.API.Tool.Wall;
 
+import com.SouthernWall_404.LaplaceAPI.Math37.Vector3f;
+import com.SouthernWall_404.LaplaceAPI.RegulappleEngine.OutLine.Line;
+import com.SouthernWall_404.LaplaceAPI.VertinCore.Config.Configs;
+import com.SouthernWall_404.LaplaceAPI.VertinCore.Util.CommonUtil;
+import com.SouthernWall_404.Painter.Client.Config.ClientConfig;
+import com.SouthernWall_404.Painter.Painter;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.util.FastColor;
+import net.neoforged.neoforge.common.ModConfigSpec;
 
-import java.util.Set;
-import java.util.HashSet;
+import java.util.*;
 
 public class SelectedQuad{
 
@@ -41,6 +48,30 @@ public class SelectedQuad{
         return A.get( axis)== B.get(axis);
     }
 
+    /**
+     * 计算并返回最小坐标点
+     * @return 包含最小X、Y、Z坐标的BlockPos
+     */
+    public BlockPos getMinPos() {
+        return new BlockPos(
+            Math.min(A.getX(), B.getX()),
+            Math.min(A.getY(), B.getY()),
+            Math.min(A.getZ(), B.getZ())
+        );
+    }
+
+    /**
+     * 计算并返回最大坐标点
+     * @return 包含最大X、Y、Z坐标的BlockPos
+     */
+    public BlockPos getMaxPos() {
+        return new BlockPos(
+            Math.max(A.getX(), B.getX()),
+            Math.max(A.getY(), B.getY()),
+            Math.max(A.getZ(), B.getZ())
+        );
+    }
+
     //========业务方法=========
 
     /**
@@ -55,12 +86,15 @@ public class SelectedQuad{
         }
             
         // 计算两个点的最小和最大坐标
-        int minX = Math.min(A.getX(), B.getX());
-        int maxX = Math.max(A.getX(), B.getX());
-        int minY = Math.min(A.getY(), B.getY());
-        int maxY = Math.max(A.getY(), B.getY());
-        int minZ = Math.min(A.getZ(), B.getZ());
-        int maxZ = Math.max(A.getZ(), B.getZ());
+        BlockPos minPos = getMinPos();
+        BlockPos maxPos = getMaxPos();
+        
+        int minX = minPos.getX();
+        int maxX = maxPos.getX();
+        int minY = minPos.getY();
+        int maxY = maxPos.getY();
+        int minZ = minPos.getZ();
+        int maxZ = maxPos.getZ();
             
         // 根据 face 方向，只遍历对应平面上的方块
         switch (face) {
@@ -95,5 +129,4 @@ public class SelectedQuad{
             
         return result;
     }
-
 }
