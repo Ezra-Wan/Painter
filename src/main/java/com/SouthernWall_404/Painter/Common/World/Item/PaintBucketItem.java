@@ -41,7 +41,7 @@ public class PaintBucketItem extends BlockInteractItem {
         Level level = event.getLevel();
         BlockPos blockPos = event.getPos();
         Player player = event.getEntity();
-        SelectedZone selectedZone = player.getData(ModAttachments.SELECTED_ZONE);
+        SelectedZone selectedZone = player.getData(ModAttachments.SELECTED_ZONE_FOR_SWAP);
 
         if (selectedZone != null) {
             List<IFilter> filters = new ArrayList<>();

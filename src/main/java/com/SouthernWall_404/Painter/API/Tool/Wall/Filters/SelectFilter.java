@@ -14,12 +14,12 @@ public class SelectFilter extends EmptyFilter {
     @Override
     public boolean check(BlockPos pos, Player player, Direction face) {
 
-        SelectedZone selectedZone=player.getData(ModAttachments.SELECTED_ZONE);
+        SelectedZone selectedZone=player.getData(ModAttachments.SELECTED_ZONE_FOR_SWAP);
         if(selectedZone!=null)
         {
             if(selectedZone.isSelecting()) {//如果存在选区,且在同一平面
 
-                if(!selectedZone.isInSurface(pos,face))
+                if(!selectedZone.contains(face, pos))
                 {
                     return false;
                 }
