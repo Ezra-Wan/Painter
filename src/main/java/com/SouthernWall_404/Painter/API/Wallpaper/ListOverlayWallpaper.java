@@ -24,7 +24,7 @@ public class ListOverlayWallpaper implements IWallpaper {
     public static ListOverlayWallpaper ofQuads(List<BakedQuad> quads){
 
         List<IWallpaper> overlays=new ArrayList<>();
-        quads.forEach(quad->overlays.add(SpriteWallpaperForSwap.builder(quad).build()));
+        quads.forEach(quad->overlays.add(SpriteWallpaper.builder(quad).build()));
 
         return new ListOverlayWallpaper(overlays);
 
