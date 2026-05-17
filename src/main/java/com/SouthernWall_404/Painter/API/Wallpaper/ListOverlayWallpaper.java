@@ -1,10 +1,8 @@
 package com.SouthernWall_404.Painter.API.Wallpaper;
 
 import net.minecraft.client.renderer.block.model.BakedQuad;
-import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.UnknownNullability;
 
 import java.util.ArrayList;
@@ -30,22 +28,18 @@ public class ListOverlayWallpaper implements IWallpaper {
 
     }
 
-    public static Builder builder(){
-        return new Builder();
-    }
-
     @Override
     public String getType() {
         return "";
     }
 
     @Override
-    public List<BakedQuad> createQuad(int flag, BlockState origin, boolean isTinted, TextureAtlasSprite sprite) {
+    public List<BakedQuad> createQuad(BakedQuad originQuad) {
 
         List<BakedQuad> quads=new ArrayList<>();
 
         overlays.forEach(wallpaper->{
-            quads.addAll(wallpaper.createQuad(flag,origin,isTinted,sprite));
+            quads.addAll(wallpaper.createQuad(originQuad));
         });
 
         return quads;
@@ -58,14 +52,6 @@ public class ListOverlayWallpaper implements IWallpaper {
 
     @Override
     public void deserializeNBT(HolderLookup.Provider provider, CompoundTag compoundTag) {
-
-    }
-
-    public static class Builder{
-
-        public Builder() {
-        }
-
 
     }
 }

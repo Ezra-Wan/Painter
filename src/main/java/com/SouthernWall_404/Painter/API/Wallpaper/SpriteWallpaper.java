@@ -32,24 +32,14 @@ public class SpriteWallpaper implements IWallpaper {
     private int tintIndex;
     private TextureAtlasSprite sprite;
 
-    private static final int NORTH = 1, SOUTH = 2, WEST = 4, EAST = 8, UP = 16, DOWN = 32;
-    private Map<Direction, Integer> flags = new HashMap<>();
 
     private SpriteWallpaper(float[][] uvs, int[] color, int tintIndex, TextureAtlasSprite sprite) {
         this.uvs = uvs;
         this.color = color;
         this.tintIndex = tintIndex;
         this.sprite = sprite;
-        initFlags();
     }
-    private void initFlags() {
-        flags.put(Direction.NORTH, NORTH);
-        flags.put(Direction.SOUTH, SOUTH);
-        flags.put(Direction.WEST, WEST);
-        flags.put(Direction.EAST, EAST);
-        flags.put(Direction.UP, UP);
-        flags.put(Direction.DOWN, DOWN);
-    }
+
     public static Builder builder(float[][] uvs, int[] color, int tintIndex, TextureAtlasSprite sprite) {
         return new Builder(uvs, color, tintIndex, sprite);
     }
@@ -65,11 +55,8 @@ public class SpriteWallpaper implements IWallpaper {
     }
 
     @Override
-    public List<BakedQuad> createQuad(int flag, BlockState origin, boolean isTinted, TextureAtlasSprite sprite) {
+    public List<BakedQuad> createQuad(BakedQuad originQuad) {
 
-        Direction direction=getDirection(flag);
-        List<BakedQuad> originQuads = getQuadsForDirection(origin, flag);
-        BakedQuad originQuad=originQuads.getFirst();
         VerticesInfo originInfo=new VerticesInfo(originQuad);
 
         VerticeInfo[] mixedVertices=new VerticeInfo[4];
@@ -92,33 +79,10 @@ public class SpriteWallpaper implements IWallpaper {
 
         }
         VerticesInfo mixedInfo=VerticesInfo.of(mixedVertices);
-        BakedQuad quad=new BakedQuad(mixedInfo.vertices(), tintIndex,direction,sprite,true);
+        BakedQuad quad=new BakedQuad(mixedInfo.vertices(), tintIndex,originQuad.getDirection(),sprite,true);
 
 
         return List.of(quad);
-    }
-
-    public List<BakedQuad> getQuadsForDirection(BlockState state, int flag) {
-        Direction direction;
-
-        if(flag<0)
-        {
-            direction=null;
-        }else direction=getDirection(flag);
-
-        BakedModel model = Minecraft.getInstance().getModelManager().getBlockModelShaper().getBlockModel(state);
-        RandomSource random = RandomSource.create();
-        RenderType renderType = RenderUtil.getRenderType(state);
-        return model.getQuads(state, direction, random, ModelData.EMPTY, renderType);
-    }
-    public Direction getDirection(int flag) {
-        if(flag<0)flag=-flag;
-        for (Map.Entry<Direction, Integer> entry : flags.entrySet()) {
-            if (entry.getValue() == flag) {
-                return entry.getKey();
-            }
-        }
-        return Direction.NORTH;
     }
     @Override
     public @UnknownNullability CompoundTag serializeNBT(HolderLookup.Provider provider) {
@@ -150,7 +114,7 @@ public class SpriteWallpaper implements IWallpaper {
             this.sprite=quad.getSprite();
             VerticesInfo verticesInfo=new VerticesInfo(quad);
 
-            this.color=new int[]{
+            this.color=new int[]{//TODO 记得优化
                     FastColor.ARGB32.color(verticesInfo.LeftUp().alpha,verticesInfo.LeftUp().red,verticesInfo.LeftUp().green,verticesInfo.LeftUp().blue),
                     FastColor.ARGB32.color(verticesInfo.LeftDown().alpha,verticesInfo.LeftDown().red,verticesInfo.LeftDown().green,verticesInfo.LeftDown().blue),
                     FastColor.ARGB32.color(verticesInfo.RightDown().alpha,verticesInfo.RightDown().red,verticesInfo.RightDown().green,verticesInfo.RightDown().blue),

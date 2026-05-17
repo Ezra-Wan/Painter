@@ -280,7 +280,7 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>, Dire
 
         List<BakedQuad> materialQuads = getQuadsForDirection(material, Math.abs(getFlag(direction)));
 
-        return wallpaper.createQuad(flag,origin,true,materialQuads.getFirst().getSprite());
+        return wallpaper.createQuad(getQuadsForDirection(origin,flag).getFirst());
     }
 
     public void createQuads() {

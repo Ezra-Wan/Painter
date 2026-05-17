@@ -18,10 +18,10 @@ import java.util.List;
  */
 public class BlockWallPaper extends ListOverlayWallpaper{
     public BlockWallPaper(BlockState material,Direction face) {
-        super(getQuads(material,face));
+        super(getOverlays(material,face));
     }
 
-    public static List<IWallpaper> getQuads(BlockState material,Direction face)
+    public static List<IWallpaper> getOverlays(BlockState material, Direction face)
     {
         List<IWallpaper> overlays=new ArrayList<>();
         Minecraft mc=Minecraft.getInstance();
