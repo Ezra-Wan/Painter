@@ -29,16 +29,16 @@ public class SpriteWallpaper implements IWallpaper {
 
     private float[][] uvs = new float[4][2];//顺序：左上，左下，右下，右上
     private int[] color = new int[4];
-    private boolean isTinted;
+    private int tintIndex;
     private TextureAtlasSprite sprite;
 
     private static final int NORTH = 1, SOUTH = 2, WEST = 4, EAST = 8, UP = 16, DOWN = 32;
     private Map<Direction, Integer> flags = new HashMap<>();
 
-    private SpriteWallpaper(float[][] uvs, int[] color, boolean isTinted, TextureAtlasSprite sprite) {
+    private SpriteWallpaper(float[][] uvs, int[] color, int tintIndex, TextureAtlasSprite sprite) {
         this.uvs = uvs;
         this.color = color;
-        this.isTinted = isTinted;
+        this.tintIndex = tintIndex;
         this.sprite = sprite;
         initFlags();
     }
@@ -50,8 +50,8 @@ public class SpriteWallpaper implements IWallpaper {
         flags.put(Direction.UP, UP);
         flags.put(Direction.DOWN, DOWN);
     }
-    public static Builder builder(float[][] uvs, int[] color, boolean isTinted, TextureAtlasSprite sprite) {
-        return new Builder(uvs, color, isTinted, sprite);
+    public static Builder builder(float[][] uvs, int[] color, int tintIndex, TextureAtlasSprite sprite) {
+        return new Builder(uvs, color, tintIndex, sprite);
     }
 
     public static Builder builder(BakedQuad quad)
@@ -92,7 +92,7 @@ public class SpriteWallpaper implements IWallpaper {
 
         }
         VerticesInfo mixedInfo=VerticesInfo.of(mixedVertices);
-        BakedQuad quad=new BakedQuad(mixedInfo.vertices(), 0,direction,sprite,true);//TODO 这里的着色有待处理
+        BakedQuad quad=new BakedQuad(mixedInfo.vertices(), tintIndex,direction,sprite,true);
 
 
         return List.of(quad);
@@ -133,20 +133,20 @@ public class SpriteWallpaper implements IWallpaper {
     public static class Builder{
         private float[][] uvs=new float[4][2];//顺序：左上，左下，右下，右上
         private int[] color=new int[4];
-        private boolean isTinted;
+        private int tintIndex;
         private TextureAtlasSprite sprite;
 
-        public Builder(float[][] uvs, int[] color, boolean isTinted,TextureAtlasSprite sprite) {
+        public Builder(float[][] uvs, int[] color, int tintIndex, TextureAtlasSprite sprite) {
             this.uvs = uvs;
             this.color = color;
-            this.isTinted = isTinted;
+            this.tintIndex = tintIndex;
             this.sprite=sprite;
         }
 
         public Builder(BakedQuad quad)
         {
 
-            this.isTinted=quad.isTinted();
+            this.tintIndex =quad.getTintIndex();
             this.sprite=quad.getSprite();
             VerticesInfo verticesInfo=new VerticesInfo(quad);
 
@@ -167,7 +167,7 @@ public class SpriteWallpaper implements IWallpaper {
 
         public SpriteWallpaper build()
         {
-            return new SpriteWallpaper(uvs,color,isTinted,sprite);
+            return new SpriteWallpaper(uvs,color, tintIndex,sprite);
         }
     }
 
