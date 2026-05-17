@@ -93,7 +93,7 @@ public class SpriteWallpaperForSwap implements IWallpaper {
 
         }
         VerticesInfo mixedInfo=VerticesInfo.of(mixedVertices);
-        BakedQuad quad=new BakedQuad(mixedInfo.vertices(), 0,direction,sprite,true);
+        BakedQuad quad=new BakedQuad(mixedInfo.vertices(), 0,direction,sprite,true);//TODO 这里的着色有待处理
 
 
         return List.of(quad);

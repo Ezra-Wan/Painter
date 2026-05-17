@@ -10,6 +10,7 @@ import com.SouthernWall_404.LaplaceAPI.VertinCore.Config.Configs;
 import com.SouthernWall_404.Painter.API.Paint.Util.Paint.PaintSyncHelper;
 import com.SouthernWall_404.Painter.API.Paint.Util.RenderUtil;
 import com.SouthernWall_404.LaplaceAPI.RegulappleEngine.BakedQuadRender;
+import com.SouthernWall_404.Painter.API.Wallpaper.ListOverlayWallpaper;
 import com.SouthernWall_404.Painter.API.Wallpaper.SpriteWallpaper;
 import com.SouthernWall_404.Painter.API.Wallpaper.SpriteWallpaperForSwap;
 import com.SouthernWall_404.Painter.Client.Config.ClientConfig;
@@ -339,7 +340,7 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>, Dire
 //            newQuads.add(newQuad);
         }
 
-        SpriteWallpaperForSwap wallpaper=SpriteWallpaperForSwap.builder(materialQuads.getFirst()).build();
+        ListOverlayWallpaper wallpaper=ListOverlayWallpaper.ofQuads(materialQuads);
 //        SpriteWallpaper wallpaper = new SpriteWallpaper(materialVertices);
         for (BakedQuad materialQuad : materialQuads) {
             newQuads.addAll(wallpaper.createQuad(flag,origin,materialQuad.isTinted(),materialQuad.getSprite()));
