@@ -21,6 +21,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * 需要做拆分
+ * 这里只负责某个单独材质的处理，不处理叠加
+ */
 public class SpriteWallpaper implements IWallpaper{
 
     private static final int NORTH = 1, SOUTH = 2, WEST = 4, EAST = 8, UP = 16, DOWN = 32;

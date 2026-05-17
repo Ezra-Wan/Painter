@@ -11,6 +11,7 @@ import com.SouthernWall_404.Painter.API.Paint.Util.Paint.PaintSyncHelper;
 import com.SouthernWall_404.Painter.API.Paint.Util.RenderUtil;
 import com.SouthernWall_404.LaplaceAPI.RegulappleEngine.BakedQuadRender;
 import com.SouthernWall_404.Painter.API.Wallpaper.SpriteWallpaper;
+import com.SouthernWall_404.Painter.API.Wallpaper.SpriteWallpaperForSwap;
 import com.SouthernWall_404.Painter.Client.Config.ClientConfig;
 import com.SouthernWall_404.Painter.Client.PaintRender;
 import com.SouthernWall_404.Painter.Painter;
@@ -338,7 +339,8 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>, Dire
 //            newQuads.add(newQuad);
         }
 
-        SpriteWallpaper wallpaper = new SpriteWallpaper(materialVertices);
+        SpriteWallpaperForSwap wallpaper=SpriteWallpaperForSwap.builder(materialQuads.getFirst()).build();
+//        SpriteWallpaper wallpaper = new SpriteWallpaper(materialVertices);
         for (BakedQuad materialQuad : materialQuads) {
             newQuads.addAll(wallpaper.createQuad(flag,origin,materialQuad.isTinted(),materialQuad.getSprite()));
         }
