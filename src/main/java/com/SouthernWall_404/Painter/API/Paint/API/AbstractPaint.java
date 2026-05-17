@@ -10,6 +10,7 @@ import com.SouthernWall_404.LaplaceAPI.VertinCore.Config.Configs;
 import com.SouthernWall_404.Painter.API.Paint.Util.Paint.PaintSyncHelper;
 import com.SouthernWall_404.Painter.API.Paint.Util.RenderUtil;
 import com.SouthernWall_404.LaplaceAPI.RegulappleEngine.BakedQuadRender;
+import com.SouthernWall_404.Painter.API.Wallpaper.SpriteWallpaper;
 import com.SouthernWall_404.Painter.Client.Config.ClientConfig;
 import com.SouthernWall_404.Painter.Client.PaintRender;
 import com.SouthernWall_404.Painter.Painter;
@@ -292,44 +293,54 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>, Dire
 
         List<BakedQuad> newQuads = new ArrayList<>();
 
+
+        List<VerticesInfo> materialVertices = new ArrayList<>();
+
         for (BakedQuad materialQuad : materialQuads) {
-            VerticesInfo materialVertices = new VerticesInfo(materialQuad);
 
+            materialVertices.add(new VerticesInfo(materialQuad));
+//            VerticesInfo materialVertices = new VerticesInfo(materialQuad);
+//
+//
+//            // 逐顶点混合数据
+//            VerticeInfo[] mixedVertices = new VerticeInfo[4];
+//
+//            for (int i = 0; i < 4; i++) {
+//                VerticeInfo originVert = originVertices.vertices.get(i);
+//                VerticeInfo materialVert = materialVertices.vertices.get(i);
+//
+//                mixedVertices[i] = VerticeInfo.builder()
+//                        .position(originVert.position)          // 几何位置来自原始方块
+//                        .color(materialVert.alpha, materialVert.red, materialVert.green, materialVert.blue) // 颜色来自原始方块
+//                        .uv(materialVert.u,materialVert.v)     // ★ 纹理坐标来自材质方块 ★
+//                        .light(originVert.light)                // 光照值保持原始方块（或可根据需要混合）
+//                        .normal(originVert.normal)              // 法线保持原始方块
+//                        .build();
+//            }
+//
+//
+//            VerticesInfo newQuadVertices =new VerticesInfo(List.of(mixedVertices[0],mixedVertices[1],mixedVertices[2],mixedVertices[3]));
+//            newQuadVertices.implyUV(originVertices);
+//
+//            float[] uvOffset= this.uvOffsets.get(flag);
+//            newQuadVertices.implyUVOffest(uvOffset[0],uvOffset[1]);
+//            int[] newVertexArray = newQuadVertices.vertices();
+//
+//            // 使用 materialQuad 的元数据创建新的 BakedQuad
+//            BakedQuad newQuad = new BakedQuad(
+//                    newVertexArray,
+//                    materialQuad.getTintIndex(),
+//                    originQuad.getDirection(),
+//                    materialQuad.getSprite(),
+//                    true
+//            );
+//
+//            newQuads.add(newQuad);
+        }
 
-            // 逐顶点混合数据
-            VerticeInfo[] mixedVertices = new VerticeInfo[4];
-
-            for (int i = 0; i < 4; i++) {
-                VerticeInfo originVert = originVertices.vertices.get(i);
-                VerticeInfo materialVert = materialVertices.vertices.get(i);
-
-                mixedVertices[i] = VerticeInfo.builder()
-                        .position(originVert.position)          // 几何位置来自原始方块
-                        .color(materialVert.alpha, materialVert.red, materialVert.green, materialVert.blue) // 颜色来自原始方块
-                        .uv(materialVert.u,materialVert.v)     // ★ 纹理坐标来自材质方块 ★
-                        .light(originVert.light)                // 光照值保持原始方块（或可根据需要混合）
-                        .normal(originVert.normal)              // 法线保持原始方块
-                        .build();
-            }
-
-
-            VerticesInfo newQuadVertices =new VerticesInfo(List.of(mixedVertices[0],mixedVertices[1],mixedVertices[2],mixedVertices[3]));
-            newQuadVertices.implyUV(originVertices);
-
-            float[] uvOffset= this.uvOffsets.get(flag);
-            newQuadVertices.implyUVOffest(uvOffset[0],uvOffset[1]);
-            int[] newVertexArray = newQuadVertices.vertices();
-
-            // 使用 materialQuad 的元数据创建新的 BakedQuad
-            BakedQuad newQuad = new BakedQuad(
-                    newVertexArray,
-                    materialQuad.getTintIndex(),
-                    originQuad.getDirection(),
-                    materialQuad.getSprite(),
-                    true
-            );
-
-            newQuads.add(newQuad);
+        SpriteWallpaper wallpaper = new SpriteWallpaper(materialVertices);
+        for (BakedQuad materialQuad : materialQuads) {
+            newQuads.addAll(wallpaper.createQuad(flag,origin,materialQuad.isTinted(),materialQuad.getSprite()));
         }
 
         return newQuads;
