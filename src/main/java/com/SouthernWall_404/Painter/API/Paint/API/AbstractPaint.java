@@ -3,15 +3,13 @@ package com.SouthernWall_404.Painter.API.Paint.API;
 
 // logging removed: previously used for debug logging
 import com.SouthernWall_404.LaplaceAPI.Math37.Vector3f;
-import com.SouthernWall_404.LaplaceAPI.RegulappleEngine.BakedQuad.VerticeInfo;
 import com.SouthernWall_404.LaplaceAPI.RegulappleEngine.BakedQuad.VerticesInfo;
 import com.SouthernWall_404.LaplaceAPI.RegulappleEngine.ModelRender;
 import com.SouthernWall_404.LaplaceAPI.VertinCore.Config.Configs;
-import com.SouthernWall_404.Painter.API.Paint.Util.Paint.PaintSyncHelper;
 import com.SouthernWall_404.Painter.API.Paint.Util.RenderUtil;
 import com.SouthernWall_404.LaplaceAPI.RegulappleEngine.BakedQuadRender;
+import com.SouthernWall_404.Painter.API.Wallpaper.BlockWallPaper;
 import com.SouthernWall_404.Painter.Client.Config.ClientConfig;
-import com.SouthernWall_404.Painter.Client.PaintRender;
 import com.SouthernWall_404.Painter.Painter;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
@@ -35,7 +33,6 @@ import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
-import net.neoforged.fml.loading.FMLEnvironment;
 import net.neoforged.neoforge.client.model.data.ModelData;
 
 import java.util.*;
@@ -278,61 +275,12 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>, Dire
     public List<BakedQuad> createQuad(int flag, BlockState material)
     {
         Direction direction = getDirection(flag);
-        List<BakedQuad> originQuads = getQuadsForDirection(origin, flag);
+
+        BlockWallPaper wallpaper = new BlockWallPaper(material,direction);
+
         List<BakedQuad> materialQuads = getQuadsForDirection(material, Math.abs(getFlag(direction)));
 
-        if (originQuads == null || originQuads.isEmpty() || materialQuads == null || materialQuads.isEmpty()) {
-            return List.of();
-        }
-
-        // 为了简单，假设每个方向只有一个 quad（多数方块模型如此）；
-        // 如果有多个，你可以按索引一一对应，或统一使用第一个 originQuad 的形状。
-        BakedQuad originQuad = originQuads.get(0);
-        VerticesInfo originVertices = new VerticesInfo(originQuad);
-
-        List<BakedQuad> newQuads = new ArrayList<>();
-
-        for (BakedQuad materialQuad : materialQuads) {
-            VerticesInfo materialVertices = new VerticesInfo(materialQuad);
-
-
-            // 逐顶点混合数据
-            VerticeInfo[] mixedVertices = new VerticeInfo[4];
-
-            for (int i = 0; i < 4; i++) {
-                VerticeInfo originVert = originVertices.vertices.get(i);
-                VerticeInfo materialVert = materialVertices.vertices.get(i);
-
-                mixedVertices[i] = VerticeInfo.builder()
-                        .position(originVert.position)          // 几何位置来自原始方块
-                        .color(materialVert.alpha, materialVert.red, materialVert.green, materialVert.blue) // 颜色来自原始方块
-                        .uv(materialVert.u,materialVert.v)     // ★ 纹理坐标来自材质方块 ★
-                        .light(originVert.light)                // 光照值保持原始方块（或可根据需要混合）
-                        .normal(originVert.normal)              // 法线保持原始方块
-                        .build();
-            }
-
-
-            VerticesInfo newQuadVertices =new VerticesInfo(List.of(mixedVertices[0],mixedVertices[1],mixedVertices[2],mixedVertices[3]));
-            newQuadVertices.implyUV(originVertices);
-
-            float[] uvOffset= this.uvOffsets.get(flag);
-            newQuadVertices.implyUVOffest(uvOffset[0],uvOffset[1]);
-            int[] newVertexArray = newQuadVertices.vertices();
-
-            // 使用 materialQuad 的元数据创建新的 BakedQuad
-            BakedQuad newQuad = new BakedQuad(
-                    newVertexArray,
-                    materialQuad.getTintIndex(),
-                    originQuad.getDirection(),
-                    materialQuad.getSprite(),
-                    true
-            );
-
-            newQuads.add(newQuad);
-        }
-
-        return newQuads;
+        return wallpaper.createQuad(getQuadsForDirection(origin,flag).getFirst());
     }
 
     public void createQuads() {
