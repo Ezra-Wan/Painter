@@ -3,6 +3,7 @@ package com.SouthernWall_404.Painter.API.Wallpaper;
 import com.SouthernWall_404.LaplaceAPI.RegulappleEngine.BakedQuad.VerticeInfo;
 import com.SouthernWall_404.LaplaceAPI.RegulappleEngine.BakedQuad.VerticesInfo;
 import com.SouthernWall_404.Painter.API.Paint.Util.RenderUtil;
+import com.SouthernWall_404.Painter.Painter;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.model.BakedQuad;
@@ -24,6 +25,7 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
+import net.neoforged.fml.common.Mod;
 import net.neoforged.neoforge.client.model.data.ModelData;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.registries.NeoForgeRegistries;
@@ -215,6 +217,4 @@ public class SpriteWallpaper implements IWallpaper {
             return new SpriteWallpaper(uvs,color, tintIndex,altasKey);
         }
     }
-
-
 }
