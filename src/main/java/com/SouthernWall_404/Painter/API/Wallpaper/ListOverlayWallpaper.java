@@ -1,8 +1,10 @@
 package com.SouthernWall_404.Painter.API.Wallpaper;
 
+import com.SouthernWall_404.Painter.Painter;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
+import net.neoforged.fml.common.Mod;
 import org.jetbrains.annotations.UnknownNullability;
 
 import java.util.ArrayList;
@@ -18,6 +20,11 @@ public class ListOverlayWallpaper implements IWallpaper {
 
     public ListOverlayWallpaper(List<IWallpaper> overlays) {
         this.overlays=overlays;
+    }
+
+    public ListOverlayWallpaper(HolderLookup.Provider provider,CompoundTag tag){
+        this(List.of());
+        deserializeNBT(provider,tag);
     }
 
     public static ListOverlayWallpaper ofQuads(List<BakedQuad> quads){
@@ -87,4 +94,5 @@ public class ListOverlayWallpaper implements IWallpaper {
         
         this.overlays = deserializedOverlays;
     }
+
 }
