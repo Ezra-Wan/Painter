@@ -6,17 +6,27 @@ import com.SouthernWall_404.Painter.API.Paint.Util.RenderUtil;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.model.BakedQuad;
+import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.BakedModel;
+import net.minecraft.client.resources.model.ModelManager;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FastColor;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.block.state.BlockState;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 import net.neoforged.neoforge.client.model.data.ModelData;
+import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.registries.NeoForgeRegistries;
 import org.jetbrains.annotations.UnknownNullability;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -30,18 +40,18 @@ public class SpriteWallpaper implements IWallpaper {
     private float[][] uvs = new float[4][2];//顺序：左上，左下，右下，右上
     private int[] color = new int[4];
     private int tintIndex;
-    private TextureAtlasSprite sprite;
 
+    private ResourceLocation altasKey;
 
-    private SpriteWallpaper(float[][] uvs, int[] color, int tintIndex, TextureAtlasSprite sprite) {
+    private SpriteWallpaper(float[][] uvs, int[] color, int tintIndex, ResourceLocation altasKey) {
         this.uvs = uvs;
         this.color = color;
         this.tintIndex = tintIndex;
-        this.sprite = sprite;
+        this.altasKey = altasKey;
     }
 
-    public static Builder builder(float[][] uvs, int[] color, int tintIndex, TextureAtlasSprite sprite) {
-        return new Builder(uvs, color, tintIndex, sprite);
+    public static Builder builder(float[][] uvs, int[] color, int tintIndex, ResourceLocation altasKey) {
+        return new Builder(uvs, color, tintIndex, altasKey);
     }
 
     public static Builder builder(BakedQuad quad)
@@ -54,65 +64,79 @@ public class SpriteWallpaper implements IWallpaper {
         return "";
     }
 
+    @OnlyIn(Dist.CLIENT)
     @Override
     public List<BakedQuad> createQuad(BakedQuad originQuad) {
 
-        VerticesInfo originInfo=new VerticesInfo(originQuad);
-
-        VerticeInfo[] mixedVertices=new VerticeInfo[4];
-        for(int i=0;i<4;i++)
+        List<BakedQuad> quads=new ArrayList<>();
+        Minecraft mc=Minecraft.getInstance();
+        if(mc!=null)
         {
-            VerticeInfo originVert=originInfo.vertices.get(i);
-            VerticeInfo mixedVert= VerticeInfo.builder()
-                    .uv(uvs[i][0],uvs[i][1])
-                    .normal(originVert.normal)
-                    .color(
-                            FastColor.ABGR32.alpha(color[i]),
-                            FastColor.ABGR32.blue(color[i]),
-                            FastColor.ABGR32.green(color[i]),
-                            FastColor.ABGR32.red(color[i])
-                    )
-                    .position(originVert.position)
-                    .light(originVert.light)
-                    .build();
-            mixedVertices[i]=mixedVert;
+            ModelManager modelManager = Minecraft.getInstance().getModelManager();
+            TextureAtlas blocksAtlas = modelManager.getAtlas(TextureAtlas.LOCATION_BLOCKS);
+            TextureAtlasSprite sprite=blocksAtlas.getSprite(altasKey);
 
+            VerticesInfo originInfo=new VerticesInfo(originQuad);
+
+            VerticeInfo[] mixedVertices=new VerticeInfo[4];
+            for(int i=0;i<4;i++)
+            {
+                VerticeInfo originVert=originInfo.vertices.get(i);
+                VerticeInfo mixedVert= VerticeInfo.builder()
+                        .uv(uvs[i][0],uvs[i][1])
+                        .normal(originVert.normal)
+                        .color(
+                                FastColor.ABGR32.alpha(color[i]),
+                                FastColor.ABGR32.blue(color[i]),
+                                FastColor.ABGR32.green(color[i]),
+                                FastColor.ABGR32.red(color[i])
+                        )
+                        .position(originVert.position)
+                        .light(originVert.light)
+                        .build();
+                mixedVertices[i]=mixedVert;
+
+            }
+            VerticesInfo mixedInfo=VerticesInfo.of(mixedVertices);
+            BakedQuad quad=new BakedQuad(mixedInfo.vertices(), tintIndex,originQuad.getDirection(),sprite,true);
+            quads.add(quad);
         }
-        VerticesInfo mixedInfo=VerticesInfo.of(mixedVertices);
-        BakedQuad quad=new BakedQuad(mixedInfo.vertices(), tintIndex,originQuad.getDirection(),sprite,true);
 
 
-        return List.of(quad);
+
+        return quads;
     }
     @Override
     public @UnknownNullability CompoundTag serializeNBT(HolderLookup.Provider provider) {
+
+        CompoundTag tag = new CompoundTag();
+
         return null;
     }
 
     @Override
     public void deserializeNBT(HolderLookup.Provider provider, CompoundTag compoundTag) {
-
     }
 
     public static class Builder{
         private float[][] uvs=new float[4][2];//顺序：左上，左下，右下，右上
         private int[] color=new int[4];
         private int tintIndex;
-        private TextureAtlasSprite sprite;
+        private ResourceLocation altasKey;
 
-        public Builder(float[][] uvs, int[] color, int tintIndex, TextureAtlasSprite sprite) {
+        public Builder(float[][] uvs, int[] color, int tintIndex, ResourceLocation altasKey ) {
             this.uvs = uvs;
             this.color = color;
             this.tintIndex = tintIndex;
-            this.sprite=sprite;
+            this.altasKey=altasKey;
         }
 
         public Builder(BakedQuad quad)
         {
 
             this.tintIndex =quad.getTintIndex();
-            this.sprite=quad.getSprite();
             VerticesInfo verticesInfo=new VerticesInfo(quad);
+            this.altasKey= quad.getSprite().contents().name();
 
             this.color=new int[]{//TODO 记得优化
                     FastColor.ARGB32.color(verticesInfo.LeftUp().alpha,verticesInfo.LeftUp().red,verticesInfo.LeftUp().green,verticesInfo.LeftUp().blue),
@@ -131,7 +155,7 @@ public class SpriteWallpaper implements IWallpaper {
 
         public SpriteWallpaper build()
         {
-            return new SpriteWallpaper(uvs,color, tintIndex,sprite);
+            return new SpriteWallpaper(uvs,color, tintIndex,altasKey);
         }
     }
 
