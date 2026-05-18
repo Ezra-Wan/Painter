@@ -15,6 +15,9 @@ import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.FloatTag;
+import net.minecraft.nbt.IntTag;
+import net.minecraft.nbt.ListTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FastColor;
 import net.minecraft.util.RandomSource;
@@ -37,17 +40,23 @@ import java.util.Map;
  */
 public class SpriteWallpaper implements IWallpaper {
 
+    public static final String TYPE="sprite";
+
     private float[][] uvs = new float[4][2];//顺序：左上，左下，右下，右上
     private int[] color = new int[4];
     private int tintIndex;
-
     private ResourceLocation altasKey;
 
-    private SpriteWallpaper(float[][] uvs, int[] color, int tintIndex, ResourceLocation altasKey) {
+    SpriteWallpaper(float[][] uvs, int[] color, int tintIndex, ResourceLocation altasKey) {
         this.uvs = uvs;
         this.color = color;
         this.tintIndex = tintIndex;
         this.altasKey = altasKey;
+    }
+
+    SpriteWallpaper(HolderLookup.Provider provider,CompoundTag tag){
+        this(new float[4][2], new int[4], -1, null);
+        deserializeNBT(provider,tag);
     }
 
     public static Builder builder(float[][] uvs, int[] color, int tintIndex, ResourceLocation altasKey) {
@@ -61,7 +70,7 @@ public class SpriteWallpaper implements IWallpaper {
 
     @Override
     public String getType() {
-        return "";
+        return TYPE;
     }
 
     @OnlyIn(Dist.CLIENT)
@@ -108,14 +117,62 @@ public class SpriteWallpaper implements IWallpaper {
     }
     @Override
     public @UnknownNullability CompoundTag serializeNBT(HolderLookup.Provider provider) {
-
         CompoundTag tag = new CompoundTag();
-
-        return null;
+        
+        // 序列化 UV 坐标数组
+        ListTag uvsList = new ListTag();
+        for (int i = 0; i < 4; i++) {
+            ListTag uvPair = new ListTag();
+            uvPair.add(FloatTag.valueOf(uvs[i][0]));
+            uvPair.add(FloatTag.valueOf(uvs[i][1]));
+            uvsList.add(uvPair);
+        }
+        tag.put("uvs", uvsList);
+        
+        // 序列化颜色数组
+        ListTag colorList = new ListTag();
+        for (int i = 0; i < 4; i++) {
+            colorList.add(IntTag.valueOf(color[i]));
+        }
+        tag.put("color", colorList);
+        
+        // 序列化 tintIndex
+        tag.putInt("tintIndex", tintIndex);
+        
+        // 序列化纹理资源位置
+        if (altasKey != null) {
+            tag.putString("altasKey", altasKey.toString());
+        }
+        
+        return tag;
     }
 
     @Override
     public void deserializeNBT(HolderLookup.Provider provider, CompoundTag compoundTag) {
+        // 反序列化 UV 坐标数组
+        ListTag uvsList = compoundTag.getList("uvs", net.minecraft.nbt.Tag.TAG_LIST);
+        for (int i = 0; i < 4 && i < uvsList.size(); i++) {
+            ListTag uvPair = uvsList.getList(i);
+            if (uvPair.size() >= 2) {
+                uvs[i][0] = uvPair.getFloat(0);
+                uvs[i][1] = uvPair.getFloat(1);
+            }
+        }
+        
+        // 反序列化颜色数组
+        ListTag colorList = compoundTag.getList("color", net.minecraft.nbt.Tag.TAG_INT);
+        for (int i = 0; i < 4 && i < colorList.size(); i++) {
+            color[i] = colorList.getInt(i);
+        }
+        
+        // 反序列化 tintIndex
+        tintIndex = compoundTag.getInt("tintIndex");
+        
+        // 反序列化纹理资源位置
+        if (compoundTag.contains("altasKey", net.minecraft.nbt.Tag.TAG_STRING)) {
+            String atlasKeyStr = compoundTag.getString("altasKey");
+            altasKey = ResourceLocation.parse(atlasKeyStr);
+        }
     }
 
     public static class Builder{

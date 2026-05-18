@@ -14,6 +14,7 @@ import java.util.List;
 public class ListOverlayWallpaper implements IWallpaper {
 
     private List<IWallpaper> overlays;
+    public static final String TYPE = "List";
 
     public ListOverlayWallpaper(List<IWallpaper> overlays) {
         this.overlays=overlays;
@@ -30,7 +31,7 @@ public class ListOverlayWallpaper implements IWallpaper {
 
     @Override
     public String getType() {
-        return "";
+        return TYPE;
     }
 
     @Override
@@ -47,11 +48,43 @@ public class ListOverlayWallpaper implements IWallpaper {
 
     @Override
     public @UnknownNullability CompoundTag serializeNBT(HolderLookup.Provider provider) {
-        return null;
+        CompoundTag tag = new CompoundTag();
+        
+        // 保存类型标识
+        tag.putString("type", TYPE);
+        
+        // 序列化 overlays 列表
+        net.minecraft.nbt.ListTag overlaysList = new net.minecraft.nbt.ListTag();
+        for (IWallpaper wallpaper : overlays) {
+            CompoundTag wallpaperTag = wallpaper.serializeNBT(provider);
+            // 确保每个 wallpaper 都有 type 字段
+            if (!wallpaperTag.contains("type")) {
+                wallpaperTag.putString("type", wallpaper.getType());
+            }
+            overlaysList.add(wallpaperTag);
+        }
+        tag.put("overlays", overlaysList);
+        
+        return tag;
     }
 
     @Override
     public void deserializeNBT(HolderLookup.Provider provider, CompoundTag compoundTag) {
-
+        // 反序列化 overlays 列表
+        net.minecraft.nbt.ListTag overlaysList = compoundTag.getList("overlays", net.minecraft.nbt.Tag.TAG_COMPOUND);
+        
+        List<IWallpaper> deserializedOverlays = new ArrayList<>();
+        for (int i = 0; i < overlaysList.size(); i++) {
+            CompoundTag wallpaperTag = overlaysList.getCompound(i);
+            String type = wallpaperTag.getString("type");
+            
+            // 使用 Wallpapers 注册表反序列化
+            IWallpaper wallpaper = Wallpapers.create(type,provider, wallpaperTag);
+            if (wallpaper != null) {
+                deserializedOverlays.add(wallpaper);
+            }
+        }
+        
+        this.overlays = deserializedOverlays;
     }
 }
