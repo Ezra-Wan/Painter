@@ -1,14 +1,15 @@
 // AbstractPaint.java
 package com.SouthernWall_404.Painter.API.Paint.API;
 
-// logging removed: previously used for debug logging
 import com.SouthernWall_404.LaplaceAPI.Math37.Vector3f;
+import com.SouthernWall_404.Painter.API.Wallpaper.BlockWallPaper;
+import com.SouthernWall_404.Painter.API.Wallpaper.IWallpaper;
+import com.SouthernWall_404.Painter.API.Wallpaper.Wallpapers;
 import com.SouthernWall_404.LaplaceAPI.RegulappleEngine.BakedQuad.VerticesInfo;
 import com.SouthernWall_404.LaplaceAPI.RegulappleEngine.ModelRender;
 import com.SouthernWall_404.LaplaceAPI.VertinCore.Config.Configs;
 import com.SouthernWall_404.Painter.API.Paint.Util.RenderUtil;
 import com.SouthernWall_404.LaplaceAPI.RegulappleEngine.BakedQuadRender;
-import com.SouthernWall_404.Painter.API.Wallpaper.BlockWallPaper;
 import com.SouthernWall_404.Painter.Client.Config.ClientConfig;
 import com.SouthernWall_404.Painter.Painter;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -27,6 +28,8 @@ import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.Tag;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.TrapDoorBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
@@ -36,11 +39,14 @@ import net.neoforged.api.distmarker.OnlyIn;
 import net.neoforged.neoforge.client.model.data.ModelData;
 
 import java.util.*;
-// removed: java.util.Arrays import
 
 /**
  * Quad Vertice顺序 留档备用
  * 顺序：左上，左下，右下，右上
+ */
+
+/**
+ * TODO 将material替换为Wallpaper类
  */
 public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>, Direction> {
     //LOGGER removed
@@ -56,7 +62,7 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>, Dire
     protected Map<Integer,Boolean> visibles =new HashMap<>();
     protected Map<Integer, Vec3> renderVec=new HashMap<>();
     //========需要持久化的数据========
-    protected Map<Integer, BlockState> materials = new HashMap<>();
+    protected Map<Integer, IWallpaper> wallpapers = new HashMap<>();
     protected Map<Integer,float[]> uvOffsets =new HashMap<>();
 
     //========构造方法========
@@ -168,19 +174,21 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>, Dire
 
     public void cycleTextureDir(Direction direction) {
         BlockState material = getMaterial(direction);
-        if (material.hasProperty(TrapDoorBlock.HALF) && material.getOptionalValue(TrapDoorBlock.OPEN).orElse(false))
-            paint(direction, material.cycle(TrapDoorBlock.HALF));
-        else if (material.hasProperty(BlockStateProperties.FACING))
-            paint(direction, material.cycle(BlockStateProperties.FACING));
-        else if (material.hasProperty(BlockStateProperties.HORIZONTAL_FACING))
-            paint(direction, material.setValue(BlockStateProperties.HORIZONTAL_FACING,
-                    material.getValue(BlockStateProperties.HORIZONTAL_FACING).getClockWise()));
-        else if (material.hasProperty(BlockStateProperties.AXIS))
-            paint(direction, material.cycle(BlockStateProperties.AXIS));
-        else if (material.hasProperty(BlockStateProperties.HORIZONTAL_AXIS))
-            paint(direction, material.cycle(BlockStateProperties.HORIZONTAL_AXIS));
-        else if (material.hasProperty(BlockStateProperties.LIT))
-            paint(direction, material.cycle(BlockStateProperties.LIT));
+        if (material != null) {
+            if (material.hasProperty(TrapDoorBlock.HALF) && material.getOptionalValue(TrapDoorBlock.OPEN).orElse(false))
+                paint(direction, material.cycle(TrapDoorBlock.HALF));
+            else if (material.hasProperty(BlockStateProperties.FACING))
+                paint(direction, material.cycle(BlockStateProperties.FACING));
+            else if (material.hasProperty(BlockStateProperties.HORIZONTAL_FACING))
+                paint(direction, material.setValue(BlockStateProperties.HORIZONTAL_FACING,
+                        material.getValue(BlockStateProperties.HORIZONTAL_FACING).getClockWise()));
+            else if (material.hasProperty(BlockStateProperties.AXIS))
+                paint(direction, material.cycle(BlockStateProperties.AXIS));
+            else if (material.hasProperty(BlockStateProperties.HORIZONTAL_AXIS))
+                paint(direction, material.cycle(BlockStateProperties.HORIZONTAL_AXIS));
+            else if (material.hasProperty(BlockStateProperties.LIT))
+                paint(direction, material.cycle(BlockStateProperties.LIT));
+        }
         refresh();
     }
 
@@ -228,9 +236,8 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>, Dire
             aoFaces.clear();
             return;
         }
-        for (Map.Entry<Integer, BlockState> entry : materials.entrySet()) {
+        for (Map.Entry<Integer, IWallpaper> entry : wallpapers.entrySet()) {
             int flag = entry.getKey();
-            BlockState state = materials.get(flag);
             Direction direction = getDirection(flag);
 
             BlockPos blockPos=this.blockPos;
@@ -239,7 +246,7 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>, Dire
             }
 
             ModelRender.AmbientOcclusionFace aoFace = new ModelRender.AmbientOcclusionFace();
-            aoFace.calculate(level, state,blockPos, direction, shape, shapeFlags, true);
+            aoFace.calculate(level,origin,blockPos, direction, shape, shapeFlags, true);
             aoFaces.put(flag, aoFace);
         }
     }
@@ -267,30 +274,27 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>, Dire
     }
 
     /**
-     * 将uv转移，即将origin面各自的uv长度应用于material左下角
-     * @param flag
-     * @param material
-     * @return
+     * 使用指定的 Wallpaper 创建渲染面
+     * @param flag 方向标志
+     * @param wallpaper 壁纸实例
+     * @return 渲染四边形列表
      */
-    public List<BakedQuad> createQuad(int flag, BlockState material)
+    public List<BakedQuad> createQuad(int flag, IWallpaper wallpaper)
     {
-        Direction direction = getDirection(flag);
+        if (wallpaper == null) return Collections.emptyList();
+        
+        List<BakedQuad> originQuads = getQuadsForDirection(origin, flag);
+        if (originQuads == null || originQuads.isEmpty()) return Collections.emptyList();
 
-        BlockWallPaper wallpaper = new BlockWallPaper(material,direction);
-
-        List<BakedQuad> materialQuads = getQuadsForDirection(material, Math.abs(getFlag(direction)));
-
-        return wallpaper.createQuad(getQuadsForDirection(origin,flag).getFirst());
+        return wallpaper.createQuad(originQuads.getFirst());
     }
 
     public void createQuads() {
-        materials.forEach((flag, material) -> {
-
-
-            List<BakedQuad> quads=createQuad(flag,material);
+        wallpapers.forEach((flag, wallpaper) -> {
+            List<BakedQuad> quads = createQuad(flag, wallpaper);
             if(!quads.isEmpty())
             {
-                objects.put(flag,quads);   // 存入结果，objects 应为 Map<Integer, List<BakedQuad>>
+                objects.put(flag,quads);
             }
         });
     }
@@ -308,8 +312,6 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>, Dire
             List<BakedQuad> quads = entry.getValue();
             int flag = entry.getKey();
 
-            BlockState material = materials.get(flag);
-
             if (!visibles.getOrDefault(flag,false))continue;
 
             Vec3 renderVec3 = renderVec.get(flag);
@@ -319,11 +321,11 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>, Dire
             
             for (BakedQuad quad : quads) {
                 if (aoFaces.containsKey(flag)) {
-                    BakedQuadRender.renderInOfferredAO(quad, material, renderVec3, poseStack, buffer, aoFaces.get(flag));
+                    BakedQuadRender.renderInOfferredAO(quad, origin, renderVec3, poseStack, buffer, aoFaces.get(flag));
                 } else {
                     refreshAO();
                     if (aoFaces.containsKey(flag))
-                        BakedQuadRender.renderInOfferredAO(quad, material, renderVec3, poseStack, buffer, aoFaces.get(flag));
+                        BakedQuadRender.renderInOfferredAO(quad, origin, renderVec3, poseStack, buffer, aoFaces.get(flag));//TODO 这里会因为输入origin而产生着色问题
                 }
             }
         }
@@ -357,10 +359,11 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>, Dire
     public void putMaterial(Direction f, BlockState blockState)
     {
         int flag = getFlag(f);
-
-
-        materials.put(flag, blockState);
-
+        if (blockState != null) {
+            wallpapers.put(flag, new BlockWallPaper(blockState, f));
+        } else {
+            wallpapers.remove(flag);
+        }
     }
 
     /**
@@ -369,8 +372,8 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>, Dire
      */
     public void removeMaterial(Direction f) {
         int flag = getFlag(f);
-        materials.remove(flag);
-        materials.remove(-flag);
+        wallpapers.remove(flag);
+        wallpapers.remove(-flag);
         uvOffsets.remove(flag);
         uvOffsets.remove(-flag);
         refresh();
@@ -380,16 +383,24 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>, Dire
 
 
     public BlockState getMaterial(Direction f) {
+        IWallpaper wallpaper = getWallpaper(f);
+        if (wallpaper instanceof BlockWallPaper blockWallPaper) {
+            return Blocks.AIR.defaultBlockState();
+        }
+        return null;
+    }
+
+    public IWallpaper getWallpaper(Direction f) {
         int flag = getFlag(f);
-        return materials.get(flag);
+        return wallpapers.get(flag);
     }
 
     /**
-     * 获取所有材质的映射
-     * @return 材质映射
+     * 获取所有壁纸的映射
+     * @return 壁纸映射
      */
-    public Map<Integer, BlockState> getMaterials() {
-        return materials;
+    public Map<Integer, IWallpaper> getWallpapers() {
+        return wallpapers;
     }
 
     @Override
@@ -397,31 +408,24 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>, Dire
         if(hasNullInDirection(object))return -super.getFlag(object);
         return super.getFlag(object);
     }
-
-    private int hasBlockInPaint(BlockState toCheck) {
-        for (Map.Entry<Integer, BlockState> entry : materials.entrySet()) {
-            BlockState blockState = entry.getValue();
-            if (blockState != null && blockState.getBlock() == toCheck.getBlock()) {
-                return entry.getKey();
-            }
-        }
-        return -1;
-    }
-    //========覆盖序列化方法，处理 materials========
+    //========覆盖序列化方法，处理 wallpapers========
     @Override
     public CompoundTag serializeNBT(HolderLookup.Provider provider) {
         CompoundTag tag = super.serializeNBT(provider);
-        // 序列化 materials
-        ListTag materialsList = new ListTag();
-        for (Map.Entry<Integer, BlockState> entry : materials.entrySet()) {
+        // 序列化 wallpapers
+        ListTag wallpapersList = new ListTag();
+        for (Map.Entry<Integer, IWallpaper> entry : wallpapers.entrySet()) {
             CompoundTag entryTag = new CompoundTag();
             entryTag.putInt("flag", entry.getKey());
-            DataResult<Tag> stateResult = BlockState.CODEC.encode(entry.getValue(),
-                    provider.createSerializationContext(NbtOps.INSTANCE), new CompoundTag());
-            entryTag.put("state", stateResult.getOrThrow());
-            materialsList.add(entryTag);
+            IWallpaper wallpaper = entry.getValue();
+            if (wallpaper != null) {
+                CompoundTag wallpaperTag = wallpaper.serializeNBT(provider);
+                wallpaperTag.putString("type", wallpaper.getType());
+                entryTag.put("wallpaper", wallpaperTag);
+                wallpapersList.add(entryTag);
+            }
         }
-        tag.put("materials", materialsList);
+        tag.put("wallpapers", wallpapersList);
 
         // Persist UV offset data
         ListTag uvList = new ListTag();
@@ -442,33 +446,35 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>, Dire
     }
 
     /**
-     * 从NBT标签反序列化粉刷数据，恢复材质映射和UV偏移信息
+     * 从NBT标签反序列化粉刷数据，恢复壁纸映射和UV偏移信息
      * <p>
      * 该方法执行以下操作：
      * 1. 调用父类反序列化方法恢复基础数据
-     * 2. 解析并恢复各方向的材质方块状态（materials）
+     * 2. 解析并恢复各方向的壁纸实例（wallpapers）
      * 3. 解析并恢复各方向的UV纹理偏移量（uvOffsets）
      * 4. 确保所有方向标志都有对应的UV偏移条目
      * 5. 触发刷新以重建渲染缓存
      *
-     * @param provider 注册表提供者，用于BlockState的编解码上下文
-     * @param tag      包含序列化数据的NBT复合标签，应包含"materials"和"uvOffsets"列表
+     * @param provider 注册表提供者，用于IWallpaper的编解码上下文
+     * @param tag      包含序列化数据的NBT复合标签，应包含"wallpapers"和"uvOffsets"列表
      */
     @Override
     public void deserializeNBT(HolderLookup.Provider provider, CompoundTag tag) {
         super.deserializeNBT(provider, tag);
         
-        // 清空并恢复材质映射数据
-        this.materials.clear();
-        ListTag materialsList = tag.getList("materials", Tag.TAG_COMPOUND);
-        for (int i = 0; i < materialsList.size(); i++) {
-            CompoundTag entryTag = materialsList.getCompound(i);
+        // 清空并恢复壁纸映射数据
+        this.wallpapers.clear();
+        ListTag wallpapersList = tag.getList("wallpapers", Tag.TAG_COMPOUND);
+        for (int i = 0; i < wallpapersList.size(); i++) {
+            CompoundTag entryTag = wallpapersList.getCompound(i);
             int flag = entryTag.getInt("flag");
-            Tag stateTag = entryTag.get("state");
-            DataResult<BlockState> stateResult = BlockState.CODEC.parse(
-                    provider.createSerializationContext(NbtOps.INSTANCE), stateTag);
-            BlockState state = stateResult.getOrThrow();
-            materials.put(flag, state);
+            CompoundTag wallpaperTag = entryTag.getCompound("wallpaper");
+            String type = wallpaperTag.getString("type");
+            
+            IWallpaper wallpaper = Wallpapers.create(type, provider, wallpaperTag);
+            if (wallpaper != null) {
+                wallpapers.put(flag, wallpaper);
+            }
         }
 
         // 清空并恢复UV偏移数据
