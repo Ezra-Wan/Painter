@@ -37,9 +37,11 @@ public class ChulkItem extends BlockInteractItem {
 
         if (zone == null) return;
 
-        // 判断当前是设置A点还是B点
+        // 判断当前是否已有A点缓存
+        System.out.println("[DEBUG] zone.isCreating() = " + zone.isCreating());
         if (!zone.isCreating()) {
-            // 第一次右键：设置A点
+            // === 没有A点：设置A点 ===
+            System.out.println("[DEBUG] 进入设置A点分支");
             zone.setA(event.getPos(), event.getFace());
             player.displayClientMessage(Component.translatable(
                             ToolContent.getMessagePath(ToolContent.SELECT_POSA),
@@ -50,21 +52,48 @@ public class ChulkItem extends BlockInteractItem {
                     ).withStyle(style -> style.withColor(ChatFormatting.YELLOW)),
                     true);
         } else {
-            // 第二次右键：设置B点并形成选区
-            if(zone.setB(event.getPos())) {
-                // 成功建立选区
+            // === 已有A点：尝试设置B点 ===
+            System.out.println("[DEBUG] 进入设置B点分支");
+            boolean result = zone.setB(event.getPos());
+            System.out.println("[DEBUG] setB() 返回结果: " + result);
+            if(result) {
+                // B点正确：成功建立选区，setB内部已自动清除缓存
                 player.displayClientMessage(
                     Component.translatable("painter.message.select.success")
                         .withStyle(ChatFormatting.GREEN),
                     true
                 );
             } else {
-                // 两点不在同一平面，已自动清除缓存
+                // B点错误：两点不在同一平面，A点缓存未被清除
+                System.out.println("[DEBUG] 进入B点错误分支");
+                
+                // 第一步：无论是否按Shift，都先显示红色错误提示
+                System.out.println("[DEBUG] 显示红色错误提示");
                 player.displayClientMessage(
                     Component.translatable("painter.message.select_b.not_in_surface")
                         .withStyle(ChatFormatting.RED),
                     true
                 );
+                
+                // 第二步：根据Shift键状态决定下一步操作
+                System.out.println("[DEBUG] Shift按键状态: " + player.isShiftKeyDown());
+                if (player.isShiftKeyDown()) {
+                    // 按Shift：保留A点，用户可以继续右键尝试其他B点
+                    System.out.println("[DEBUG] 按Shift，保留A点");
+                    // 不需要额外操作，A点已保留
+                } else {
+                    // 不按Shift：重置A点，用当前点击位置作为新的A点
+                    System.out.println("[DEBUG] 不按Shift，重置A点");
+                    zone.setA(event.getPos(), event.getFace());
+                    player.displayClientMessage(Component.translatable(
+                                    ToolContent.getMessagePath(ToolContent.SELECT_POSA),
+                                    event.getPos().getX(),
+                                    event.getPos().getY(),
+                                    event.getPos().getZ(),
+                                    ToolContent.getFaceTranslation(event.getFace())
+                            ).withStyle(style -> style.withColor(ChatFormatting.YELLOW)),
+                            true);
+                }
             }
         }
         player.swing(InteractionHand.MAIN_HAND);

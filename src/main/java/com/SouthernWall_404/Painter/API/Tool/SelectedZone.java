@@ -33,12 +33,11 @@ public class SelectedZone implements IAttachment {
 
     public boolean setB(BlockPos b) {
         if(SelectedQuad.isSameSurface(cachedA,b,cachedFace)){//确保两个点在同一平面
-            addQuad(b);//添加选区
+            addQuad(b);//添加选区并清除缓存
             return true;//成功创建选区
         }else {
-            //两点不在同一平面，清除缓存
-            cachedA = null;
-            cachedFace = null;
+            //两点不在同一平面，不清除A点缓存，只返回false
+            //用户可以继续尝试选择正确的B点
             return false;//创建失败
         }
     }
