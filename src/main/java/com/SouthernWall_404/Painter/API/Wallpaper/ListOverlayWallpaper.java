@@ -15,7 +15,7 @@ import java.util.List;
  */
 public class ListOverlayWallpaper extends AbstractWallpaper {
 
-    private List<IWallpaper> overlays;
+    protected List<IWallpaper> overlays;
     public static final String TYPE = "List";
 
     public ListOverlayWallpaper(List<IWallpaper> overlays) {
