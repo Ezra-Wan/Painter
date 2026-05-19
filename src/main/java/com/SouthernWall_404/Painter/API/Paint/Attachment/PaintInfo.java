@@ -68,14 +68,14 @@ public class PaintInfo implements IAttachment {
     @OnlyIn(Dist.CLIENT)
     public void refreshAO() {
         paints.forEach((blockPos, paint) -> {
-            paint.refreshAO();
+            paint.refresh();
         });
     }
 
     @OnlyIn(Dist.CLIENT)
     public void refreshVisibles() {
         paints.forEach((blockPos, paint) -> {
-            paint.refreshVisible();
+            paint.refresh();//可以的话进行拆分
         });
     }
 
@@ -198,8 +198,7 @@ public class PaintInfo implements IAttachment {
                     int x = blockPos.getX();
                     int z = blockPos.getZ();
                     if (x >= startX && x <= endX && z >= startZ && z <= endZ) {
-                        paint.refreshAO();
-                        paint.refreshVisible();
+                        paint.refresh();
                     }
                 }
             });
