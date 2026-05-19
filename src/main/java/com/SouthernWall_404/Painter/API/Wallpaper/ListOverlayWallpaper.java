@@ -13,7 +13,7 @@ import java.util.List;
 /**
  * 应当允许存储多个Wallpaper，包括自身，即自引用
  */
-public class ListOverlayWallpaper implements IWallpaper {
+public class ListOverlayWallpaper extends AbstractWallpaper {
 
     private List<IWallpaper> overlays;
     public static final String TYPE = "List";

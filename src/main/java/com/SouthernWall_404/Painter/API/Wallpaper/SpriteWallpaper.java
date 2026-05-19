@@ -40,7 +40,7 @@ import java.util.Map;
  * 需要做拆分
  * 这里只负责某个单独材质的处理，不处理叠加
  */
-public class SpriteWallpaper implements IWallpaper {
+public class SpriteWallpaper extends AbstractWallpaper {
 
     public static final String TYPE="sprite";
 

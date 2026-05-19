@@ -74,6 +74,20 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>, Dire
 
     }
 
+    @Override
+    public BlockState getOrigin() {
+        return super.getOrigin();
+    }
+
+    public BlockPos getBlockPos() {
+        return blockPos;
+    }
+
+
+    public Map<Integer, Vec3> getRenderVec() {
+        return renderVec;
+    }
+
     protected void registerRenderVec()
     {
         if(renderVec==null)
@@ -218,37 +232,40 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>, Dire
 
     @OnlyIn(Dist.CLIENT)
     public void refreshVisible() {
-        Level level = Minecraft.getInstance().level;
-        if(level==null||origin==null) {
-            visibles .clear();
-            return;
-        };
-        flags.forEach((direction, flag) -> {
-            boolean shouldRender = RenderUtil.shouldRenderFace(blockPos, origin, direction);
-            visibles.put(flag, shouldRender);
-            visibles.put(-flag,shouldRender);
-        });
+//        refresh();
+//        Level level = Minecraft.getInstance().level;
+//        if(level==null||origin==null) {
+//            visibles .clear();
+//            return;
+//        };
+//        flags.forEach((direction, flag) -> {
+//            boolean shouldRender = RenderUtil.shouldRenderFace(blockPos, origin, direction);
+//            visibles.put(flag, shouldRender);
+//            visibles.put(-flag,shouldRender);
+//        });
     }
     @OnlyIn(Dist.CLIENT)
     public void refreshAO() {
-        Level level = Minecraft.getInstance().level;
-        if (level==null){
-            aoFaces.clear();
-            return;
-        }
-        for (Map.Entry<Integer, IWallpaper> entry : wallpapers.entrySet()) {
-            int flag = entry.getKey();
-            Direction direction = getDirection(flag);
+//        Level level = Minecraft.getInstance().level;
+//        if (level==null){
+//            aoFaces.clear();
+//            return;
+//        }
+//        for (Map.Entry<Integer, IWallpaper> entry : wallpapers.entrySet()) {
+//            int flag = entry.getKey();
+//            Direction direction = getDirection(flag);
+//
+//            BlockPos blockPos=this.blockPos;
+//            if(!hasNullInDirection( direction)){
+//                blockPos=blockPos.relative(direction);
+//            }
+//
+//            ModelRender.AmbientOcclusionFace aoFace = new ModelRender.AmbientOcclusionFace();
+//            aoFace.calculate(level,origin,blockPos, direction, shape, shapeFlags, true);
+//            aoFaces.put(flag, aoFace);
+//        }
+//        refresh();
 
-            BlockPos blockPos=this.blockPos;
-            if(!hasNullInDirection( direction)){
-                blockPos=blockPos.relative(direction);
-            }
-
-            ModelRender.AmbientOcclusionFace aoFace = new ModelRender.AmbientOcclusionFace();
-            aoFace.calculate(level,origin,blockPos, direction, shape, shapeFlags, true);
-            aoFaces.put(flag, aoFace);
-        }
     }
 
     public Map<Integer, float[]> getUvOffsets() {
@@ -256,9 +273,10 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>, Dire
     }
 
     public void refresh() {
-        visibles.clear();
-        aoFaces.clear();
-        objects.clear();;
+        wallpapers.forEach((flag, wallpaper) -> wallpaper.refresh());
+//        visibles.clear();
+//        aoFaces.clear();
+//        objects.clear();;
 //        PaintRender.setChanged();
     }
     @Override
@@ -304,31 +322,34 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>, Dire
     public void render(BlockPos blockPos, PoseStack poseStack, VertexConsumer buffer) {
         Minecraft mc = Minecraft.getInstance();
 
-        if (objects.isEmpty())createQuads();
-        if(visibles.isEmpty())refreshVisible();
-        if(aoFaces.isEmpty())refreshAO();
-
-        for (Map.Entry<Integer, List<BakedQuad>> entry : objects.entrySet()) {
-            List<BakedQuad> quads = entry.getValue();
-            int flag = entry.getKey();
-
-            if (!visibles.getOrDefault(flag,false))continue;
-
-            Vec3 renderVec3 = renderVec.get(flag);
-            if (renderVec3 == null) {
-                registerRenderVec();
-            }
-            
-            for (BakedQuad quad : quads) {
-                if (aoFaces.containsKey(flag)) {
-                    BakedQuadRender.renderInOfferredAO(quad, origin, renderVec3, poseStack, buffer, aoFaces.get(flag));
-                } else {
-                    refreshAO();
-                    if (aoFaces.containsKey(flag))
-                        BakedQuadRender.renderInOfferredAO(quad, origin, renderVec3, poseStack, buffer, aoFaces.get(flag));//TODO 这里会因为输入origin而产生着色问题
-                }
-            }
-        }
+        wallpapers.forEach((flag, wallpaper) -> {
+            wallpaper.render(this, getDirection(flag),poseStack, buffer);
+        });
+//        if (objects.isEmpty())createQuads();
+//        if(visibles.isEmpty())refreshVisible();
+//        if(aoFaces.isEmpty())refreshAO();
+//
+//        for (Map.Entry<Integer, List<BakedQuad>> entry : objects.entrySet()) {
+//            List<BakedQuad> quads = entry.getValue();
+//            int flag = entry.getKey();
+//
+//            if (!visibles.getOrDefault(flag,false))continue;
+//
+//            Vec3 renderVec3 = renderVec.get(flag);
+//            if (renderVec3 == null) {
+//                registerRenderVec();
+//            }
+//
+//            for (BakedQuad quad : quads) {
+//                if (aoFaces.containsKey(flag)) {
+//                    BakedQuadRender.renderInOfferredAO(quad, origin, renderVec3, poseStack, buffer, aoFaces.get(flag));
+//                } else {
+//                    refreshAO();
+//                    if (aoFaces.containsKey(flag))
+//                        BakedQuadRender.renderInOfferredAO(quad, origin, renderVec3, poseStack, buffer, aoFaces.get(flag));//TODO 这里会因为输入origin而产生着色问题
+//                }
+//            }
+//        }
     }
 
     public final void paint(Direction f, BlockState blockState) {
