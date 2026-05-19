@@ -21,6 +21,10 @@ public class BlockWallPaper extends ListOverlayWallpaper{
         super(getOverlays(material,face));
     }
 
+    //TODO 添加对于方块的特殊调整
+    // createQuad需要修改
+    // render需要添加对于颜色的处理
+
     public static List<IWallpaper> getOverlays(BlockState material, Direction face)
     {
         List<IWallpaper> overlays=new ArrayList<>();

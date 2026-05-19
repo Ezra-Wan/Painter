@@ -46,7 +46,11 @@ import java.util.*;
  */
 
 /**
- * TODO 将material替换为Wallpaper类
+ * 方块位置的wallPaper转包
+ * - 只负责存储相关方块数据
+ * - 不负责具体的渲染实现
+ *
+ * TODO 需要考虑对flag系统的重构
  */
 public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>, Direction> {
     //LOGGER removed
@@ -56,10 +60,6 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>, Dire
 
 
     //========不需要持久化的数据========
-    private final float[] shape = new float[ModelRender.DIRECTIONS.length * 2];
-    private final BitSet shapeFlags = new BitSet(3);
-    protected Map<Integer, ModelRender.AmbientOcclusionFace> aoFaces = new HashMap<>();
-    protected Map<Integer,Boolean> visibles =new HashMap<>();
     protected Map<Integer, Vec3> renderVec=new HashMap<>();
     //========需要持久化的数据========
     protected Map<Integer, IWallpaper> wallpapers = new HashMap<>();
@@ -88,6 +88,7 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>, Dire
         return renderVec;
     }
 
+    //TODO 需要移动到Wallpaper
     protected void registerRenderVec()
     {
         if(renderVec==null)
@@ -108,7 +109,6 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>, Dire
             renderVec.put(-flag, vec);
         });
     }
-
     @Override
     protected void registerFlag(Direction direction, int flag) {
         super.registerFlag(direction, flag);
@@ -139,6 +139,7 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>, Dire
      * 
      * 注意：此方法仅在客户端调用，通过数据包同步到服务端
      */
+    //TODO 考虑转移到Wallpaper中
     @OnlyIn(Dist.CLIENT)
     public void cycleTextureUV(Direction direction) {
         int flag = getFlag(direction);
@@ -186,6 +187,7 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>, Dire
         refresh();
     }
 
+    //TODO 考虑转移到Wallpaper中
     public void cycleTextureDir(Direction direction) {
         BlockState material = getMaterial(direction);
         if (material != null) {
@@ -205,7 +207,7 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>, Dire
         }
         refresh();
     }
-
+    //TODO 捆绑到方法类
     public List<BakedQuad> getQuadsForDirection(BlockState state, int flag) {
         Direction direction;
 
@@ -220,6 +222,7 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>, Dire
         return model.getQuads(state, direction, random, ModelData.EMPTY, renderType);
     }
 
+    //TODO 有待修改
     public Direction getDirection(int flag) {
         if(flag<0)flag=-flag;
         for (Map.Entry<Direction, Integer> entry : flags.entrySet()) {
@@ -230,6 +233,7 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>, Dire
         return Direction.NORTH;
     }
 
+    //TODO 有待移除
     @OnlyIn(Dist.CLIENT)
     public void refreshVisible() {
 //        refresh();
@@ -244,6 +248,7 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>, Dire
 //            visibles.put(-flag,shouldRender);
 //        });
     }
+    //TODO 有待移除
     @OnlyIn(Dist.CLIENT)
     public void refreshAO() {
 //        Level level = Minecraft.getInstance().level;
@@ -267,7 +272,7 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>, Dire
 //        refresh();
 
     }
-
+    //TODO 有待移除
     public Map<Integer, float[]> getUvOffsets() {
         return uvOffsets;
     }
@@ -297,6 +302,7 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>, Dire
      * @param wallpaper 壁纸实例
      * @return 渲染四边形列表
      */
+    //TODO 有待移除
     public List<BakedQuad> createQuad(int flag, IWallpaper wallpaper)
     {
         if (wallpaper == null) return Collections.emptyList();
@@ -306,7 +312,7 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>, Dire
 
         return wallpaper.createQuad(originQuads.getFirst());
     }
-
+    //TODO 有待移除
     public void createQuads() {
         wallpapers.forEach((flag, wallpaper) -> {
             List<BakedQuad> quads = createQuad(flag, wallpaper);
@@ -364,6 +370,8 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>, Dire
      * @param u U分量偏移
      * @param v V分量偏移
      */
+
+    //TODO 有待移除
     public void setUVOffset(Direction direction, float u, float v) {
         int flag = getFlag(direction);
         float[] off = uvOffsets.get(flag);
@@ -377,6 +385,7 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>, Dire
         refresh();
     }
 
+    //TODO 有待修改为Wallpaper类
     public void putMaterial(Direction f, BlockState blockState)
     {
         int flag = getFlag(f);
@@ -430,6 +439,8 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>, Dire
         return super.getFlag(object);
     }
     //========覆盖序列化方法，处理 wallpapers========
+
+    //TODO 有待重构
     @Override
     public CompoundTag serializeNBT(HolderLookup.Provider provider) {
         CompoundTag tag = super.serializeNBT(provider);
