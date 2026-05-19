@@ -3,6 +3,8 @@ package com.SouthernWall_404.Painter.API.Paint.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.BlockRenderDispatcher;
+import net.minecraft.client.renderer.block.model.BakedQuad;
+import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.util.RandomSource;
@@ -12,6 +14,8 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 import net.neoforged.neoforge.client.model.data.ModelData;
+
+import java.util.List;
 
 
 @OnlyIn(Dist.CLIENT)
@@ -68,6 +72,15 @@ public class RenderUtil {
         // 调用原版标准面渲染判定逻辑
         boolean shouldRender=Block.shouldRenderFace(state, level, pos, face, neighborPos);
         return shouldRender;
+    }
+
+
+    public static List<BakedQuad> getQuadsForDirection(BlockState state, Direction face) {
+
+        BakedModel model = Minecraft.getInstance().getModelManager().getBlockModelShaper().getBlockModel(state);
+        RandomSource random = RandomSource.create();
+        RenderType renderType = RenderUtil.getRenderType(state);
+        return model.getQuads(state, face, random, ModelData.EMPTY, renderType);
     }
 }
 

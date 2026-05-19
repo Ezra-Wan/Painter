@@ -144,7 +144,7 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>, Dire
     public void cycleTextureUV(Direction direction) {
         int flag = getFlag(direction);
         // 获取指定方向的原始四边形以读取其UV空间尺寸
-        List<BakedQuad> originQuads = getQuadsForDirection(origin, flag);
+        List<BakedQuad> originQuads = RenderUtil.getQuadsForDirection(origin,getDirection(flag));
         if (originQuads == null || originQuads.isEmpty()) {
             return;
         }
@@ -207,19 +207,16 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>, Dire
         }
         refresh();
     }
-    //TODO 捆绑到方法类
-    public List<BakedQuad> getQuadsForDirection(BlockState state, int flag) {
-        Direction direction;
 
-        if(flag<0)
-        {
-            direction=null;
-        }else direction=getDirection(flag);
+    /**
+     *  用于将渲染的方块面转换为实际归属的方块面，即处理null面的情况
+     * @param visualFace
+     * @return
+     */
+    public Direction translateFace(Direction visualFace){
 
-        BakedModel model = Minecraft.getInstance().getModelManager().getBlockModelShaper().getBlockModel(state);
-        RandomSource random = RandomSource.create();
-        RenderType renderType = RenderUtil.getRenderType(state);
-        return model.getQuads(state, direction, random, ModelData.EMPTY, renderType);
+        if(hasNullInDirection(visualFace))return null;
+        return translateFace(visualFace);
     }
 
     //TODO 有待修改
@@ -296,32 +293,32 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>, Dire
 
     }
 
-    /**
-     * 使用指定的 Wallpaper 创建渲染面
-     * @param flag 方向标志
-     * @param wallpaper 壁纸实例
-     * @return 渲染四边形列表
-     */
-    //TODO 有待移除
-    public List<BakedQuad> createQuad(int flag, IWallpaper wallpaper)
-    {
-        if (wallpaper == null) return Collections.emptyList();
-        
-        List<BakedQuad> originQuads = getQuadsForDirection(origin, flag);
-        if (originQuads == null || originQuads.isEmpty()) return Collections.emptyList();
-
-        return wallpaper.createQuad(originQuads.getFirst());
-    }
-    //TODO 有待移除
-    public void createQuads() {
-        wallpapers.forEach((flag, wallpaper) -> {
-            List<BakedQuad> quads = createQuad(flag, wallpaper);
-            if(!quads.isEmpty())
-            {
-                objects.put(flag,quads);
-            }
-        });
-    }
+//    /**
+//     * 使用指定的 Wallpaper 创建渲染面
+//     * @param flag 方向标志
+//     * @param wallpaper 壁纸实例
+//     * @return 渲染四边形列表
+//     */
+//    //TODO 有待移除
+//    public List<BakedQuad> createQuad(int flag, IWallpaper wallpaper)
+//    {
+//        if (wallpaper == null) return Collections.emptyList();
+//
+//        List<BakedQuad> originQuads = getQuadsForDirection(origin, flag);
+//        if (originQuads == null || originQuads.isEmpty()) return Collections.emptyList();
+//
+//        return wallpaper.createQuad(originQuads.getFirst());
+//    }
+//    //TODO 有待移除
+//    public void createQuads() {
+//        wallpapers.forEach((flag, wallpaper) -> {
+//            List<BakedQuad> quads = createQuad(flag, wallpaper);
+//            if(!quads.isEmpty())
+//            {
+//                objects.put(flag,quads);
+//            }
+//        });
+//    }
 
     @Override
     @OnlyIn(Dist.CLIENT)
