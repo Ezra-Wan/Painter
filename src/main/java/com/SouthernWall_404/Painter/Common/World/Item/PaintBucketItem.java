@@ -43,14 +43,21 @@ public class PaintBucketItem extends BlockInteractItem {
         Player player = event.getEntity();
         SelectedZone selectedZone = player.getData(ModAttachments.SELECTED_ZONE_FOR_SWAP);
 
-        if (selectedZone != null) {
-            List<IFilter> filters = new ArrayList<>();
-            filters.add(new EmptyFilter());
-            if (selectedZone.isSelecting()) {
-                filters.add(new SelectFilter());
-            }
-            PaintUtil.dealBucketClick(blockPos, event.getFace(), player, level, filters,isInMainHand);
+        // 强制要求选区存在
+        if (selectedZone == null || !selectedZone.isSelecting()) {
+            player.displayClientMessage(
+                Component.translatable("painter.message.bucket.requires_selection")
+                    .withStyle(ChatFormatting.RED),
+                true
+            );
+            event.setCanceled(true);
+            return;
         }
+
+        List<IFilter> filters = new ArrayList<>();
+        filters.add(new EmptyFilter());
+        filters.add(new SelectFilter()); // 始终添加选区过滤器
+        PaintUtil.dealBucketClick(blockPos, event.getFace(), player, level, filters,isInMainHand);
 
         event.setCanceled(true);
         player.swing(InteractionHand.MAIN_HAND);
