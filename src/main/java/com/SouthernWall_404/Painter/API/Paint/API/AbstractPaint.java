@@ -216,7 +216,7 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>, Dire
     public Direction translateFace(Direction visualFace){
 
         if(hasNullInDirection(visualFace))return null;
-        return translateFace(visualFace);
+        return visualFace;
     }
 
     //TODO 有待修改
@@ -230,45 +230,6 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>, Dire
         return Direction.NORTH;
     }
 
-    //TODO 有待移除
-    @OnlyIn(Dist.CLIENT)
-    public void refreshVisible() {
-//        refresh();
-//        Level level = Minecraft.getInstance().level;
-//        if(level==null||origin==null) {
-//            visibles .clear();
-//            return;
-//        };
-//        flags.forEach((direction, flag) -> {
-//            boolean shouldRender = RenderUtil.shouldRenderFace(blockPos, origin, direction);
-//            visibles.put(flag, shouldRender);
-//            visibles.put(-flag,shouldRender);
-//        });
-    }
-    //TODO 有待移除
-    @OnlyIn(Dist.CLIENT)
-    public void refreshAO() {
-//        Level level = Minecraft.getInstance().level;
-//        if (level==null){
-//            aoFaces.clear();
-//            return;
-//        }
-//        for (Map.Entry<Integer, IWallpaper> entry : wallpapers.entrySet()) {
-//            int flag = entry.getKey();
-//            Direction direction = getDirection(flag);
-//
-//            BlockPos blockPos=this.blockPos;
-//            if(!hasNullInDirection( direction)){
-//                blockPos=blockPos.relative(direction);
-//            }
-//
-//            ModelRender.AmbientOcclusionFace aoFace = new ModelRender.AmbientOcclusionFace();
-//            aoFace.calculate(level,origin,blockPos, direction, shape, shapeFlags, true);
-//            aoFaces.put(flag, aoFace);
-//        }
-//        refresh();
-
-    }
     //TODO 有待移除
     public Map<Integer, float[]> getUvOffsets() {
         return uvOffsets;
@@ -293,33 +254,6 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>, Dire
 
     }
 
-//    /**
-//     * 使用指定的 Wallpaper 创建渲染面
-//     * @param flag 方向标志
-//     * @param wallpaper 壁纸实例
-//     * @return 渲染四边形列表
-//     */
-//    //TODO 有待移除
-//    public List<BakedQuad> createQuad(int flag, IWallpaper wallpaper)
-//    {
-//        if (wallpaper == null) return Collections.emptyList();
-//
-//        List<BakedQuad> originQuads = getQuadsForDirection(origin, flag);
-//        if (originQuads == null || originQuads.isEmpty()) return Collections.emptyList();
-//
-//        return wallpaper.createQuad(originQuads.getFirst());
-//    }
-//    //TODO 有待移除
-//    public void createQuads() {
-//        wallpapers.forEach((flag, wallpaper) -> {
-//            List<BakedQuad> quads = createQuad(flag, wallpaper);
-//            if(!quads.isEmpty())
-//            {
-//                objects.put(flag,quads);
-//            }
-//        });
-//    }
-
     @Override
     @OnlyIn(Dist.CLIENT)
     public void render(BlockPos blockPos, PoseStack poseStack, VertexConsumer buffer) {
@@ -328,31 +262,7 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>, Dire
         wallpapers.forEach((flag, wallpaper) -> {
             wallpaper.render(this, getDirection(flag),poseStack, buffer);
         });
-//        if (objects.isEmpty())createQuads();
-//        if(visibles.isEmpty())refreshVisible();
-//        if(aoFaces.isEmpty())refreshAO();
-//
-//        for (Map.Entry<Integer, List<BakedQuad>> entry : objects.entrySet()) {
-//            List<BakedQuad> quads = entry.getValue();
-//            int flag = entry.getKey();
-//
-//            if (!visibles.getOrDefault(flag,false))continue;
-//
-//            Vec3 renderVec3 = renderVec.get(flag);
-//            if (renderVec3 == null) {
-//                registerRenderVec();
-//            }
-//
-//            for (BakedQuad quad : quads) {
-//                if (aoFaces.containsKey(flag)) {
-//                    BakedQuadRender.renderInOfferredAO(quad, origin, renderVec3, poseStack, buffer, aoFaces.get(flag));
-//                } else {
-//                    refreshAO();
-//                    if (aoFaces.containsKey(flag))
-//                        BakedQuadRender.renderInOfferredAO(quad, origin, renderVec3, poseStack, buffer, aoFaces.get(flag));//TODO 这里会因为输入origin而产生着色问题
-//                }
-//            }
-//        }
+        //TODO 这里会因为输入origin而产生着色问题
     }
 
     public final void paint(Direction f, BlockState blockState) {
