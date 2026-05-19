@@ -112,6 +112,7 @@ public final class PaintOperationHelper {
 
 
 
+    //TODO 考虑扔进Laplace
     public static BlockState cycleInDirection(BlockState material){
         if (material.hasProperty(TrapDoorBlock.HALF) && material.getOptionalValue(TrapDoorBlock.OPEN).orElse(false))
             return material.cycle(TrapDoorBlock.HALF);

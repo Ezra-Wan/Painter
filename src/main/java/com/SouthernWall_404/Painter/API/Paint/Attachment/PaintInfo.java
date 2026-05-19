@@ -241,6 +241,7 @@ public class PaintInfo implements IAttachment {
             PaintSyncHelper.syncPaintUV(pos, direction, paint.getUvOffsets().get(paint.getFlag(direction)));
         }
     }
+
     /**
      * 设置指定位置指定方向的纹理UV偏移
      * @param pos 方块位置

@@ -2,6 +2,7 @@ package com.SouthernWall_404.Painter.API.Wallpaper;
 
 import com.SouthernWall_404.LaplaceAPI.RegulappleEngine.BakedQuadRender;
 import com.SouthernWall_404.Painter.API.Paint.API.AbstractPaint;
+import com.SouthernWall_404.Painter.API.Paint.Util.Paint.PaintOperationHelper;
 import com.SouthernWall_404.Painter.API.Paint.Util.RenderUtil;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
@@ -16,7 +17,9 @@ import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.Tag;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.TrapDoorBlock;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 import net.neoforged.neoforge.client.model.data.ModelData;
@@ -33,18 +36,36 @@ import java.util.List;
 public class BlockWallPaper extends ListOverlayWallpaper{
     public static final String TYPE = "block";
     
-    private BlockState blockState;
+    private BlockState material;
     private Direction face;
 
     public BlockWallPaper(BlockState material,Direction face) {
         super(getOverlays(material,face));
-        this.blockState = material;
+        this.material = material;
         this.face = face;
     }
 
     public BlockWallPaper(HolderLookup.Provider provider, CompoundTag tag) {
         super(List.of());
         deserializeNBT(provider, tag);
+    }
+
+
+
+    public void cycleTextureDir() {
+        if (material != null) {
+            material= PaintOperationHelper.cycleInDirection( material);
+
+            refresh();//TODO 似乎有数据持久化上的问题
+
+        }
+
+    }
+
+    @Override
+    public void refresh() {
+        super.refresh();
+        overlays=getOverlays(material,face);
     }
 
     @Override
@@ -64,11 +85,11 @@ public class BlockWallPaper extends ListOverlayWallpaper{
                 if(aoFace==null)refreshAO(paint,direction);
                 if(isVisible<0)refreshVisibles(paint,direction);
                 if(quads.isEmpty()){
-                    quads=createQuad(RenderUtil.getQuadsForDirection(blockState,paint.translateFace(direction)).getFirst());//TODO 不是很标准的编程
+                    quads=createQuad(RenderUtil.getQuadsForDirection(paint.getOrigin(),paint.translateFace(direction)).getFirst());//TODO 不是很标准的编程
                 }
 
                 if(isVisible>0){//正数为可见
-                    quads.forEach(quad -> BakedQuadRender.renderInOfferredAO(quad, blockState,paint.getRenderVec().get(paint.getFlag(direction)), poseStack, buffer, aoFace));
+                    quads.forEach(quad -> BakedQuadRender.renderInOfferredAO(quad, material,paint.getRenderVec().get(paint.getFlag(direction)), poseStack, buffer, aoFace));
                 }
             }
         }
@@ -105,10 +126,10 @@ public class BlockWallPaper extends ListOverlayWallpaper{
         
         tag.putString("type", TYPE);
         
-        if (blockState != null) {
+        if (material != null) {
             Tag stateTag = BlockState.CODEC.encodeStart(
                 provider.createSerializationContext(NbtOps.INSTANCE),
-                blockState
+                    material
             ).getOrThrow();
             tag.put("blockState", stateTag);
         }
@@ -124,7 +145,7 @@ public class BlockWallPaper extends ListOverlayWallpaper{
     public void deserializeNBT(HolderLookup.Provider provider, CompoundTag compoundTag) {
         if (compoundTag.contains("blockState")) {
             Tag stateTag = compoundTag.get("blockState");
-            blockState = BlockState.CODEC.parse(
+            material = BlockState.CODEC.parse(
                 provider.createSerializationContext(NbtOps.INSTANCE),
                 stateTag
             ).getOrThrow();
@@ -135,8 +156,8 @@ public class BlockWallPaper extends ListOverlayWallpaper{
             face = Direction.from3DDataValue(faceValue);
         }
 
-        if (blockState != null && face != null) {
-            this.overlays = getOverlays(blockState, face);
+        if (material != null && face != null) {
+            this.overlays = getOverlays(material, face);
         }
     }
 }

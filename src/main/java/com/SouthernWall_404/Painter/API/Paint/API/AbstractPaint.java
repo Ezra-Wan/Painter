@@ -74,6 +74,7 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>, Dire
 
     }
 
+
     @Override
     public BlockState getOrigin() {
         return super.getOrigin();
@@ -131,6 +132,14 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>, Dire
         });
     }
 
+    public void cycleTextureDir(Direction face)
+    {
+        IWallpaper wallpaper=wallpapers.get(getFlag(face));
+        if(wallpaper!=null){
+            if(wallpaper instanceof BlockWallPaper blockWallPaper)blockWallPaper.cycleTextureDir();
+        }
+    }
+
     /**
      * 循环切换指定方向面的纹理UV偏移位置
      * 使用origin面的xLength和yLength作为直接步长
@@ -186,28 +195,6 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>, Dire
 //        uvOffsets.put(flag, new float[]{newU, newV});
         refresh();
     }
-
-    //TODO 考虑转移到Wallpaper中
-    public void cycleTextureDir(Direction direction) {
-        BlockState material = getMaterial(direction);
-        if (material != null) {
-            if (material.hasProperty(TrapDoorBlock.HALF) && material.getOptionalValue(TrapDoorBlock.OPEN).orElse(false))
-                paint(direction, material.cycle(TrapDoorBlock.HALF));
-            else if (material.hasProperty(BlockStateProperties.FACING))
-                paint(direction, material.cycle(BlockStateProperties.FACING));
-            else if (material.hasProperty(BlockStateProperties.HORIZONTAL_FACING))
-                paint(direction, material.setValue(BlockStateProperties.HORIZONTAL_FACING,
-                        material.getValue(BlockStateProperties.HORIZONTAL_FACING).getClockWise()));
-            else if (material.hasProperty(BlockStateProperties.AXIS))
-                paint(direction, material.cycle(BlockStateProperties.AXIS));
-            else if (material.hasProperty(BlockStateProperties.HORIZONTAL_AXIS))
-                paint(direction, material.cycle(BlockStateProperties.HORIZONTAL_AXIS));
-            else if (material.hasProperty(BlockStateProperties.LIT))
-                paint(direction, material.cycle(BlockStateProperties.LIT));
-        }
-        refresh();
-    }
-
     /**
      *  用于将渲染的方块面转换为实际归属的方块面，即处理null面的情况
      * @param visualFace

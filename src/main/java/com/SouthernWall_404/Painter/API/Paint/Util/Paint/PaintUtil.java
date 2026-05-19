@@ -55,10 +55,7 @@ public class PaintUtil {
                 //则正常喷涂
             } else {// 副手不是方块物品，则尝试利用已有的 paint 材质进行旋转
                 if (paint != null) {//如果存在paint
-                    BlockState oldMaterial = paint.getMaterial(direction);
-                    if (oldMaterial != null) {//且在点击面存在原有的喷涂
-                        toPaint = PaintOperationHelper.cycleInDirection(oldMaterial);//旋转uv
-                    }
+                    paint.cycleTextureDir( direction);
                 }
             }
 
