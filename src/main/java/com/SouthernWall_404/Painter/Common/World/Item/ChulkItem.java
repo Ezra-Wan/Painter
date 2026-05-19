@@ -37,34 +37,56 @@ public class ChulkItem extends BlockInteractItem {
 
         if (zone == null) return;
 
+        boolean isClientSide = event.getLevel().isClientSide;
+        
         // 判断当前是设置A点还是B点
         if (!zone.isCreating()) {
             // 第一次右键：设置A点
             zone.setA(event.getPos(), event.getFace());
-            player.displayClientMessage(Component.translatable(
-                            ToolContent.getMessagePath(ToolContent.SELECT_POSA),
-                            event.getPos().getX(),
-                            event.getPos().getY(),
-                            event.getPos().getZ(),
-                            ToolContent.getFaceTranslation(event.getFace())
-                    ).withStyle(style -> style.withColor(ChatFormatting.YELLOW)),
-                    true);
+            
+            // 只在客户端显示消息
+            if (isClientSide) {
+                player.displayClientMessage(Component.translatable(
+                                ToolContent.getMessagePath(ToolContent.SELECT_POSA),
+                                event.getPos().getX(),
+                                event.getPos().getY(),
+                                event.getPos().getZ(),
+                                ToolContent.getFaceTranslation(event.getFace())
+                        ).withStyle(style -> style.withColor(ChatFormatting.YELLOW)),
+                        false); // 显示在聊天栏
+            }
         } else {
             // 第二次右键：设置B点并形成选区
             if(zone.setB(event.getPos())) {
-                // 成功建立选区
-                player.displayClientMessage(
-                    Component.translatable("painter.message.select.success")
-                        .withStyle(ChatFormatting.GREEN),
-                    true
-                );
+                // 只在客户端显示消息
+                if (isClientSide) {
+                    // B点设置成功，显示在聊天栏（包含方向）
+                    player.displayClientMessage(Component.translatable(
+                                    ToolContent.getMessagePath(ToolContent.SELECT_POSB),
+                                    event.getPos().getX(),
+                                    event.getPos().getY(),
+                                    event.getPos().getZ(),
+                                    ToolContent.getFaceTranslation(event.getFace())
+                            ).withStyle(style -> style.withColor(ChatFormatting.YELLOW)),
+                            false);
+                    
+                    // 成功建立选区
+                    player.displayClientMessage(
+                        Component.translatable("painter.message.select.success")
+                            .withStyle(ChatFormatting.GREEN),
+                        true
+                    );
+                }
             } else {
-                // 两点不在同一平面，已自动清除缓存
-                player.displayClientMessage(
-                    Component.translatable("painter.message.select_b.not_in_surface")
-                        .withStyle(ChatFormatting.RED),
-                    true
-                );
+                // 只在客户端显示消息
+                if (isClientSide) {
+                    // 两点不在同一平面，已自动清除缓存
+                    player.displayClientMessage(
+                        Component.translatable("painter.message.select_b.not_in_surface")
+                            .withStyle(ChatFormatting.RED),
+                        true
+                    );
+                }
             }
         }
         player.swing(InteractionHand.MAIN_HAND);
