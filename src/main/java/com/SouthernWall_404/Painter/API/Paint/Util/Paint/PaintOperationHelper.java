@@ -4,6 +4,7 @@ import com.SouthernWall_404.Painter.API.Paint.API.AbstractPaint;
 import com.SouthernWall_404.Painter.API.Paint.Attachment.PaintInfo;
 import com.SouthernWall_404.Painter.API.Paint.Imply.SimpleBlockPaint;
 import com.SouthernWall_404.Painter.API.Paint.Imply.SlabBlockPaint;
+import com.SouthernWall_404.Painter.API.Wallpaper.BlockWallPaper;
 import com.SouthernWall_404.Painter.Common.Init.ModAttachments;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
@@ -78,7 +79,7 @@ public final class PaintOperationHelper {
 
             AbstractPaint paint=paints.get(blockPos);
 
-            paint.paint(direction,material);
+            paint.paint(direction,new BlockWallPaper(material,direction));
 
             paintInfo.putPaints(level,blockPos, paint);
 
@@ -96,13 +97,13 @@ public final class PaintOperationHelper {
             {
                 SlabType slabType=origin.getValue(SlabBlock.TYPE);
                 AbstractPaint paint=new SlabBlockPaint(blockPos,slabType);
-                paint.paint(direction, material);
+                paint.paint(direction, new BlockWallPaper(material,direction));
                 paintInfo.putPaints(level,blockPos, paint);
             }
             if(origin.isCollisionShapeFullBlock(level,blockPos))
             {
                 AbstractPaint paint=new SimpleBlockPaint(blockPos);
-                paint.paint(direction, material);
+                paint.paint(direction, new BlockWallPaper(material,direction));
                 paintInfo.putPaints(level,blockPos, paint);
             }
             //        AbstractRender render = new SimpleBlockPaint();//默认普通方块

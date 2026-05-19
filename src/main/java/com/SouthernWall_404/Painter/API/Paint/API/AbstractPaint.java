@@ -265,9 +265,13 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>, Dire
         //TODO 这里会因为输入origin而产生着色问题
     }
 
-    public final void paint(Direction f, BlockState blockState) {
 
-        putMaterial(f,blockState);
+    public void paint(Direction f, BlockState material) {
+        paint(f,new BlockWallPaper(material,f));
+    }
+    public final void paint(Direction f,IWallpaper wallpaper) {
+
+        putMaterial(f,wallpaper);
         refresh();
     }
 
@@ -293,13 +297,11 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>, Dire
     }
 
     //TODO 有待修改为Wallpaper类
-    public void putMaterial(Direction f, BlockState blockState)
+    public void putMaterial(Direction f, IWallpaper wallpaper)
     {
         int flag = getFlag(f);
-        if (blockState != null) {
-            wallpapers.put(flag, new BlockWallPaper(blockState, f));
-        } else {
-            wallpapers.remove(flag);
+        if (wallpaper != null) {
+            wallpapers.put(flag, wallpaper);
         }
     }
 
