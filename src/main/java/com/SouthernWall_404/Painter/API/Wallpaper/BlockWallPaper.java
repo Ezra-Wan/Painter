@@ -38,6 +38,7 @@ public class BlockWallPaper extends ListOverlayWallpaper{
     
     private BlockState material;
     private Direction face;
+    private float[] uvOffset=new float[2];
 
     public BlockWallPaper(BlockState material,Direction face) {
         super(getOverlays(material,face));
@@ -59,6 +60,11 @@ public class BlockWallPaper extends ListOverlayWallpaper{
             refresh();//TODO 似乎有数据持久化上的问题
 
         }
+
+    }
+
+    public void setUvOffset(float u,float v) {
+
 
     }
 
@@ -111,7 +117,6 @@ public class BlockWallPaper extends ListOverlayWallpaper{
         }
         return overlays;
     }
-
     public static List<BakedQuad> getQuadsForDirection(BlockState state, Direction face) {
 
         BakedModel model = Minecraft.getInstance().getModelManager().getBlockModelShaper().getBlockModel(state);

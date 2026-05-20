@@ -30,7 +30,8 @@ public class PaintUtil {
 
         if (!isInMainHand) {//当副手持刷子
             if (paint != null) {//只要有paint在
-                if(level.isClientSide) PaintOperationHelper.cycleTextureUV(blockPos,direction); // 旋转纹理并发送网络包
+                //TODO 这里有uv处理相关
+//                if(level.isClientSide) PaintOperationHelper.cycleTextureUV(blockPos,direction); // 旋转纹理并发送网络包
             }
         }
         else {//当主手持刷子

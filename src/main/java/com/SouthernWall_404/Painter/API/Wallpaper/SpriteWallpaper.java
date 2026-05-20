@@ -212,6 +212,28 @@ public class SpriteWallpaper extends AbstractWallpaper {
 
         }
 
+        public Builder(BakedQuad quad,float u,float v)
+        {
+
+            this.tintIndex =quad.getTintIndex();
+            VerticesInfo verticesInfo=new VerticesInfo(quad);
+            this.altasKey= quad.getSprite().contents().name();
+
+            this.color=new int[]{//TODO 记得优化
+                    FastColor.ARGB32.color(verticesInfo.LeftUp().alpha,verticesInfo.LeftUp().red,verticesInfo.LeftUp().green,verticesInfo.LeftUp().blue),
+                    FastColor.ARGB32.color(verticesInfo.LeftDown().alpha,verticesInfo.LeftDown().red,verticesInfo.LeftDown().green,verticesInfo.LeftDown().blue),
+                    FastColor.ARGB32.color(verticesInfo.RightDown().alpha,verticesInfo.RightDown().red,verticesInfo.RightDown().green,verticesInfo.RightDown().blue),
+                    FastColor.ARGB32.color(verticesInfo.RightUp().alpha,verticesInfo.RightUp().red,verticesInfo.RightUp().green,verticesInfo.RightUp().blue)
+            };
+            this.uvs=new float[][]{
+                    {verticesInfo.LeftUp().u, verticesInfo.LeftUp().v},
+                    {verticesInfo.LeftDown().u, verticesInfo.LeftDown().v},
+                    {verticesInfo.RightDown().u, verticesInfo.RightDown().v},
+                    {verticesInfo.RightUp().u, verticesInfo.RightUp().v}
+            };
+
+        }
+
         public SpriteWallpaper build()
         {
             return new SpriteWallpaper(uvs,color, tintIndex,altasKey);

@@ -227,35 +227,7 @@ public class PaintInfo implements IAttachment {
             ServerTick.update(new ChunkPos(pos));
         }
     }
-    /**
-     * 循环切换指定位置指定方向的纹理UV
-     * @param pos 方块位置
-     * @param direction 方向
-     */
-    @OnlyIn(Dist.CLIENT)
-    public void cycleTextureUV(Level level,BlockPos pos, Direction direction) {
-        AbstractPaint paint = paints.get(pos);
-        if (paint != null) {
-            paint.cycleTextureUV(direction);
 
-            PaintSyncHelper.syncPaintUV(pos, direction, paint.getUvOffsets().get(paint.getFlag(direction)));
-        }
-    }
-
-    /**
-     * 设置指定位置指定方向的纹理UV偏移
-     * @param pos 方块位置
-     * @param direction 方向
-     * @param u U坐标偏移
-     * @param v V坐标偏移
-     */
-    public void setUVOffset(Level level,BlockPos pos, Direction direction, float u, float v) {
-        AbstractPaint paint = paints.get(pos);
-        if (paint != null) {
-            paint.setUVOffset(direction, u, v);
-            PaintSyncHelper.syncPaintUV(pos, direction, new float[]{u, v});
-        }
-    }
 
 
     @Override

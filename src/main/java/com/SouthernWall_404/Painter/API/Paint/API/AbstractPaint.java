@@ -49,8 +49,6 @@ import java.util.*;
  * 方块位置的wallPaper转包
  * - 只负责存储相关方块数据
  * - 不负责具体的渲染实现
- *
- * TODO 需要考虑对flag系统的重构
  */
 public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>, Direction> {
     //LOGGER removed
@@ -63,13 +61,11 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>, Dire
     protected Map<Integer, Vec3> renderVec=new HashMap<>();
     //========需要持久化的数据========
     protected Map<Integer, IWallpaper> wallpapers = new HashMap<>();
-    protected Map<Integer,float[]> uvOffsets =new HashMap<>();
 
     //========构造方法========
     public AbstractPaint(BlockPos blockPos,String type) {
         super(blockPos,type);
 
-        registerUVs();
         registerRenderVec();
 
     }
@@ -89,7 +85,6 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>, Dire
         return renderVec;
     }
 
-    //TODO 需要移动到Wallpaper
     protected void registerRenderVec()
     {
         if(renderVec==null)
@@ -119,19 +114,7 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>, Dire
 
     }
 
-    private void registerUVs()
-    {
-        if(uvOffsets==null)
-        {
-            uvOffsets=new HashMap<>();
-        }
-
-        flags.forEach((direction,flag)->{
-            uvOffsets.put(flag,new float[]{0,0});
-            uvOffsets.put(-flag,new float[]{0,0});
-        });
-    }
-
+    //TODO 记得添加对于同类材质的旋转兼容
     public void cycleTextureDir(Direction face)
     {
         IWallpaper wallpaper=wallpapers.get(getFlag(face));
@@ -140,61 +123,6 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>, Dire
         }
     }
 
-    /**
-     * 循环切换指定方向面的纹理UV偏移位置
-     * 使用origin面的xLength和yLength作为直接步长
-     * 逻辑：先尝试增加U，如果U超出边界(1.0)，则尝试增加V；
-     * 如果V也超出边界，则重置为(0,0)
-     * 
-     * 注意：此方法仅在客户端调用，通过数据包同步到服务端
-     */
-    //TODO 考虑转移到Wallpaper中
-    @OnlyIn(Dist.CLIENT)
-    public void cycleTextureUV(Direction direction) {
-        int flag = getFlag(direction);
-        // 获取指定方向的原始四边形以读取其UV空间尺寸
-        List<BakedQuad> originQuads = RenderUtil.getQuadsForDirection(origin,getDirection(flag));
-        if (originQuads == null || originQuads.isEmpty()) {
-            return;
-        }
-        BakedQuad originQuad = originQuads.get(0);
-        VerticesInfo originVertices = new VerticesInfo(originQuad);
-        float stepU = originVertices.getXLength();
-        float stepV = originVertices.getYLength();
-        // 如果长度为非正值，使用合理的默认值
-        if (stepU <= 0f) stepU = 0f;
-        if (stepV <= 0f) stepV = 0f;
-
-        // 获取当前UV偏移量
-        float[] current = uvOffsets.get(flag);
-        if (current == null || current.length < 2) {
-            current = new float[]{0f, 0f};
-        }
-
-        float currentU = current[0];
-        float currentV = current[1];
-
-        // 先尝试增加stepU
-        float newU = currentU + stepU;
-        float newV = currentV;
-
-        // 如果U超出边界(1.0)，重置U并尝试增加stepV
-        if (newU > 1.0f-stepU) {
-            newU = 0f;
-            newV = currentV + stepV;
-
-            // 如果V也超出边界，将两者都重置为(0,0)
-            if (newV > 1.0f-stepV) {
-                newV = 0f;
-            }
-        }
-
-        setUVOffset(direction, newU, newV);
-
-
-//        uvOffsets.put(flag, new float[]{newU, newV});
-        refresh();
-    }
     /**
      *  用于将渲染的方块面转换为实际归属的方块面，即处理null面的情况
      * @param visualFace
@@ -206,7 +134,6 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>, Dire
         return visualFace;
     }
 
-    //TODO 有待修改
     public Direction getDirection(int flag) {
         if(flag<0)flag=-flag;
         for (Map.Entry<Direction, Integer> entry : flags.entrySet()) {
@@ -217,17 +144,8 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>, Dire
         return Direction.NORTH;
     }
 
-    //TODO 有待移除
-    public Map<Integer, float[]> getUvOffsets() {
-        return uvOffsets;
-    }
-
     public void refresh() {
         wallpapers.forEach((flag, wallpaper) -> wallpaper.refresh());
-//        visibles.clear();
-//        aoFaces.clear();
-//        objects.clear();;
-//        PaintRender.setChanged();
     }
     @Override
     public void initFlags() {
@@ -249,7 +167,6 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>, Dire
         wallpapers.forEach((flag, wallpaper) -> {
             wallpaper.render(this, getDirection(flag),poseStack, buffer);
         });
-        //TODO 这里会因为输入origin而产生着色问题
     }
 
 
@@ -262,28 +179,6 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>, Dire
         refresh();
     }
 
-    /**
-     * 设置某个方向的UV偏移，供调试或扩展UI使用
-     * @param direction 方向
-     * @param u U分量偏移
-     * @param v V分量偏移
-     */
-
-    //TODO 有待移除
-    public void setUVOffset(Direction direction, float u, float v) {
-        int flag = getFlag(direction);
-        float[] off = uvOffsets.get(flag);
-        if (off == null || off.length < 2) {
-            off = new float[]{0f, 0f};
-        }
-        off[0] = u;
-        off[1] = v;
-        uvOffsets.put(flag, off);
-
-        refresh();
-    }
-
-    //TODO 有待修改为Wallpaper类
     public void putMaterial(Direction f, IWallpaper wallpaper)
     {
         int flag = getFlag(f);
@@ -300,8 +195,6 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>, Dire
         int flag = getFlag(f);
         wallpapers.remove(flag);
         wallpapers.remove(-flag);
-        uvOffsets.remove(flag);
-        uvOffsets.remove(-flag);
         refresh();
     }
 
@@ -336,7 +229,6 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>, Dire
     }
     //========覆盖序列化方法，处理 wallpapers========
 
-    //TODO 有待重构
     @Override
     public CompoundTag serializeNBT(HolderLookup.Provider provider) {
         CompoundTag tag = super.serializeNBT(provider);
@@ -355,21 +247,6 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>, Dire
         }
         tag.put("wallpapers", wallpapersList);
 
-        // Persist UV offset data
-        ListTag uvList = new ListTag();
-        if (uvOffsets != null) {
-            for (Map.Entry<Integer, float[]> e : uvOffsets.entrySet()) {
-                CompoundTag uvTag = new CompoundTag();
-                uvTag.putInt("flag", e.getKey());
-                float[] arr = e.getValue();
-                float u = (arr != null && arr.length > 0) ? arr[0] : 0f;
-                float v = (arr != null && arr.length > 1) ? arr[1] : 0f;
-                uvTag.putFloat("u", u);
-                uvTag.putFloat("v", v);
-                uvList.add(uvTag);
-            }
-        }
-        tag.put("uvOffsets", uvList);
         return tag;
     }
 
@@ -405,29 +282,6 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>, Dire
             }
         }
 
-        // 清空并恢复UV偏移数据
-        uvOffsets.clear();
-        if (tag.contains("uvOffsets", Tag.TAG_LIST)) {
-            ListTag uvList = tag.getList("uvOffsets", Tag.TAG_COMPOUND);
-            for (int i = 0; i < uvList.size(); i++) {
-                CompoundTag uvTag = uvList.getCompound(i);
-                int flag = uvTag.getInt("flag");
-                float u = uvTag.getFloat("u");
-                float v = uvTag.getFloat("v");
-                uvOffsets.put(flag, new float[]{u, v});
-            }
-        }
-        
-        // 确保所有方向标志都有对应的UV偏移条目，防止空指针异常
-        if (uvOffsets.isEmpty()) {
-            registerUVs();
-        } else {
-            flags.forEach((direction, f) -> {
-                uvOffsets.computeIfAbsent(f, k -> new float[]{0f, 0f});
-                uvOffsets.computeIfAbsent(-f, k -> new float[]{0f, 0f});
-            });
-        }
-        
         // 触发渲染系统刷新，重建可见性、环境光遮蔽和四元面缓存
         refresh();
     }
