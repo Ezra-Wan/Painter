@@ -1,6 +1,7 @@
 package com.SouthernWall_404.Painter.API.Wallpaper;
 
 import com.SouthernWall_404.LaplaceAPI.RegulappleEngine.BakedQuadRender;
+import com.SouthernWall_404.LaplaceAPI.UlrichToolBox.Blocks.BlockClientUtil;
 import com.SouthernWall_404.LaplaceAPI.UlrichToolBox.Blocks.BlockUtil;
 import com.SouthernWall_404.Painter.API.Paint.API.AbstractPaint;
 import com.SouthernWall_404.Painter.API.Paint.Util.Paint.PaintOperationHelper;
@@ -90,7 +91,7 @@ public class BlockWallPaper extends ListOverlayWallpaper{
                 if(aoFace==null)refreshAO(paint,direction);
                 if(isVisible<0)refreshVisibles(paint,direction);
                 if(quads.isEmpty()){
-                    quads=createQuad(RenderUtil.getQuadsForDirection(paint.getOrigin(),paint.translateFace(direction)).getFirst());//TODO 不是很标准的编程
+                    quads=createQuad(BlockClientUtil.getQuadsForDirection(paint.getOrigin(),paint.translateFace(direction)).getFirst());//TODO 不是很标准的编程
                 }
 
                 if(isVisible>0){//正数为可见
@@ -106,24 +107,17 @@ public class BlockWallPaper extends ListOverlayWallpaper{
     // createQuad需要修改
     // render需要添加对于颜色的处理
 
+    @OnlyIn(Dist.CLIENT)
     public static List<IWallpaper> getOverlays(BlockState material, Direction face)
     {
         List<IWallpaper> overlays=new ArrayList<>();
         Minecraft mc=Minecraft.getInstance();
         if(mc!=null) {
-            List<BakedQuad> quads = getQuadsForDirection(material, face);
+            List<BakedQuad> quads = BlockClientUtil.getQuadsForDirection(material, face);
             quads.forEach(quad -> overlays.add(SpriteWallpaper.builder(quad).build()));
         }
         return overlays;
     }
-    public static List<BakedQuad> getQuadsForDirection(BlockState state, Direction face) {
-
-        BakedModel model = Minecraft.getInstance().getModelManager().getBlockModelShaper().getBlockModel(state);
-        RandomSource random = RandomSource.create();
-        RenderType renderType = RenderUtil.getRenderType(state);
-        return model.getQuads(state, face, random, ModelData.EMPTY, renderType);
-    }
-
     @Override
     public @UnknownNullability CompoundTag serializeNBT(HolderLookup.Provider provider) {
         CompoundTag tag = new CompoundTag();

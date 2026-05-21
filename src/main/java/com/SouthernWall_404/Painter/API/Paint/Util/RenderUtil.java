@@ -20,40 +20,6 @@ import java.util.List;
 
 @OnlyIn(Dist.CLIENT)
 public class RenderUtil {
-    /**
-     * 获取方块状态对应的渲染类型
-     * @param state 方块状态
-     * @return 渲染类型，如果获取失败则返回 null
-     */
-    public static RenderType getRenderType(BlockState state) {
-
-        Minecraft mc = Minecraft.getInstance();
-        BlockRenderDispatcher dispatcher = mc.getBlockRenderer();
-
-            try {
-                // 获取方块模型使用的渲染类型
-                var model = dispatcher.getBlockModel(state);
-                if(model==null){
-                    return RenderType.solid();
-                }
-                var renderTypes = model.getRenderTypes(state,RandomSource.create(), ModelData.EMPTY);
-
-            // 返回第一个非空的渲染类型
-            if (renderTypes != null) {
-                for (RenderType type : renderTypes) {
-                    if (type != null) {
-                        return type;
-                    }
-                }
-            }
-        } catch (Exception e) {
-            // 如果获取失败，返回默认的 solid 类型
-            return RenderType.solid();
-        }
-
-        return RenderType.solid();
-    }
-
 
     @OnlyIn(Dist.CLIENT)
     public static boolean shouldRenderFace(BlockPos pos,BlockState state, Direction face ) {
@@ -72,15 +38,6 @@ public class RenderUtil {
         // 调用原版标准面渲染判定逻辑
         boolean shouldRender=Block.shouldRenderFace(state, level, pos, face, neighborPos);
         return shouldRender;
-    }
-
-
-    public static List<BakedQuad> getQuadsForDirection(BlockState state, Direction face) {
-
-        BakedModel model = Minecraft.getInstance().getModelManager().getBlockModelShaper().getBlockModel(state);
-        RandomSource random = RandomSource.create();
-        RenderType renderType = RenderUtil.getRenderType(state);
-        return model.getQuads(state, face, random, ModelData.EMPTY, renderType);
     }
 }
 
