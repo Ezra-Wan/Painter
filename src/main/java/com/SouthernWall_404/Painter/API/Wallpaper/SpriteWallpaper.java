@@ -44,10 +44,13 @@ public class SpriteWallpaper extends AbstractWallpaper {
 
     public static final String TYPE="sprite";
 
+    //========属性=========
     private float[][] uvs = new float[4][2];//顺序：左上，左下，右下，右上
     private int[] color = new int[4];
     private int tintIndex;
     private ResourceLocation altasKey;
+
+
 
     SpriteWallpaper(float[][] uvs, int[] color, int tintIndex, ResourceLocation altasKey) {
         this.uvs = uvs;
@@ -80,38 +83,46 @@ public class SpriteWallpaper extends AbstractWallpaper {
     public List<BakedQuad> createQuad(BakedQuad originQuad) {
 
         List<BakedQuad> quads=new ArrayList<>();
-        Minecraft mc=Minecraft.getInstance();
-        if(mc!=null)
-        {
-            ModelManager modelManager = Minecraft.getInstance().getModelManager();
-            TextureAtlas blocksAtlas = modelManager.getAtlas(TextureAtlas.LOCATION_BLOCKS);
-            TextureAtlasSprite sprite=blocksAtlas.getSprite(altasKey);
-
-            VerticesInfo originInfo=new VerticesInfo(originQuad);
-
-            VerticeInfo[] mixedVertices=new VerticeInfo[4];
-            for(int i=0;i<4;i++)
+            Minecraft mc=Minecraft.getInstance();
+            if(mc!=null)
             {
-                VerticeInfo originVert=originInfo.vertices.get(i);
-                VerticeInfo mixedVert= VerticeInfo.builder()
-                        .uv(uvs[i][0],uvs[i][1])
-                        .normal(originVert.normal)
-                        .color(
-                                FastColor.ABGR32.alpha(color[i]),
-                                FastColor.ABGR32.blue(color[i]),
-                                FastColor.ABGR32.green(color[i]),
-                                FastColor.ABGR32.red(color[i])
-                        )
-                        .position(originVert.position)
-                        .light(originVert.light)
-                        .build();
-                mixedVertices[i]=mixedVert;
+                VerticesInfo originInfo=new VerticesInfo(originQuad);
+                //TODO 记得改laplace命名
 
-            }
-            VerticesInfo mixedInfo=VerticesInfo.of(mixedVertices);
-            BakedQuad quad=new BakedQuad(mixedInfo.vertices(), tintIndex,originQuad.getDirection(),sprite,true);
-            quads.add(quad);
+                ModelManager modelManager = Minecraft.getInstance().getModelManager();
+                TextureAtlas blocksAtlas = modelManager.getAtlas(TextureAtlas.LOCATION_BLOCKS);
+                TextureAtlasSprite sprite=blocksAtlas.getSprite(altasKey);
+
+
+                //建立基础普通方块面
+                VerticeInfo[] mixedVertices=new VerticeInfo[4];
+                for(int i=0;i<4;i++)
+                {
+                    VerticeInfo originVert=originInfo.vertices.get(i);//TODO 记得添加可变方法
+                    VerticeInfo mixedVert= VerticeInfo.builder()
+                            .uv(uvs[i][0],uvs[i][1])
+                            .normal(originVert.normal)
+                            .color(
+                                    FastColor.ABGR32.alpha(color[i]),
+                                    FastColor.ABGR32.blue(color[i]),
+                                    FastColor.ABGR32.green(color[i]),
+                                    FastColor.ABGR32.red(color[i])
+                            )
+                            .position(originVert.position)
+                            .light(originVert.light)
+                            .build();
+                    mixedVertices[i]=mixedVert;
+
+                }
+
+                //uv处理
+                VerticesInfo mixedInfo=VerticesInfo.of(mixedVertices);
+                mixedInfo.implyUV(originInfo);//进行Uv长度变换
+                BakedQuad quad=new BakedQuad(mixedInfo.vertices(), tintIndex,originQuad.getDirection(),sprite,true);
+                quads.add(quad);
         }
+
+
 
 
 
@@ -206,7 +217,7 @@ public class SpriteWallpaper extends AbstractWallpaper {
             this.uvs=new float[][]{
                     {verticesInfo.LeftUp().u, verticesInfo.LeftUp().v},
                     {verticesInfo.LeftDown().u, verticesInfo.LeftDown().v},
-                    {verticesInfo.RightDown().u, verticesInfo.RightDown().v},
+                    {verticesInfo.RightDown().u, verticesInfo.RightDown().v},//TODo 这里似乎出现了解码错误
                     {verticesInfo.RightUp().u, verticesInfo.RightUp().v}
             };
 
