@@ -59,19 +59,17 @@ public class BlockWallPaper extends ListOverlayWallpaper{
 
             refresh();//TODO 似乎有数据持久化上的问题
 
+            overlays=getOverlays(material,face);
+
         }
 
     }
 
-    public void setUvOffset(float u,float v) {
-
-
-    }
 
     @Override
     public void refresh() {
         super.refresh();
-        overlays=getOverlays(material,face);
+
     }
 
     @Override
@@ -143,6 +141,8 @@ public class BlockWallPaper extends ListOverlayWallpaper{
             tag.putInt("face", face.get3DDataValue());
         }
 
+        tag.put("list", super.serializeNBT(provider));
+
         return tag;
     }
 
@@ -161,8 +161,8 @@ public class BlockWallPaper extends ListOverlayWallpaper{
             face = Direction.from3DDataValue(faceValue);
         }
 
-        if (material != null && face != null) {
-            this.overlays = getOverlays(material, face);
+        if(compoundTag.contains("list")){
+            super.deserializeNBT(provider, compoundTag.getCompound("list"));
         }
     }
 }
