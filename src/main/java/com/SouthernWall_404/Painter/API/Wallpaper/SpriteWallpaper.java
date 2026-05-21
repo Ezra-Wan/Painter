@@ -2,39 +2,27 @@ package com.SouthernWall_404.Painter.API.Wallpaper;
 
 import com.SouthernWall_404.LaplaceAPI.RegulappleEngine.BakedQuad.VerticeInfo;
 import com.SouthernWall_404.LaplaceAPI.RegulappleEngine.BakedQuad.VerticesInfo;
-import com.SouthernWall_404.Painter.API.Paint.Util.RenderUtil;
-import com.SouthernWall_404.Painter.Painter;
+import com.SouthernWall_404.Painter.API.Paint.Util.Paint.PaintSyncHelper;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.client.resources.model.ModelManager;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
-import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.FloatTag;
 import net.minecraft.nbt.IntTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FastColor;
-import net.minecraft.util.RandomSource;
-import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
-import net.neoforged.fml.common.Mod;
-import net.neoforged.neoforge.client.model.data.ModelData;
-import net.neoforged.neoforge.common.NeoForge;
-import net.neoforged.neoforge.registries.NeoForgeRegistries;
 import org.jetbrains.annotations.UnknownNullability;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * 需要做拆分
@@ -80,7 +68,30 @@ public class SpriteWallpaper extends AbstractWallpaper {
         return TYPE;
     }
 
-    public void cycleTextureUV(BakedQuad originQuad){
+    public void setUVOffset(float u, float v)
+    {
+        uOffset = u;
+        vOffset = v;
+        refresh();
+
+        //TODO 记得做错误处理
+    }
+    @Override
+    public void setUVOffset(BlockPos blockPos,Direction direction,float uOffset, float vOffset) {
+        this.uOffset = uOffset;
+        this.vOffset = vOffset;
+        refresh();
+        if (Minecraft.getInstance()!=null&&Minecraft.getInstance().level.isClientSide)
+        {
+            PaintSyncHelper.syncPaintUV(blockPos,direction,new float[]{uOffset,vOffset});
+        }
+
+        //TODO UV处理需要再修复以下
+        //TODO Block和这里的职能略有不清，需要明确
+        //TODO 似乎有循环调用的错误
+    }
+
+    public void cycleTextureUV(BakedQuad originQuad, Direction direction, BlockPos blockPos){
 
         //获取步长
         VerticesInfo originVertices = new VerticesInfo(originQuad);
@@ -105,24 +116,26 @@ public class SpriteWallpaper extends AbstractWallpaper {
         boolean uReachedEnd = (nextU >= 1.0f);
         // 判断V方向是否截止
         boolean vReachedEnd = (nextV >= 1.0f);
-        
+
+        float uToSet=0;
+        float vToSet=0;
+
         if (!uReachedEnd) {
             // U方向未截止，继续步进U
-            uOffset = nextU;
+            uToSet = nextU;
         } else {
             // U方向已截止，重置U并步进V
-            uOffset = 0.0f;
+            uToSet = 0.0f;
             
             if (!vReachedEnd) {
                 // V方向未截止，步进V
-                vOffset = nextV;
+                vToSet = nextV;
             } else {
                 // V方向也已截止，全部归零
-                vOffset = 0.0f;
+                vToSet = 0.0f;
             }
         }
-
-        refresh();
+        setUVOffset(blockPos, direction,uToSet, vToSet);
     }
 
     @OnlyIn(Dist.CLIENT)
@@ -204,12 +217,18 @@ public class SpriteWallpaper extends AbstractWallpaper {
         if (altasKey != null) {
             tag.putString("altasKey", altasKey.toString());
         }
+
+        tag.putFloat("u_offset", uOffset);
+        tag.putFloat("v_offset", vOffset);
         
         return tag;
     }
 
     @Override
     public void deserializeNBT(HolderLookup.Provider provider, CompoundTag compoundTag) {
+
+        if(compoundTag.contains("u_offset"))uOffset=compoundTag.getFloat("u_offset");
+        if(compoundTag.contains("v_offset"))vOffset=compoundTag.getFloat("v_offset");
         // 反序列化 UV 坐标数组
         ListTag uvsList = compoundTag.getList("uvs", net.minecraft.nbt.Tag.TAG_LIST);
         for (int i = 0; i < 4 && i < uvsList.size(); i++) {

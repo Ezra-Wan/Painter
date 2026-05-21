@@ -51,6 +51,7 @@ public class ServerHandlers {
             AbstractPaint paint = PaintAttachmentHelper.getPaint(level, blockPos);
             if (paint == null) return;
 
+            paint.getWallpaper( direction).setUVOffset(u,v);
 //            // 标记区块需要保存
 //            LevelChunk chunk = level.getChunkAt(blockPos);
 //            chunk.setUnsaved(true);
