@@ -1,6 +1,7 @@
 package com.SouthernWall_404.Painter.API.Wallpaper;
 
 import com.SouthernWall_404.LaplaceAPI.RegulappleEngine.BakedQuadRender;
+import com.SouthernWall_404.LaplaceAPI.UlrichToolBox.Blocks.BlockUtil;
 import com.SouthernWall_404.Painter.API.Paint.API.AbstractPaint;
 import com.SouthernWall_404.Painter.API.Paint.Util.Paint.PaintOperationHelper;
 import com.SouthernWall_404.Painter.API.Paint.Util.RenderUtil;
@@ -55,7 +56,7 @@ public class BlockWallPaper extends ListOverlayWallpaper{
 
     public void cycleTextureDir() {
         if (material != null) {
-            material= PaintOperationHelper.cycleInDirection( material);
+            material= BlockUtil.cycleInDirection( material);
 
             refresh();//TODO 似乎有数据持久化上的问题
 
