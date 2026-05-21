@@ -49,6 +49,8 @@ public class SpriteWallpaper extends AbstractWallpaper {
     private int[] color = new int[4];
     private int tintIndex;
     private ResourceLocation altasKey;
+    private float uOffset=0;//左下角点u方向偏移量
+    private float vOffset=0;//左下角点v方向偏移量
 
 
 
@@ -76,6 +78,51 @@ public class SpriteWallpaper extends AbstractWallpaper {
     @Override
     public String getType() {
         return TYPE;
+    }
+
+    public void cycleTextureUV(BakedQuad originQuad){
+
+        //获取步长
+        VerticesInfo originVertices = new VerticesInfo(originQuad);
+        float stepU = originVertices.getXLength();
+        float stepV = originVertices.getYLength();
+
+        /**
+         * TODO 进行步进
+         *  先沿u行进，如果截止后沿v步进重启
+         *  若v截止，且u截止，则归零
+         *  - 截止条件：当前值在经过stepU补正（也即quad右上点）刚好到达1时停止
+         *  - 处理：
+         *   - 若小于1，则加上stepU继续步进
+         *   - 若大于1，则归位到1-stepU，下一次截止
+         */
+        
+        // 计算右上角的UV值（当前偏移 + 步长）
+        float nextU = uOffset + stepU;
+        float nextV = vOffset + stepV;
+        
+        // 判断U方向是否截止
+        boolean uReachedEnd = (nextU >= 1.0f);
+        // 判断V方向是否截止
+        boolean vReachedEnd = (nextV >= 1.0f);
+        
+        if (!uReachedEnd) {
+            // U方向未截止，继续步进U
+            uOffset = nextU;
+        } else {
+            // U方向已截止，重置U并步进V
+            uOffset = 0.0f;
+            
+            if (!vReachedEnd) {
+                // V方向未截止，步进V
+                vOffset = nextV;
+            } else {
+                // V方向也已截止，全部归零
+                vOffset = 0.0f;
+            }
+        }
+
+        refresh();
     }
 
     @OnlyIn(Dist.CLIENT)
@@ -118,6 +165,7 @@ public class SpriteWallpaper extends AbstractWallpaper {
                 //uv处理
                 VerticesInfo mixedInfo=VerticesInfo.of(mixedVertices);
                 mixedInfo.implyUV(originInfo);//进行Uv长度变换
+                mixedInfo.implyUVOffest(uOffset,vOffset);
                 BakedQuad quad=new BakedQuad(mixedInfo.vertices(), tintIndex,originQuad.getDirection(),sprite,true);
                 quads.add(quad);
         }

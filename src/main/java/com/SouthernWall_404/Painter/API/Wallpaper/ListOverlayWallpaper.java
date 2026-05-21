@@ -18,6 +18,11 @@ public class ListOverlayWallpaper extends AbstractWallpaper {
     protected List<IWallpaper> overlays;
     public static final String TYPE = "List";
 
+    @Override
+    public void cycleTextureUV(BakedQuad originQuad) {
+        overlays.forEach(wallpaper->wallpaper.cycleTextureUV(originQuad));
+    }
+
     public ListOverlayWallpaper(List<IWallpaper> overlays) {
         this.overlays=overlays;
     }

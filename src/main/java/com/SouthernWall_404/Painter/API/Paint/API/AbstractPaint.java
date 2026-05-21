@@ -85,6 +85,13 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>, Dire
         return renderVec;
     }
 
+    @OnlyIn(Dist.CLIENT)
+    public void cycleTextureUV(Direction direction) {
+        int flag=getFlag( direction);
+        IWallpaper wallpaper=getWallpaper( direction);
+        wallpaper.cycleTextureUV(RenderUtil.getQuadsForDirection(getOrigin(),direction).getFirst());
+    }
+
     protected void registerRenderVec()
     {
         if(renderVec==null)

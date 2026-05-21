@@ -132,19 +132,19 @@ public final class PaintOperationHelper {
     }
 
 
-//    @OnlyIn(Dist.CLIENT)
-//    public static void cycleTextureUV(BlockPos blockPos, Direction direction) {
-//
-//        Minecraft mc=Minecraft.getInstance();
-//        if(mc!=null)
-//        {
-//            Level level = mc.level;
-//            if(level!= null)
-//            {
-//                LevelChunk chunk = level.getChunkAt(blockPos);
-//                PaintInfo paintInfo = chunk.getData(ModAttachments.PAINT_INFO);
+    @OnlyIn(Dist.CLIENT)
+    public static void cycleTextureUV(BlockPos blockPos, Direction direction) {
+
+        Minecraft mc=Minecraft.getInstance();
+        if(mc!=null)
+        {
+            Level level = mc.level;
+            if(level!= null)
+            {
+                LevelChunk chunk = level.getChunkAt(blockPos);
+                PaintInfo paintInfo = chunk.getData(ModAttachments.PAINT_INFO);
 //                paintInfo.cycleTextureUV(level,blockPos, direction);
-//            }
-//        }
-//    }
+            }
+        }
+    }
 }

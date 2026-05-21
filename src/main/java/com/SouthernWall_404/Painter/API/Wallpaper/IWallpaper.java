@@ -26,4 +26,7 @@ public interface IWallpaper extends INBTSerializable<CompoundTag> {
 
     @OnlyIn(Dist.CLIENT)
     public void refresh();
+
+    @OnlyIn(Dist.CLIENT)
+    public void cycleTextureUV(BakedQuad originQuad);
 }
