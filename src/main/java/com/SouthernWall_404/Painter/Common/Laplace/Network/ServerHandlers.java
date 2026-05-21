@@ -24,6 +24,7 @@ public class ServerHandlers {
         NetworkRegister.registerClientRequestHandler(CYCLE_TEXTURE_UV_PACKET, ((packet, context) -> cycleTextureUVHandler( packet, context)));
     }
 
+    //TODO 暂且保留作为备用
     public static void cycleTextureUVHandler(ClientRequestPacket packet, IPayloadContext context) {
         context.enqueueWork(() -> {
             Player player = context.player();
@@ -50,9 +51,7 @@ public class ServerHandlers {
             AbstractPaint paint = PaintAttachmentHelper.getPaint(level, blockPos);
             if (paint == null) return;
 
-            // 直接设置UV偏移值（服务端不执行计算，只存储）
-            paint.setUVOffset(direction, u, v);
-            
+            paint.getWallpaper( direction).setUVOffset(u,v);
 //            // 标记区块需要保存
 //            LevelChunk chunk = level.getChunkAt(blockPos);
 //            chunk.setUnsaved(true);

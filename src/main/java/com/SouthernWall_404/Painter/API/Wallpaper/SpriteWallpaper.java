@@ -2,39 +2,27 @@ package com.SouthernWall_404.Painter.API.Wallpaper;
 
 import com.SouthernWall_404.LaplaceAPI.RegulappleEngine.BakedQuad.VerticeInfo;
 import com.SouthernWall_404.LaplaceAPI.RegulappleEngine.BakedQuad.VerticesInfo;
-import com.SouthernWall_404.Painter.API.Paint.Util.RenderUtil;
-import com.SouthernWall_404.Painter.Painter;
+import com.SouthernWall_404.Painter.API.Paint.Util.Paint.PaintSyncHelper;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.client.resources.model.ModelManager;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
-import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.FloatTag;
 import net.minecraft.nbt.IntTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FastColor;
-import net.minecraft.util.RandomSource;
-import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
-import net.neoforged.fml.common.Mod;
-import net.neoforged.neoforge.client.model.data.ModelData;
-import net.neoforged.neoforge.common.NeoForge;
-import net.neoforged.neoforge.registries.NeoForgeRegistries;
 import org.jetbrains.annotations.UnknownNullability;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * 需要做拆分
@@ -44,10 +32,15 @@ public class SpriteWallpaper extends AbstractWallpaper {
 
     public static final String TYPE="sprite";
 
+    //========属性=========
     private float[][] uvs = new float[4][2];//顺序：左上，左下，右下，右上
     private int[] color = new int[4];
     private int tintIndex;
     private ResourceLocation altasKey;
+    private float uOffset=0;//左下角点u方向偏移量
+    private float vOffset=0;//左下角点v方向偏移量
+
+
 
     SpriteWallpaper(float[][] uvs, int[] color, int tintIndex, ResourceLocation altasKey) {
         this.uvs = uvs;
@@ -75,43 +68,122 @@ public class SpriteWallpaper extends AbstractWallpaper {
         return TYPE;
     }
 
+    public void setUVOffset(float u, float v)
+    {
+        uOffset = u;
+        vOffset = v;
+        refresh();
+
+        //TODO 记得做错误处理
+    }
+    @Override
+    public void setUVOffset(BlockPos blockPos,Direction direction,float uOffset, float vOffset) {
+        this.uOffset = uOffset;
+        this.vOffset = vOffset;
+        refresh();
+        if (Minecraft.getInstance()!=null&&Minecraft.getInstance().level.isClientSide)
+        {
+            PaintSyncHelper.syncPaintUV(blockPos,direction,new float[]{uOffset,vOffset});
+        }
+
+        //TODO UV处理需要再修复以下
+        //TODO Block和这里的职能略有不清，需要明确
+        //TODO 似乎有循环调用的错误
+    }
+
+    public void cycleTextureUV(BakedQuad originQuad, Direction direction, BlockPos blockPos){
+
+        //获取步长
+        VerticesInfo originVertices = new VerticesInfo(originQuad);
+        float stepU = originVertices.getXLength();
+        float stepV = originVertices.getYLength();
+
+        /**
+         * TODO 进行步进
+         *  先沿u行进，如果截止后沿v步进重启
+         *  若v截止，且u截止，则归零
+         *  - 截止条件：当前值在经过stepU补正（也即quad右上点）刚好到达1时停止
+         *  - 处理：
+         *   - 若小于1，则加上stepU继续步进
+         *   - 若大于1，则归位到1-stepU，下一次截止
+         */
+        
+        // 计算右上角的UV值（当前偏移 + 步长）
+        float nextU = uOffset + stepU;
+        float nextV = vOffset + stepV;
+        
+        // 判断U方向是否截止
+        boolean uReachedEnd = (nextU >= 1.0f);
+        // 判断V方向是否截止
+        boolean vReachedEnd = (nextV >= 1.0f);
+
+        float uToSet=0;
+        float vToSet=0;
+
+        if (!uReachedEnd) {
+            // U方向未截止，继续步进U
+            uToSet = nextU;
+        } else {
+            // U方向已截止，重置U并步进V
+            uToSet = 0.0f;
+            
+            if (!vReachedEnd) {
+                // V方向未截止，步进V
+                vToSet = nextV;
+            } else {
+                // V方向也已截止，全部归零
+                vToSet = 0.0f;
+            }
+        }
+        setUVOffset(blockPos, direction,uToSet, vToSet);
+    }
+
     @OnlyIn(Dist.CLIENT)
     @Override
     public List<BakedQuad> createQuad(BakedQuad originQuad) {
 
         List<BakedQuad> quads=new ArrayList<>();
-        Minecraft mc=Minecraft.getInstance();
-        if(mc!=null)
-        {
-            ModelManager modelManager = Minecraft.getInstance().getModelManager();
-            TextureAtlas blocksAtlas = modelManager.getAtlas(TextureAtlas.LOCATION_BLOCKS);
-            TextureAtlasSprite sprite=blocksAtlas.getSprite(altasKey);
-
-            VerticesInfo originInfo=new VerticesInfo(originQuad);
-
-            VerticeInfo[] mixedVertices=new VerticeInfo[4];
-            for(int i=0;i<4;i++)
+            Minecraft mc=Minecraft.getInstance();
+            if(mc!=null)
             {
-                VerticeInfo originVert=originInfo.vertices.get(i);
-                VerticeInfo mixedVert= VerticeInfo.builder()
-                        .uv(uvs[i][0],uvs[i][1])
-                        .normal(originVert.normal)
-                        .color(
-                                FastColor.ABGR32.alpha(color[i]),
-                                FastColor.ABGR32.blue(color[i]),
-                                FastColor.ABGR32.green(color[i]),
-                                FastColor.ABGR32.red(color[i])
-                        )
-                        .position(originVert.position)
-                        .light(originVert.light)
-                        .build();
-                mixedVertices[i]=mixedVert;
+                VerticesInfo originInfo=new VerticesInfo(originQuad);
+                //TODO 记得改laplace命名
 
-            }
-            VerticesInfo mixedInfo=VerticesInfo.of(mixedVertices);
-            BakedQuad quad=new BakedQuad(mixedInfo.vertices(), tintIndex,originQuad.getDirection(),sprite,true);
-            quads.add(quad);
+                ModelManager modelManager = Minecraft.getInstance().getModelManager();
+                TextureAtlas blocksAtlas = modelManager.getAtlas(TextureAtlas.LOCATION_BLOCKS);
+                TextureAtlasSprite sprite=blocksAtlas.getSprite(altasKey);
+
+
+                //建立基础普通方块面
+                VerticeInfo[] mixedVertices=new VerticeInfo[4];
+                for(int i=0;i<4;i++)
+                {
+                    VerticeInfo originVert=originInfo.vertices.get(i);//TODO 记得添加可变方法
+                    VerticeInfo mixedVert= VerticeInfo.builder()
+                            .uv(uvs[i][0],uvs[i][1])
+                            .normal(originVert.normal)
+                            .color(
+                                    FastColor.ABGR32.alpha(color[i]),
+                                    FastColor.ABGR32.blue(color[i]),
+                                    FastColor.ABGR32.green(color[i]),
+                                    FastColor.ABGR32.red(color[i])
+                            )
+                            .position(originVert.position)
+                            .light(originVert.light)
+                            .build();
+                    mixedVertices[i]=mixedVert;
+
+                }
+
+                //uv处理
+                VerticesInfo mixedInfo=VerticesInfo.of(mixedVertices);
+                mixedInfo.implyUV(originInfo);//进行Uv长度变换
+                mixedInfo.implyUVOffest(uOffset,vOffset);
+                BakedQuad quad=new BakedQuad(mixedInfo.vertices(), tintIndex,originQuad.getDirection(),sprite,true);
+                quads.add(quad);
         }
+
+
 
 
 
@@ -145,12 +217,18 @@ public class SpriteWallpaper extends AbstractWallpaper {
         if (altasKey != null) {
             tag.putString("altasKey", altasKey.toString());
         }
+
+        tag.putFloat("u_offset", uOffset);
+        tag.putFloat("v_offset", vOffset);
         
         return tag;
     }
 
     @Override
     public void deserializeNBT(HolderLookup.Provider provider, CompoundTag compoundTag) {
+
+        if(compoundTag.contains("u_offset"))uOffset=compoundTag.getFloat("u_offset");
+        if(compoundTag.contains("v_offset"))vOffset=compoundTag.getFloat("v_offset");
         // 反序列化 UV 坐标数组
         ListTag uvsList = compoundTag.getList("uvs", net.minecraft.nbt.Tag.TAG_LIST);
         for (int i = 0; i < 4 && i < uvsList.size(); i++) {
@@ -191,6 +269,28 @@ public class SpriteWallpaper extends AbstractWallpaper {
         }
 
         public Builder(BakedQuad quad)
+        {
+
+            this.tintIndex =quad.getTintIndex();
+            VerticesInfo verticesInfo=new VerticesInfo(quad);
+            this.altasKey= quad.getSprite().contents().name();
+
+            this.color=new int[]{//TODO 记得优化
+                    FastColor.ARGB32.color(verticesInfo.LeftUp().alpha,verticesInfo.LeftUp().red,verticesInfo.LeftUp().green,verticesInfo.LeftUp().blue),
+                    FastColor.ARGB32.color(verticesInfo.LeftDown().alpha,verticesInfo.LeftDown().red,verticesInfo.LeftDown().green,verticesInfo.LeftDown().blue),
+                    FastColor.ARGB32.color(verticesInfo.RightDown().alpha,verticesInfo.RightDown().red,verticesInfo.RightDown().green,verticesInfo.RightDown().blue),
+                    FastColor.ARGB32.color(verticesInfo.RightUp().alpha,verticesInfo.RightUp().red,verticesInfo.RightUp().green,verticesInfo.RightUp().blue)
+            };
+            this.uvs=new float[][]{
+                    {verticesInfo.LeftUp().u, verticesInfo.LeftUp().v},
+                    {verticesInfo.LeftDown().u, verticesInfo.LeftDown().v},
+                    {verticesInfo.RightDown().u, verticesInfo.RightDown().v},//TODo 这里似乎出现了解码错误
+                    {verticesInfo.RightUp().u, verticesInfo.RightUp().v}
+            };
+
+        }
+
+        public Builder(BakedQuad quad,float u,float v)
         {
 
             this.tintIndex =quad.getTintIndex();

@@ -30,7 +30,10 @@ public class PaintUtil {
 
         if (!isInMainHand) {//当副手持刷子
             if (paint != null) {//只要有paint在
-                if(level.isClientSide) PaintOperationHelper.cycleTextureUV(blockPos,direction); // 旋转纹理并发送网络包
+                //TODO 这里有uv处理相关
+
+                //TODO 需要整理到PaintInfo?又或者不用
+                if(level.isClientSide) paint.cycleTextureUV(direction); // 旋转纹理并发送网络包
             }
         }
         else {//当主手持刷子
@@ -55,10 +58,7 @@ public class PaintUtil {
                 //则正常喷涂
             } else {// 副手不是方块物品，则尝试利用已有的 paint 材质进行旋转
                 if (paint != null) {//如果存在paint
-                    BlockState oldMaterial = paint.getMaterial(direction);
-                    if (oldMaterial != null) {//且在点击面存在原有的喷涂
-                        toPaint = PaintOperationHelper.cycleInDirection(oldMaterial);//旋转uv
-                    }
+                    paint.cycleTextureDir( direction);
                 }
             }
 

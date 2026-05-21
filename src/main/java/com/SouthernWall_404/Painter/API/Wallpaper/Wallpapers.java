@@ -22,6 +22,7 @@ public class Wallpapers {
     static {
         register(SpriteWallpaper.TYPE, SpriteWallpaper::new);
         register(ListOverlayWallpaper.TYPE, ListOverlayWallpaper::new);
+        register(BlockWallPaper.TYPE, BlockWallPaper::new);
     }
 
 }
