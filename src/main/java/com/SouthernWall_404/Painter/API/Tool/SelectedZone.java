@@ -108,13 +108,15 @@ public class SelectedZone implements IAttachment {
 
 
 
-    //TODO 建立面时记得加合法判定
-    public void clear()
-    {
-        quads.clear();
-        contains.clear();
-        cachedA=null;
-        cachedFace=null;
+    /**
+     * 清除所有选区数据
+     */
+    public void clear() {
+        quads.clear();         // 清空选区列表
+        contains.clear();      // 清空位置映射
+        cachedA = null;        // 清除缓存A点
+        cachedFace = null;     // 清除缓存朝向
+        SelectedZoneRender.setChanged(); // 通知渲染系统更新
     }
 
     public Map<Direction, Set<BlockPos>> getContains() {
