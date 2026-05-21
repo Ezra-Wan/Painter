@@ -34,6 +34,8 @@ public abstract class AbstractWallpaper implements IWallpaper{
     protected ModelRender.AmbientOcclusionFace aoFace=null;//AO缓存
     protected short isVisible=-1;//可见性,负数为非法
 
+
+    //TODO 考虑将getType放在这里
     @OnlyIn(Dist.CLIENT)
     public void refreshAO(AbstractPaint paint,Direction direction){
         Minecraft mc=Minecraft.getInstance();
@@ -64,6 +66,7 @@ public abstract class AbstractWallpaper implements IWallpaper{
         aoFace=null;
         isVisible=-1;
         quads.clear();
+
     }
 
     @OnlyIn(Dist.CLIENT)
@@ -78,7 +81,7 @@ public abstract class AbstractWallpaper implements IWallpaper{
                 if(aoFace==null)refreshAO(paint,direction);
                 if(isVisible<0)refreshVisibles(paint,direction);
                 if(quads.isEmpty()){
-                    quads=createQuad(paint.getQuadsForDirection(paint.getOrigin(), paint.getFlag(direction)).getFirst());
+                    quads=createQuad(RenderUtil.getQuadsForDirection(paint.getOrigin(),paint.translateFace(direction)).getFirst());//TODO 不是很标准的编程
                 }
 
                 if(isVisible>0){//正数为可见
