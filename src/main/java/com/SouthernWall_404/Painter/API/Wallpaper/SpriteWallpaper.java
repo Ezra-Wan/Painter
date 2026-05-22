@@ -158,20 +158,16 @@ public class SpriteWallpaper extends AbstractWallpaper {
                 VerticeInfo[] mixedVertices=new VerticeInfo[4];
                 for(int i=0;i<4;i++)
                 {
-                    VerticeInfo originVert=originInfo.vertices.get(i);//TODO 记得添加可变方法
-                    VerticeInfo mixedVert= VerticeInfo.builder()
+                    VerticeInfo originVert=originInfo.vertices.get(i);
+                    mixedVertices[i]=originVert.copy()
                             .uv(uvs[i][0],uvs[i][1])
-                            .normal(originVert.normal)
                             .color(
                                     FastColor.ABGR32.alpha(color[i]),
                                     FastColor.ABGR32.blue(color[i]),
                                     FastColor.ABGR32.green(color[i]),
-                                    FastColor.ABGR32.red(color[i])
+                                    FastColor.ABGR32.red(color[i])//TODO 这里记得改成比较合理的方法
                             )
-                            .position(originVert.position)
-                            .light(originVert.light)
                             .build();
-                    mixedVertices[i]=mixedVert;
 
                 }
 
