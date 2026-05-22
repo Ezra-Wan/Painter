@@ -1,6 +1,6 @@
 package com.SouthernWall_404.Painter.API.Paint.Util.Paint;
 
-import com.SouthernWall_404.LaplaceAPI.VertinCore.Util.BlockUtil;
+import com.SouthernWall_404.LaplaceAPI.UlrichToolBox.Blocks.BlockUtil;
 import com.SouthernWall_404.Painter.API.Paint.API.AbstractPaint;
 import com.SouthernWall_404.Painter.API.Paint.Attachment.PaintInfo;
 import com.SouthernWall_404.Painter.API.Tool.Wall.IFilter;
@@ -49,7 +49,7 @@ public class PaintUtil {
                 if (paint != null) {//如果点击存有paint
                     BlockState existingMat = paint.getMaterial(direction);//获取当前面的喷涂
                     if (existingMat != null && existingMat.getBlock() == toPaint.getBlock()) {//如果当面有喷涂，且与手中方块相同
-                        toPaint = PaintOperationHelper.cycleInDirection(existingMat);//旋转
+                        toPaint = BlockUtil.cycleInDirection(existingMat);//旋转
                     }
                     //如果当面没有喷涂，或与手中方块不同
                     //则正常喷涂
@@ -100,7 +100,7 @@ public class PaintUtil {
                         {
                             if(oldMeterial.getBlock()==toPaint.getBlock())//如果它存在
                             {
-                                toPaint=PaintOperationHelper.cycleInDirection(oldMeterial);//喷涂类设定为点击处喷涂的旋转后状态
+                                toPaint=BlockUtil.cycleInDirection(oldMeterial);//喷涂类设定为点击处喷涂的旋转后状态
                             }//没有原本喷涂
                         }
                     }
@@ -115,7 +115,7 @@ public class PaintUtil {
                     BlockState oldMeterial=paint.getMaterial(face);//尝试获取当前此面已有的材料
                     if(oldMeterial!=null)//如果它存在
                     {
-                        toPaint=PaintOperationHelper.cycleInDirection(oldMeterial);//喷涂类设定为点击处喷涂的旋转后状态
+                        toPaint=BlockUtil.cycleInDirection(oldMeterial);//喷涂类设定为点击处喷涂的旋转后状态
                     }//没有原本喷涂
                     else {
                         return;//没有动作

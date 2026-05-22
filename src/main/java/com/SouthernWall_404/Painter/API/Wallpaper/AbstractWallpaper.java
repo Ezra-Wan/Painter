@@ -3,6 +3,7 @@ package com.SouthernWall_404.Painter.API.Wallpaper;
 import com.SouthernWall_404.LaplaceAPI.Math37.Vector3f;
 import com.SouthernWall_404.LaplaceAPI.RegulappleEngine.BakedQuadRender;
 import com.SouthernWall_404.LaplaceAPI.RegulappleEngine.ModelRender;
+import com.SouthernWall_404.LaplaceAPI.UlrichToolBox.Blocks.BlockClientUtil;
 import com.SouthernWall_404.LaplaceAPI.VertinCore.Config.Configs;
 import com.SouthernWall_404.Painter.API.Paint.API.AbstractPaint;
 import com.SouthernWall_404.Painter.API.Paint.Util.Paint.PaintValidHelper;
@@ -81,7 +82,7 @@ public abstract class AbstractWallpaper implements IWallpaper{
                 if(aoFace==null)refreshAO(paint,direction);
                 if(isVisible<0)refreshVisibles(paint,direction);
                 if(quads.isEmpty()){
-                    quads=createQuad(RenderUtil.getQuadsForDirection(paint.getOrigin(),paint.translateFace(direction)).getFirst());//TODO 不是很标准的编程
+                    quads=createQuad(BlockClientUtil.getQuadsForDirection(paint.getOrigin(),paint.translateFace(direction)).getFirst());//TODO 不是很标准的编程
                 }
 
                 if(isVisible>0){//正数为可见

@@ -1,6 +1,6 @@
 package com.SouthernWall_404.Painter.API.Paint.Util.Paint;
 
-import com.SouthernWall_404.LaplaceAPI.VertinCore.Util.BlockUtil;
+import com.SouthernWall_404.LaplaceAPI.UlrichToolBox.Blocks.BlockUtil;
 import com.SouthernWall_404.Painter.API.Paint.API.AbstractPaint;
 import com.SouthernWall_404.Painter.API.Paint.API.AbstractRender;
 import com.SouthernWall_404.Painter.Common.World.Item.ChulkItem;

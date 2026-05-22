@@ -2,6 +2,7 @@
 package com.SouthernWall_404.Painter.API.Paint.API;
 
 import com.SouthernWall_404.LaplaceAPI.Math37.Vector3f;
+import com.SouthernWall_404.LaplaceAPI.UlrichToolBox.Blocks.BlockClientUtil;
 import com.SouthernWall_404.Painter.API.Wallpaper.BlockWallPaper;
 import com.SouthernWall_404.Painter.API.Wallpaper.IWallpaper;
 import com.SouthernWall_404.Painter.API.Wallpaper.Wallpapers;
@@ -76,7 +77,7 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>, Dire
     public void cycleTextureUV(Direction direction) {
         int flag=getFlag( direction);
         IWallpaper wallpaper=getWallpaper( direction);
-        wallpaper.cycleTextureUV(RenderUtil.getQuadsForDirection(getOrigin(),direction).getFirst(),direction ,blockPos );
+        wallpaper.cycleTextureUV(BlockClientUtil.getQuadsForDirection(getOrigin(),direction).getFirst(),direction ,blockPos );
     }
 
     protected void registerRenderVec()
