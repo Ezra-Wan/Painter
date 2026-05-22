@@ -111,27 +111,6 @@ public final class PaintOperationHelper {
     }
 
 
-
-    //TODO 考虑扔进Laplace
-    public static BlockState cycleInDirection(BlockState material){
-        if (material.hasProperty(TrapDoorBlock.HALF) && material.getOptionalValue(TrapDoorBlock.OPEN).orElse(false))
-            return material.cycle(TrapDoorBlock.HALF);
-        else if (material.hasProperty(BlockStateProperties.FACING))
-            return  material.cycle(BlockStateProperties.FACING);
-        else if (material.hasProperty(BlockStateProperties.HORIZONTAL_FACING))
-            return  material.setValue(BlockStateProperties.HORIZONTAL_FACING,
-                    material.getValue(BlockStateProperties.HORIZONTAL_FACING).getClockWise());
-        else if (material.hasProperty(BlockStateProperties.AXIS))
-            return material.cycle(BlockStateProperties.AXIS);
-        else if (material.hasProperty(BlockStateProperties.HORIZONTAL_AXIS))
-            return  material.cycle(BlockStateProperties.HORIZONTAL_AXIS);
-        else if (material.hasProperty(BlockStateProperties.LIT))
-            return  material.cycle(BlockStateProperties.LIT);
-        else
-            return material;
-    }
-
-
     @OnlyIn(Dist.CLIENT)
     public static void cycleTextureUV(BlockPos blockPos, Direction direction) {
 
