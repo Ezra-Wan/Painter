@@ -94,7 +94,7 @@ public class SpriteWallpaper extends AbstractWallpaper {
     public void cycleTextureUV(BakedQuad originQuad, Direction direction, BlockPos blockPos){
 
         //获取步长
-        VerticesInfo originVertices = new VerticesInfo(originQuad);
+        VerticesInfo originVertices =VerticesInfo.of(originQuad);
         float stepU = originVertices.getXLength();
         float stepV = originVertices.getYLength();
 
@@ -126,7 +126,7 @@ public class SpriteWallpaper extends AbstractWallpaper {
         } else {
             // U方向已截止，重置U并步进V
             uToSet = 0.0f;
-            
+
             if (!vReachedEnd) {
                 // V方向未截止，步进V
                 vToSet = nextV;
@@ -146,53 +146,24 @@ public class SpriteWallpaper extends AbstractWallpaper {
             Minecraft mc=Minecraft.getInstance();
             if(mc!=null)
             {
-                VerticesInfo originInfo=new VerticesInfo(originQuad);
+                VerticesInfo originInfo=VerticesInfo.of(originQuad);
                 //TODO 记得改laplace命名
 
                 ModelManager modelManager = Minecraft.getInstance().getModelManager();
                 TextureAtlas blocksAtlas = modelManager.getAtlas(TextureAtlas.LOCATION_BLOCKS);
                 TextureAtlasSprite sprite=blocksAtlas.getSprite(altasKey);
 
-
-                //建立基础普通方块面
-                VerticeInfo[] mixedVertices=new VerticeInfo[4];
-                for(int i=0;i<4;i++)
-                {
-                    VerticeInfo originVert=originInfo.vertices.get(i);//TODO 记得添加可变方法
-                    VerticeInfo mixedVert= VerticeInfo.builder()
-                            .uv(uvs[i][0],uvs[i][1])
-                            .normal(originVert.normal)
-                            .color(
-                                    FastColor.ABGR32.alpha(color[i]),
-                                    FastColor.ABGR32.blue(color[i]),
-                                    FastColor.ABGR32.green(color[i]),
-                                    FastColor.ABGR32.red(color[i])
-                            )
-                            .position(originVert.position)
-                            .light(originVert.light)
-                            .build();
-                    mixedVertices[i]=mixedVert;
-
-                }
-
                 //uv处理
-                VerticesInfo mixedInfo=VerticesInfo.of(mixedVertices);
-                mixedInfo.implyUV(originInfo);//进行Uv长度变换
-                mixedInfo.implyUVOffest(uOffset,vOffset);
+                VerticesInfo mixedInfo=originInfo.copy().uv(uvs).color( color);
                 BakedQuad quad=new BakedQuad(mixedInfo.vertices(), tintIndex,originQuad.getDirection(),sprite,true);
                 quads.add(quad);
         }
-
-
-
-
-
         return quads;
     }
     @Override
     public @UnknownNullability CompoundTag serializeNBT(HolderLookup.Provider provider) {
         CompoundTag tag = new CompoundTag();
-        
+
         // 序列化 UV 坐标数组
         ListTag uvsList = new ListTag();
         for (int i = 0; i < 4; i++) {
@@ -272,7 +243,7 @@ public class SpriteWallpaper extends AbstractWallpaper {
         {
 
             this.tintIndex =quad.getTintIndex();
-            VerticesInfo verticesInfo=new VerticesInfo(quad);
+            VerticesInfo verticesInfo=VerticesInfo.of(quad);
             this.altasKey= quad.getSprite().contents().name();
 
             this.color=new int[]{//TODO 记得优化
@@ -282,10 +253,10 @@ public class SpriteWallpaper extends AbstractWallpaper {
                     FastColor.ARGB32.color(verticesInfo.RightUp().alpha,verticesInfo.RightUp().red,verticesInfo.RightUp().green,verticesInfo.RightUp().blue)
             };
             this.uvs=new float[][]{
-                    {verticesInfo.LeftUp().u, verticesInfo.LeftUp().v},
-                    {verticesInfo.LeftDown().u, verticesInfo.LeftDown().v},
-                    {verticesInfo.RightDown().u, verticesInfo.RightDown().v},//TODo 这里似乎出现了解码错误
-                    {verticesInfo.RightUp().u, verticesInfo.RightUp().v}
+                    {verticesInfo.LeftUp().u(), verticesInfo.LeftUp().v()},
+                    {verticesInfo.LeftDown().u(), verticesInfo.LeftDown().v()},
+                    {verticesInfo.RightDown().u(), verticesInfo.RightDown().v()},//TODo 这里似乎出现了解码错误
+                    {verticesInfo.RightUp().u(), verticesInfo.RightUp().v()}
             };
 
         }
@@ -294,7 +265,7 @@ public class SpriteWallpaper extends AbstractWallpaper {
         {
 
             this.tintIndex =quad.getTintIndex();
-            VerticesInfo verticesInfo=new VerticesInfo(quad);
+            VerticesInfo verticesInfo=VerticesInfo.of(quad);
             this.altasKey= quad.getSprite().contents().name();
 
             this.color=new int[]{//TODO 记得优化
@@ -304,10 +275,10 @@ public class SpriteWallpaper extends AbstractWallpaper {
                     FastColor.ARGB32.color(verticesInfo.RightUp().alpha,verticesInfo.RightUp().red,verticesInfo.RightUp().green,verticesInfo.RightUp().blue)
             };
             this.uvs=new float[][]{
-                    {verticesInfo.LeftUp().u, verticesInfo.LeftUp().v},
-                    {verticesInfo.LeftDown().u, verticesInfo.LeftDown().v},
-                    {verticesInfo.RightDown().u, verticesInfo.RightDown().v},
-                    {verticesInfo.RightUp().u, verticesInfo.RightUp().v}
+                    {verticesInfo.LeftUp().u(), verticesInfo.LeftUp().v()},
+                    {verticesInfo.LeftDown().u(), verticesInfo.LeftDown().v()},
+                    {verticesInfo.RightDown().u(), verticesInfo.RightDown().v()},
+                    {verticesInfo.RightUp().u(), verticesInfo.RightUp().v()}
             };
 
         }
