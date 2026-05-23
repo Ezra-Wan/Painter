@@ -27,6 +27,8 @@ import java.util.*;
 
 /**
  * 定义壁纸的渲染职能
+ * 初始的内容
+ * 需要处理渲染、
  */
 public abstract class AbstractWallpaper implements IWallpaper{
     private final float[] shape = new float[ModelRender.DIRECTIONS.length * 2];
