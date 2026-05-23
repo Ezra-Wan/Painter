@@ -153,42 +153,17 @@ public class SpriteWallpaper extends AbstractWallpaper {
                 TextureAtlas blocksAtlas = modelManager.getAtlas(TextureAtlas.LOCATION_BLOCKS);
                 TextureAtlasSprite sprite=blocksAtlas.getSprite(altasKey);
 
-
-                //建立基础普通方块面
-                VerticeInfo[] mixedVertices=new VerticeInfo[4];
-                for(int i=0;i<4;i++)
-                {
-                    VerticeInfo originVert=originInfo.verts.get(i);
-                    mixedVertices[i]=originVert.modify()
-                            .uv(uvs[i][0],uvs[i][1])
-                            .color(
-                                    FastColor.ABGR32.alpha(color[i]),
-                                    FastColor.ABGR32.blue(color[i]),
-                                    FastColor.ABGR32.green(color[i]),
-                                    FastColor.ABGR32.red(color[i])//TODO 这里记得改成比较合理的方法
-                            )
-                            .build();
-
-                }
-
                 //uv处理
-                VerticesInfo mixedInfo=VerticesInfo.of(mixedVertices);
-                mixedInfo.implyUV(originInfo);//进行Uv长度变换
-                mixedInfo.implyUVOffest(uOffset,vOffset*2);//TODO测试方法，记得改
+                VerticesInfo mixedInfo=originInfo.copy().uv(uvs).color( color);
                 BakedQuad quad=new BakedQuad(mixedInfo.vertices(), tintIndex,originQuad.getDirection(),sprite,true);
                 quads.add(quad);
         }
-
-
-
-
-
         return quads;
     }
     @Override
     public @UnknownNullability CompoundTag serializeNBT(HolderLookup.Provider provider) {
         CompoundTag tag = new CompoundTag();
-        
+
         // 序列化 UV 坐标数组
         ListTag uvsList = new ListTag();
         for (int i = 0; i < 4; i++) {
