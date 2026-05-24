@@ -146,7 +146,11 @@ public class SpriteWallpaper extends AbstractWallpaper {
                 TextureAtlasSprite sprite=blocksAtlas.getSprite(altasKey);
 
                 //uv处理
-                VerticesInfo mixedInfo=originInfo.copy().uv(texture.startVertice.uv,texture.getuVec(),texture.getvVec()).color(texture.getColors());
+                VerticesInfo mixedInfo=
+                        originInfo.copy()
+                                .stuffedBy( texture)
+                                .color(texture.getColors());
+
                 BakedQuad quad=new BakedQuad(mixedInfo.vertices(), tintIndex,originQuad.getDirection(),sprite,true);
                 quads.add(quad);
         }

@@ -1,6 +1,7 @@
 package com.SouthernWall_404.Painter.API.Wallpaper;
 
 import com.SouthernWall_404.LaplaceAPI.Math37.Vector3f;
+import com.SouthernWall_404.LaplaceAPI.RegulappleEngine.BakedQuad.VerticesInfo;
 import com.SouthernWall_404.LaplaceAPI.RegulappleEngine.BakedQuadRender;
 import com.SouthernWall_404.LaplaceAPI.RegulappleEngine.ModelRender;
 import com.SouthernWall_404.LaplaceAPI.UlrichToolBox.Blocks.BlockClientUtil;
@@ -38,6 +39,19 @@ public abstract class AbstractWallpaper implements IWallpaper{
     protected short isVisible=-1;//可见性,负数为非法
 
 
+    /**
+     * 用于以填充方式创建Quad
+     * @param originInfo
+     * @param texture
+     * @return
+     */
+    public VerticesInfo doStuff(VerticesInfo originInfo,VerticesInfo texture) {
+        float xScale=originInfo.getXLength()/texture.getXLength();
+        float yScale=originInfo.getYLength()/texture.getYLength();
+
+        texture.scaleUV(xScale,yScale);
+        return texture;
+    }
     //TODO 考虑将getType放在这里
     @OnlyIn(Dist.CLIENT)
     public void refreshAO(AbstractPaint paint,Direction direction){
