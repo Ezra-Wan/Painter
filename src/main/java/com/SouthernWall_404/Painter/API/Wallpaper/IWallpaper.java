@@ -25,6 +25,7 @@ public interface IWallpaper extends INBTSerializable<CompoundTag> {
 
     @OnlyIn(Dist.CLIENT)
     public List<VerticesInfo> createTexture(BakedQuad originQuad);
+    public void cycleTextureUV(BakedQuad originQuad);
 
     @OnlyIn(Dist.CLIENT)
     public void setUVOffset(BlockPos blockPos, Direction direction, float uOffset, float vOffset) ;
@@ -35,6 +36,4 @@ public interface IWallpaper extends INBTSerializable<CompoundTag> {
     @OnlyIn(Dist.CLIENT)
     public void refresh();
 
-    @OnlyIn(Dist.CLIENT)
-    public void cycleTextureUV(BakedQuad originQuad, Direction direction, BlockPos blockPos);
 }

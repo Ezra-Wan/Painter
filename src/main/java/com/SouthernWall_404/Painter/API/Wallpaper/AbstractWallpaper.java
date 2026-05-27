@@ -1,6 +1,7 @@
 package com.SouthernWall_404.Painter.API.Wallpaper;
 
 import com.SouthernWall_404.Laplace.VerticesHelper;
+import com.SouthernWall_404.LaplaceAPI.Math37.Vector2f;
 import com.SouthernWall_404.LaplaceAPI.RegulappleEngine.BakedQuad.VerticesInfo;
 import com.SouthernWall_404.LaplaceAPI.RegulappleEngine.BakedQuadRender;
 import com.SouthernWall_404.LaplaceAPI.RegulappleEngine.ModelRender;
@@ -41,6 +42,7 @@ public abstract class AbstractWallpaper implements IWallpaper{
     // 通用属性
     protected int tintIndex;
     protected ResourceLocation altasKey;
+    protected Vector2f uvOffset=new Vector2f(0f,0f);
 
     public AbstractWallpaper(int tintIndex, ResourceLocation altasKey) {
         this.tintIndex = tintIndex;
@@ -82,7 +84,7 @@ public abstract class AbstractWallpaper implements IWallpaper{
 
             textures.forEach(texture -> {//遍历纹理信息
 //                texture=texture.stuffedBy(originInfo);//填充
-                texture= VerticesHelper.offset(VerticesHelper.StuffedTo(texture,originInfo),0f,0f);
+                texture= VerticesHelper.offset(VerticesHelper.StuffedTo(texture,originInfo),this.uvOffset.getX(),this.uvOffset.getY());
 
                 BakedQuad quad=new BakedQuad(texture.vertices(), tintIndex,originQuad.getDirection(),sprite,true);//创建Quad
 

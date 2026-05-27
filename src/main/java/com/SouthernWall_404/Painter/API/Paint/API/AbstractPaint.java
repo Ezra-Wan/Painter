@@ -77,7 +77,7 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>, Dire
     public void cycleTextureUV(Direction direction) {
         int flag=getFlag( direction);
         IWallpaper wallpaper=getWallpaper( direction);
-        wallpaper.cycleTextureUV(BlockClientUtil.getQuadsForDirection(getOrigin(),direction).getFirst(),direction ,blockPos );
+        wallpaper.cycleTextureUV(BlockClientUtil.getQuadsForDirection(getOrigin(),direction).getFirst());
     }
 
     protected void registerRenderVec()
@@ -270,7 +270,7 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>, Dire
             int flag = entryTag.getInt("flag");
             CompoundTag wallpaperTag = entryTag.getCompound("wallpaper");
             String type = wallpaperTag.getString("type");
-            
+
             IWallpaper wallpaper = Wallpapers.create(type, provider, wallpaperTag);
             if (wallpaper != null) {
                 wallpapers.put(flag, wallpaper);

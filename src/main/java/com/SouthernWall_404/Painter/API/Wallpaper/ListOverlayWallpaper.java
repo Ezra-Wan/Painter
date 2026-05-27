@@ -20,8 +20,8 @@ public class ListOverlayWallpaper extends AbstractWallpaper {
     public static final String TYPE = "List";
 
     @Override
-    public void cycleTextureUV(BakedQuad originQuad, Direction direction, BlockPos blockPos) {
-        overlays.forEach(wallpaper->wallpaper.cycleTextureUV(originQuad,direction ,blockPos ));
+    public void cycleTextureUV(BakedQuad originQuad) {
+        overlays.forEach(wallpaper->wallpaper.cycleTextureUV(originQuad));
     }
 
     @Override
@@ -57,7 +57,6 @@ public class ListOverlayWallpaper extends AbstractWallpaper {
     public String getType() {
         return TYPE;
     }
-
     @Override
     public List<VerticesInfo> createTexture(BakedQuad originQuad) {
         return List.of();

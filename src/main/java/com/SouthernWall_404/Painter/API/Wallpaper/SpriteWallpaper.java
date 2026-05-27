@@ -1,6 +1,7 @@
 package com.SouthernWall_404.Painter.API.Wallpaper;
 
 import com.SouthernWall_404.Laplace.VerticesHelper;
+import com.SouthernWall_404.LaplaceAPI.Math37.Vector2f;
 import com.SouthernWall_404.LaplaceAPI.RegulappleEngine.BakedQuad.VerticeInfo;
 import com.SouthernWall_404.LaplaceAPI.RegulappleEngine.BakedQuad.VerticesInfo;
 import com.SouthernWall_404.Painter.API.Paint.Util.Paint.PaintSyncHelper;
@@ -82,51 +83,38 @@ public class SpriteWallpaper extends AbstractWallpaper {
         //TODO 似乎有循环调用的错误
     }
 
-    public void cycleTextureUV(BakedQuad originQuad, Direction direction, BlockPos blockPos){
+    @Override
+    public void cycleTextureUV(BakedQuad originQuad) {
 
-        //获取步长
-        VerticesInfo originVertices =VerticesInfo.of(originQuad);
-        float stepU = originVertices.getXLength();
-        float stepV = originVertices.getYLength();
+        VerticesInfo originInfo=VerticesInfo.of(originQuad);
 
-        /**
-         * TODO 进行步进
-         *  先沿u行进，如果截止后沿v步进重启
-         *  若v截止，且u截止，则归零
-         *  - 截止条件：当前值在经过stepU补正（也即quad右上点）刚好到达1时停止
-         *  - 处理：
-         *   - 若小于1，则加上stepU继续步进
-         *   - 若大于1，则归位到1-stepU，下一次截止
-         */
-        
-        // 计算右上角的UV值（当前偏移 + 步长）
-        float nextU = uOffset + stepU;
-        float nextV = vOffset + stepV;
-        
-        // 判断U方向是否截止
-        boolean uReachedEnd = (nextU >= 1.0f);
-        // 判断V方向是否截止
-        boolean vReachedEnd = (nextV >= 1.0f);
+        float maxUoffset=1/originInfo.getXLength()-1;//可用最大u向偏移倍率，减1以弥补已有框长度
+        float maxVoffset=1/originInfo.getYLength()-1;//可用最大v向偏移倍率
 
-        float uToSet=0;
-        float vToSet=0;
+        if(maxUoffset<0||maxVoffset<0)throw new IllegalArgumentException("texture size is too small");
 
-        if (!uReachedEnd) {
-            // U方向未截止，继续步进U
-            uToSet = nextU;
-        } else {
-            // U方向已截止，重置U并步进V
-            uToSet = 0.0f;
+        float currentUoffset=this.uvOffset.getX();//当前u向偏移倍率
+        float currentVoffset=this.uvOffset.getY();//当前v向偏移倍率
 
-            if (!vReachedEnd) {
-                // V方向未截止，步进V
-                vToSet = nextV;
-            } else {
-                // V方向也已截止，全部归零
-                vToSet = 0.0f;
+        //先对u进行偏移处理
+        if(currentUoffset<(int)(maxUoffset))//先从整数开始处理,若还未抵达最大
+        {
+            currentUoffset+=1;//步进
+
+        }else if(currentUoffset==(int)(maxUoffset)){//若抵达整数最大
+
+            currentUoffset=0;//回归
+            //开始v进行偏移处理
+            if(currentVoffset<(int)(maxVoffset))//先从整数开始处理,若还未抵达最大
+                currentVoffset+=1;//步进
+            else if(currentVoffset==(int)(maxVoffset)){//若抵达整数最大
+                currentVoffset=0;//回归
             }
         }
-        setUVOffset(blockPos, direction,uToSet, vToSet);
+
+        this.uvOffset=new Vector2f(currentUoffset,currentVoffset);
+        //TODO 需要添加网络处理，向服务器进行同步
+
     }
 
     @OnlyIn(Dist.CLIENT)
