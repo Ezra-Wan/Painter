@@ -1,5 +1,6 @@
 package com.SouthernWall_404.Painter.API.Wallpaper;
 
+import com.SouthernWall_404.LaplaceAPI.RegulappleEngine.BakedQuad.VerticesInfo;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -34,6 +35,7 @@ public class ListOverlayWallpaper extends AbstractWallpaper {
     }
 
     public ListOverlayWallpaper(List<IWallpaper> overlays) {
+        super(0,null);
         this.overlays=overlays;
     }
 
@@ -57,6 +59,11 @@ public class ListOverlayWallpaper extends AbstractWallpaper {
     }
 
     @Override
+    public List<VerticesInfo> createTexture(BakedQuad originQuad) {
+        return List.of();
+    }
+
+    @Override
     public List<BakedQuad> createQuad(BakedQuad originQuad) {
 
         List<BakedQuad> quads=new ArrayList<>();
@@ -65,12 +72,32 @@ public class ListOverlayWallpaper extends AbstractWallpaper {
             quads.addAll(wallpaper.createQuad(originQuad));
         });
 
+
         return quads;
     }
 
     @Override
+    public void refresh() {
+        super.refresh();
+        overlays.forEach(IWallpaper::refresh);
+    }
+
+//    @Override
+//    public List<BakedQuad> createQuad(BakedQuad originQuad) {
+//
+//        List<BakedQuad> quads=new ArrayList<>();
+//
+//        overlays.forEach(wallpaper->{
+//            quads.addAll(wallpaper.createQuad(originQuad));
+//        });
+//
+//        return quads;
+//    }
+
+    @Override
     public @UnknownNullability CompoundTag serializeNBT(HolderLookup.Provider provider) {
-        CompoundTag tag = new CompoundTag();
+        // 调用父类序列化通用字段（tintIndex, altasKey）
+        CompoundTag tag = super.serializeNBT(provider);
         
         // 保存类型标识
         tag.putString("type", TYPE);
@@ -92,6 +119,9 @@ public class ListOverlayWallpaper extends AbstractWallpaper {
 
     @Override
     public void deserializeNBT(HolderLookup.Provider provider, CompoundTag compoundTag) {
+        // 调用父类反序列化通用字段（tintIndex, altasKey）
+        super.deserializeNBT(provider, compoundTag);
+        
         // 反序列化 overlays 列表
         net.minecraft.nbt.ListTag overlaysList = compoundTag.getList("overlays", net.minecraft.nbt.Tag.TAG_COMPOUND);
         

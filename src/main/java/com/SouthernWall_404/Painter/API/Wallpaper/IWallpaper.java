@@ -1,5 +1,6 @@
 package com.SouthernWall_404.Painter.API.Wallpaper;
 
+import com.SouthernWall_404.LaplaceAPI.RegulappleEngine.BakedQuad.VerticesInfo;
 import com.SouthernWall_404.Painter.API.Paint.API.AbstractPaint;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
@@ -21,6 +22,9 @@ public interface IWallpaper extends INBTSerializable<CompoundTag> {
     public String getType();//种类
 
     public List<BakedQuad> createQuad(BakedQuad originQuad);//建立渲染面的通用方法
+
+    @OnlyIn(Dist.CLIENT)
+    public List<VerticesInfo> createTexture(BakedQuad originQuad);
 
     @OnlyIn(Dist.CLIENT)
     public void setUVOffset(BlockPos blockPos, Direction direction, float uOffset, float vOffset) ;
