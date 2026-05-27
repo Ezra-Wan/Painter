@@ -82,7 +82,7 @@ public abstract class AbstractWallpaper implements IWallpaper{
 
             textures.forEach(texture -> {//遍历纹理信息
 //                texture=texture.stuffedBy(originInfo);//填充
-                texture= VerticesHelper.StuffedTo(texture,originInfo);
+                texture= VerticesHelper.offset(VerticesHelper.StuffedTo(texture,originInfo),0f,0f);
 
                 BakedQuad quad=new BakedQuad(texture.vertices(), tintIndex,originQuad.getDirection(),sprite,true);//创建Quad
 

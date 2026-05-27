@@ -1,5 +1,6 @@
 package com.SouthernWall_404.Laplace;
 
+import com.SouthernWall_404.LaplaceAPI.Math37.Vector2f;
 import com.SouthernWall_404.LaplaceAPI.RegulappleEngine.BakedQuad.VerticesInfo;
 
 /**
@@ -24,5 +25,15 @@ public class VerticesHelper {
 
         self.refresh();
         return self.color(other.getColors());
+    }
+
+    public static VerticesInfo offset(VerticesInfo self,float uOffset,float vOffset)
+    {
+        Vector2f offset = self.getuVec().multiply(uOffset)
+                .add(self.getvVec().multiply(vOffset));
+
+        self.startVertice.uv=self.startVertice.uv.add(offset);
+        self.refresh();
+        return self;
     }
 }
