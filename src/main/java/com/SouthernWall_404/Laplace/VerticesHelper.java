@@ -18,8 +18,8 @@ public class VerticesHelper {
     public static VerticesInfo StuffedTo(VerticesInfo self,VerticesInfo other)
     {
 
-        float uScale = other.getXLength()/self.getXLength();
-        float vScale = other.getYLength()/self.getYLength();
+        float uScale = other.getXLength()/1;
+        float vScale = other.getYLength()/1;
 
         self.scaleUV(uScale,vScale);
 
