@@ -1,5 +1,6 @@
 package com.SouthernWall_404.Painter.API.Wallpaper;
 
+import com.SouthernWall_404.Laplace.VerticesHelper;
 import com.SouthernWall_404.LaplaceAPI.RegulappleEngine.BakedQuad.VerticeInfo;
 import com.SouthernWall_404.LaplaceAPI.RegulappleEngine.BakedQuad.VerticesInfo;
 import com.SouthernWall_404.Painter.API.Paint.Util.Paint.PaintSyncHelper;
@@ -30,8 +31,6 @@ public class SpriteWallpaper extends AbstractWallpaper {
     public static final String TYPE="sprite";
 
     //========属性=========
-    private int tintIndex;
-    private ResourceLocation altasKey;
     private float uOffset=0;//左下角点u方向偏移量
     private float vOffset=0;//左下角点v方向偏移量
 
@@ -40,9 +39,9 @@ public class SpriteWallpaper extends AbstractWallpaper {
 
 
     SpriteWallpaper(VerticesInfo texture,ResourceLocation atlasKey, int tintIndex) {
+        super(tintIndex, atlasKey);
         this.texture=texture;
-        this.tintIndex = tintIndex;
-        this.altasKey=atlasKey;
+
     }
 
     SpriteWallpaper(HolderLookup.Provider provider,CompoundTag tag){
@@ -132,61 +131,70 @@ public class SpriteWallpaper extends AbstractWallpaper {
 
     @OnlyIn(Dist.CLIENT)
     @Override
-    public List<BakedQuad> createQuad(BakedQuad originQuad) {
+    public List<VerticesInfo> createTexture(BakedQuad originQuad) {
 
-        List<BakedQuad> quads=new ArrayList<>();
-            Minecraft mc=Minecraft.getInstance();
-            if(mc!=null)
-            {
-                VerticesInfo originInfo=VerticesInfo.of(originQuad);
-                //TODO 记得改laplace命名
+        List<VerticesInfo> textures=new ArrayList<>();
+        Minecraft mc=Minecraft.getInstance();
+        if(mc!=null){
+            VerticesInfo originInfo=VerticesInfo.of(originQuad);
+            textures.add(
+                    VerticesHelper.texture(originInfo.copy()
+                    .color(texture.getColors()),texture));
 
-                ModelManager modelManager = Minecraft.getInstance().getModelManager();
-                TextureAtlas blocksAtlas = modelManager.getAtlas(TextureAtlas.LOCATION_BLOCKS);
-                TextureAtlasSprite sprite=blocksAtlas.getSprite(altasKey);
-
-                //uv处理
-                VerticesInfo mixedInfo=
-                        originInfo.copy()
-                                .stuffedBy( texture)
-                                .color(texture.getColors());
-
-                BakedQuad quad=new BakedQuad(mixedInfo.vertices(), tintIndex,originQuad.getDirection(),sprite,true);
-                quads.add(quad);
         }
-        return quads;
+
+
+        return textures;
     }
+//
+//    @OnlyIn(Dist.CLIENT)
+//    @Override
+//    public List<BakedQuad> createQuad(BakedQuad originQuad) {
+//
+//        List<BakedQuad> quads=new ArrayList<>();
+//            Minecraft mc=Minecraft.getInstance();
+//            if(mc!=null)
+//            {
+//                VerticesInfo originInfo=VerticesInfo.of(originQuad);
+//                //TODO 记得改laplace命名
+//
+//
+//
+//                //uv处理
+//                        VerticesInfo mixedInfo=
+//                        originInfo.copy()
+//                                .stuffedBy( texture)
+//                                .color(texture.getColors());
+//
+//                BakedQuad quad=new BakedQuad(mixedInfo.vertices(), tintIndex,originQuad.getDirection(),sprite,true);
+//                quads.add(quad);
+//        }
+//        return quads;
+//    }
+
+
     @Override
     public @UnknownNullability CompoundTag serializeNBT(HolderLookup.Provider provider) {
-        CompoundTag tag = new CompoundTag();
-
+        // 调用父类序列化通用字段（tintIndex, altasKey）
+        CompoundTag tag = super.serializeNBT(provider);
+        
+        // 序列化 SpriteWallpaper 特有字段
         tag.put("texture", texture.serializeNBT(provider));
-        // 序列化 tintIndex
-        tag.putInt("tintIndex", tintIndex);
-
         tag.putFloat("u_offset", uOffset);
         tag.putFloat("v_offset", vOffset);
-
-        tag.put("altasKey", ResourceLocation.CODEC.encodeStart(NbtOps.INSTANCE, altasKey).result().orElse(null));
         
         return tag;
     }
 
     @Override
     public void deserializeNBT(HolderLookup.Provider provider, CompoundTag compoundTag) {
-
-        if(compoundTag.contains("u_offset"))uOffset=compoundTag.getFloat("u_offset");
-        if(compoundTag.contains("v_offset"))vOffset=compoundTag.getFloat("v_offset");
-
-        if(compoundTag.contains("texture"))texture=VerticesInfo.fromNBT(provider,compoundTag.getCompound("texture"));
-
-        if(compoundTag.contains("tintIndex")) tintIndex = compoundTag.getInt("tintIndex");
-        if(compoundTag.contains("altasKey"))altasKey=ResourceLocation.CODEC.parse(
-            NbtOps.INSTANCE,
-            compoundTag.get("altasKey")
-        ).result().orElse(null);
-
-
+        // 调用父类反序列化通用字段（tintIndex, altasKey）
+        super.deserializeNBT(provider, compoundTag);
+        
+        // 反序列化 SpriteWallpaper 特有字段
+        if(compoundTag.contains("u_offset")) uOffset = compoundTag.getFloat("u_offset");
+        if(compoundTag.contains("v_offset")) vOffset = compoundTag.getFloat("v_offset");
+        if(compoundTag.contains("texture")) texture = VerticesInfo.fromNBT(provider, compoundTag.getCompound("texture"));
     }
 
     public static class Builder{
@@ -208,28 +216,6 @@ public class SpriteWallpaper extends AbstractWallpaper {
             texture=VerticesInfo.of(quad);
             this.altasKey= quad.getSprite().contents().name();
         }
-
-//        public Builder(BakedQuad quad,float u,float v)
-//        {
-//
-//            this.tintIndex =quad.getTintIndex();
-//            VerticesInfo verticesInfo=VerticesInfo.of(quad);
-//            this.altasKey= quad.getSprite().contents().name();
-//
-//            this.color=new int[]{//TODO 记得优化
-//                    FastColor.ARGB32.color(verticesInfo.LeftUp().alpha,verticesInfo.LeftUp().red,verticesInfo.LeftUp().green,verticesInfo.LeftUp().blue),
-//                    FastColor.ARGB32.color(verticesInfo.LeftDown().alpha,verticesInfo.LeftDown().red,verticesInfo.LeftDown().green,verticesInfo.LeftDown().blue),
-//                    FastColor.ARGB32.color(verticesInfo.RightDown().alpha,verticesInfo.RightDown().red,verticesInfo.RightDown().green,verticesInfo.RightDown().blue),
-//                    FastColor.ARGB32.color(verticesInfo.RightUp().alpha,verticesInfo.RightUp().red,verticesInfo.RightUp().green,verticesInfo.RightUp().blue)
-//            };
-//            this.uvs=new float[][]{
-//                    {verticesInfo.LeftUp().u(), verticesInfo.LeftUp().v()},
-//                    {verticesInfo.LeftDown().u(), verticesInfo.LeftDown().v()},
-//                    {verticesInfo.RightDown().u(), verticesInfo.RightDown().v()},
-//                    {verticesInfo.RightUp().u(), verticesInfo.RightUp().v()}
-//            };
-//
-//        }
 
         public SpriteWallpaper build()
         {
