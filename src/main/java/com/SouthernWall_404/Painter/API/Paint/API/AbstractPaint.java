@@ -74,9 +74,19 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>, Dire
 
     @OnlyIn(Dist.CLIENT)
     public void cycleTextureUV(Direction direction) {
-        int flag=getFlag( direction);
-        IWallpaper wallpaper=getWallpaper( direction);
-        wallpaper.cycleTextureUV(BlockClientUtil.getQuadsForDirection(getOrigin(),direction).getFirst(),this );//TODO这里需要防止无材质面引发崩溃
+
+        IWallpaper wallpaper=getWallpaper( direction);//先获取wallpaper
+
+        if(wallpaper==null){
+            Minecraft mc=Minecraft.getInstance();
+            if(mc.player!=null)
+            {
+                //TODO 添加提示消息
+            }
+            return;
+        }
+        direction=translateFace(direction);//获取实际方向
+        wallpaper.cycleTextureUV(BlockClientUtil.getQuadsForDirection(getOrigin(),direction).getFirst(),this );
     }
 
     protected void registerRenderVec()
