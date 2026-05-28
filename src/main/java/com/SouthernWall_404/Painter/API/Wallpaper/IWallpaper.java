@@ -1,5 +1,6 @@
 package com.SouthernWall_404.Painter.API.Wallpaper;
 
+import com.SouthernWall_404.LaplaceAPI.Math37.Vector2f;
 import com.SouthernWall_404.LaplaceAPI.RegulappleEngine.BakedQuad.VerticesInfo;
 import com.SouthernWall_404.Painter.API.Paint.API.AbstractPaint;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -25,14 +26,13 @@ public interface IWallpaper extends INBTSerializable<CompoundTag> {
 
     @OnlyIn(Dist.CLIENT)
     public List<VerticesInfo> createTexture(BakedQuad originQuad);
-    public void cycleTextureUV(BakedQuad originQuad);
+    public void cycleTextureUV(BakedQuad originQuad, BlockPos pos);
 
     @OnlyIn(Dist.CLIENT)
-    public void setUVOffset(BlockPos blockPos, Direction direction, float uOffset, float vOffset) ;
+    public void setUVOffset(BlockPos blockPos, Vector2f uvOffset) ;
     @OnlyIn(Dist.CLIENT)
     public void render(AbstractPaint paint, Direction direction, PoseStack poseStack, VertexConsumer buffer);
 
-    public void setUVOffset(float u, float v);
     @OnlyIn(Dist.CLIENT)
     public void refresh();
 

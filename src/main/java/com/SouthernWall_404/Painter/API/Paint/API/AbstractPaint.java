@@ -7,7 +7,6 @@ import com.SouthernWall_404.Painter.API.Wallpaper.BlockWallPaper;
 import com.SouthernWall_404.Painter.API.Wallpaper.IWallpaper;
 import com.SouthernWall_404.Painter.API.Wallpaper.Wallpapers;
 import com.SouthernWall_404.LaplaceAPI.VertinCore.Config.Configs;
-import com.SouthernWall_404.Painter.API.Paint.Util.RenderUtil;
 import com.SouthernWall_404.Painter.Client.Config.ClientConfig;
 import com.SouthernWall_404.Painter.Painter;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -77,7 +76,7 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>, Dire
     public void cycleTextureUV(Direction direction) {
         int flag=getFlag( direction);
         IWallpaper wallpaper=getWallpaper( direction);
-        wallpaper.cycleTextureUV(BlockClientUtil.getQuadsForDirection(getOrigin(),direction).getFirst());
+        wallpaper.cycleTextureUV(BlockClientUtil.getQuadsForDirection(getOrigin(),direction).getFirst(),this.getBlockPos() );
     }
 
     protected void registerRenderVec()

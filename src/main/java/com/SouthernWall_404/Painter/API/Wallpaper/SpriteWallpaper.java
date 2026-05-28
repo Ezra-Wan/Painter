@@ -2,20 +2,13 @@ package com.SouthernWall_404.Painter.API.Wallpaper;
 
 import com.SouthernWall_404.Laplace.VerticesHelper;
 import com.SouthernWall_404.LaplaceAPI.Math37.Vector2f;
-import com.SouthernWall_404.LaplaceAPI.RegulappleEngine.BakedQuad.VerticeInfo;
 import com.SouthernWall_404.LaplaceAPI.RegulappleEngine.BakedQuad.VerticesInfo;
-import com.SouthernWall_404.Painter.API.Paint.Util.Paint.PaintSyncHelper;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.block.model.BakedQuad;
-import net.minecraft.client.renderer.texture.TextureAtlas;
-import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.client.resources.model.ModelManager;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.*;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.FastColor;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 import org.jetbrains.annotations.UnknownNullability;
@@ -60,22 +53,15 @@ public class SpriteWallpaper extends AbstractWallpaper {
         return TYPE;
     }
 
-    public void setUVOffset(float u, float v)
-    {
-        uOffset = u;
-        vOffset = v;
+    @Override
+    public void setUVOffset(BlockPos blockPos, Vector2f uvOffset) {
+
+        this.uvOffset=uvOffset;
         refresh();
 
-        //TODO 记得做错误处理
-    }
-    @Override
-    public void setUVOffset(BlockPos blockPos,Direction direction,float uOffset, float vOffset) {
-        this.uOffset = uOffset;
-        this.vOffset = vOffset;
-        refresh();
-        if (Minecraft.getInstance()!=null&&Minecraft.getInstance().level.isClientSide)
-        {
-            PaintSyncHelper.syncPaintUV(blockPos,direction,new float[]{uOffset,vOffset});
+        Minecraft mc=Minecraft.getInstance();
+        if(mc!=null&&mc.player!=null){
+            //TODO 添加同步
         }
 
         //TODO UV处理需要再修复以下
@@ -84,7 +70,7 @@ public class SpriteWallpaper extends AbstractWallpaper {
     }
 
     @Override
-    public void cycleTextureUV(BakedQuad originQuad) {
+    public void cycleTextureUV(BakedQuad originQuad, BlockPos pos) {
 
         VerticesInfo originInfo=VerticesInfo.of(originQuad);
 
@@ -112,7 +98,7 @@ public class SpriteWallpaper extends AbstractWallpaper {
             }
         }
 
-        this.uvOffset=new Vector2f(currentUoffset,currentVoffset);
+        setUVOffset(pos,new Vector2f(currentUoffset,currentVoffset));
         //TODO 需要添加网络处理，向服务器进行同步
 
     }
