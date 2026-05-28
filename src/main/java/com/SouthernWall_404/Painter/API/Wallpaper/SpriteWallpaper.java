@@ -3,9 +3,10 @@ package com.SouthernWall_404.Painter.API.Wallpaper;
 import com.SouthernWall_404.Laplace.VerticesHelper;
 import com.SouthernWall_404.LaplaceAPI.Math37.Vector2f;
 import com.SouthernWall_404.LaplaceAPI.RegulappleEngine.BakedQuad.VerticesInfo;
+import com.SouthernWall_404.Painter.API.Paint.API.AbstractPaint;
+import com.SouthernWall_404.Painter.API.Paint.Util.Paint.PaintSyncHelper;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.block.model.BakedQuad;
-import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.*;
 import net.minecraft.resources.ResourceLocation;
@@ -25,8 +26,6 @@ public class SpriteWallpaper extends AbstractWallpaper {
     public static final String TYPE="sprite";
 
     //========属性=========
-    private float uOffset=0;//左下角点u方向偏移量
-    private float vOffset=0;//左下角点v方向偏移量
 
     private VerticesInfo texture;
 
@@ -53,24 +52,10 @@ public class SpriteWallpaper extends AbstractWallpaper {
         return TYPE;
     }
 
-    @Override
-    public void setUVOffset(BlockPos blockPos, Vector2f uvOffset) {
 
-        this.uvOffset=uvOffset;
-        refresh();
-
-        Minecraft mc=Minecraft.getInstance();
-        if(mc!=null&&mc.player!=null){
-            //TODO 添加同步
-        }
-
-        //TODO UV处理需要再修复以下
-        //TODO Block和这里的职能略有不清，需要明确
-        //TODO 似乎有循环调用的错误
-    }
 
     @Override
-    public void cycleTextureUV(BakedQuad originQuad, BlockPos pos) {
+    public void cycleTextureUV(BakedQuad originQuad, AbstractPaint paint) {
 
         VerticesInfo originInfo=VerticesInfo.of(originQuad);
 
@@ -98,7 +83,7 @@ public class SpriteWallpaper extends AbstractWallpaper {
             }
         }
 
-        setUVOffset(pos,new Vector2f(currentUoffset,currentVoffset));
+        setUVOffset(new Vector2f(currentUoffset,currentVoffset), paint);
         //TODO 需要添加网络处理，向服务器进行同步
 
     }
@@ -154,8 +139,6 @@ public class SpriteWallpaper extends AbstractWallpaper {
         
         // 序列化 SpriteWallpaper 特有字段
         tag.put("texture", texture.serializeNBT(provider));
-        tag.putFloat("u_offset", uOffset);
-        tag.putFloat("v_offset", vOffset);
         
         return tag;
     }
@@ -166,8 +149,6 @@ public class SpriteWallpaper extends AbstractWallpaper {
         super.deserializeNBT(provider, compoundTag);
         
         // 反序列化 SpriteWallpaper 特有字段
-        if(compoundTag.contains("u_offset")) uOffset = compoundTag.getFloat("u_offset");
-        if(compoundTag.contains("v_offset")) vOffset = compoundTag.getFloat("v_offset");
         if(compoundTag.contains("texture")) texture = VerticesInfo.fromNBT(provider, compoundTag.getCompound("texture"));
     }
 

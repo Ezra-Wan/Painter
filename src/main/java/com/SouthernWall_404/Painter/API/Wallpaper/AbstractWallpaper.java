@@ -7,6 +7,7 @@ import com.SouthernWall_404.LaplaceAPI.RegulappleEngine.BakedQuadRender;
 import com.SouthernWall_404.LaplaceAPI.RegulappleEngine.ModelRender;
 import com.SouthernWall_404.LaplaceAPI.UlrichToolBox.Blocks.BlockClientUtil;
 import com.SouthernWall_404.Painter.API.Paint.API.AbstractPaint;
+import com.SouthernWall_404.Painter.API.Paint.Util.Paint.PaintSyncHelper;
 import com.SouthernWall_404.Painter.API.Paint.Util.RenderUtil;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
@@ -199,8 +200,30 @@ public abstract class AbstractWallpaper implements IWallpaper{
         if (altasKey != null) {
             tag.put("altasKey", ResourceLocation.CODEC.encodeStart(NbtOps.INSTANCE, altasKey).result().orElse(null));
         }
+
+        // 添加 uvOffset
+        tag.putFloat("u_offset", uvOffset.getX());
+        tag.putFloat("v_offset", uvOffset.getY());
         
         return tag;
+    }
+
+    @Override
+    public void setUVOffset(Vector2f uvOffset, AbstractPaint paint) {
+
+        this.uvOffset=uvOffset;
+        refresh();
+
+        Minecraft mc=Minecraft.getInstance();
+        if(mc!=null&&mc.level!=null){
+
+            PaintSyncHelper.syncRenders(List.of(paint));
+            //TODO 添加同步
+        }
+
+        //TODO UV处理需要再修复以下
+        //TODO Block和这里的职能略有不清，需要明确
+        //TODO 似乎有循环调用的错误
     }
 
     @Override
@@ -217,6 +240,16 @@ public abstract class AbstractWallpaper implements IWallpaper{
                 compoundTag.get("altasKey")
             ).result().orElse(null);
         }
+
+        // 反序列化 uvOffset
+        if (compoundTag.contains("u_offset") && compoundTag.contains("v_offset")) {
+            uvOffset = new Vector2f(
+                compoundTag.getFloat("u_offset"),
+                compoundTag.getFloat("v_offset")
+            );
+        }
+
+        refresh();
     }
 
 }

@@ -2,8 +2,8 @@ package com.SouthernWall_404.Painter.API.Wallpaper;
 
 import com.SouthernWall_404.LaplaceAPI.Math37.Vector2f;
 import com.SouthernWall_404.LaplaceAPI.RegulappleEngine.BakedQuad.VerticesInfo;
+import com.SouthernWall_404.Painter.API.Paint.API.AbstractPaint;
 import net.minecraft.client.renderer.block.model.BakedQuad;
-import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import org.jetbrains.annotations.UnknownNullability;
@@ -20,14 +20,14 @@ public class ListOverlayWallpaper extends AbstractWallpaper {
     public static final String TYPE = "List";
 
     @Override
-    public void cycleTextureUV(BakedQuad originQuad, BlockPos pos) {
-        overlays.forEach(wallpaper->wallpaper.cycleTextureUV(originQuad,pos));
+    public void cycleTextureUV(BakedQuad originQuad, AbstractPaint paint) {
+        overlays.forEach(wallpaper->wallpaper.cycleTextureUV(originQuad,paint));
     }
 
 
     @Override
-    public void setUVOffset(BlockPos blockPos, Vector2f uvOffset) {
-        overlays.forEach(wallpaper->wallpaper.setUVOffset(blockPos, uvOffset));
+    public void setUVOffset(Vector2f uvOffset, AbstractPaint paint) {
+        overlays.forEach(wallpaper->wallpaper.setUVOffset(uvOffset, paint));
     }
 
     public ListOverlayWallpaper(List<IWallpaper> overlays) {
