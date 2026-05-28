@@ -1,6 +1,5 @@
 package com.SouthernWall_404.Painter.API.Wallpaper;
 
-import com.SouthernWall_404.Laplace.VerticesHelper;
 import com.SouthernWall_404.LaplaceAPI.Math37.Vector2f;
 import com.SouthernWall_404.LaplaceAPI.RegulappleEngine.BakedQuad.VerticesInfo;
 import com.SouthernWall_404.Painter.API.Paint.API.AbstractPaint;
@@ -97,8 +96,9 @@ public class SpriteWallpaper extends AbstractWallpaper {
         if(mc!=null){
             VerticesInfo originInfo=VerticesInfo.of(originQuad);
             textures.add(
-                    VerticesHelper.texture(originInfo.copy()
-                    .color(texture.getColors()),texture));
+                    originInfo.copy()
+                            .color(texture.getColors())
+                            .texture(texture));
 
         }
 
