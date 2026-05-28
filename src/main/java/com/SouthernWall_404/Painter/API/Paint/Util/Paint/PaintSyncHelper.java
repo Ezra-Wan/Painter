@@ -1,9 +1,11 @@
 package com.SouthernWall_404.Painter.API.Paint.Util.Paint;
 
 import com.SouthernWall_404.LaplaceAPI.xNetwork.API.NetworkSync;
+import com.SouthernWall_404.Painter.API.Paint.API.AbstractRender;
 import com.SouthernWall_404.Painter.Common.Init.ModAttachments;
 import com.SouthernWall_404.Painter.Common.Laplace.Network.ClientHandlers;
 import com.SouthernWall_404.Painter.Common.Laplace.Network.ServerHandlers;
+import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
@@ -11,7 +13,10 @@ import net.minecraft.nbt.ListTag;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 
+import java.util.List;
 import java.util.Set;
 
 public class PaintSyncHelper {
@@ -28,6 +33,36 @@ public class PaintSyncHelper {
     public static void syncChunkToAll(Level level, ChunkPos pos)
     {
         NetworkSync.syncChunkAttachmentToAll(level, pos,level.players(),ModAttachments.PAINT_INFO.get());
+    }
+
+
+    @OnlyIn(Dist.CLIENT)
+    public static void syncRenders(List<AbstractRender> renders){
+
+        CompoundTag tag=new CompoundTag();
+        ListTag renderList=new ListTag();
+        Minecraft mc=Minecraft.getInstance();
+        if(mc!=null){
+
+            renders.forEach(render -> {
+                CompoundTag renderTag=new CompoundTag();
+
+                CompoundTag pos=new CompoundTag();
+                pos.putInt("x",render.getBlockPos().getX());
+                pos.putInt("y",render.getBlockPos().getY());
+                pos.putInt("z",render.getBlockPos().getZ());
+                renderTag.put("pos",pos);
+
+                renderTag.put("render",render.serializeNBT(mc.level.registryAccess()));
+
+                renderList.add(renderTag);
+            });
+        }
+
+        tag.put("renders",renderList);
+
+
+        NetworkSync.requireToServer(ServerHandlers.RENDER_UPDATE_PACKET,tag);
     }
 
     /**

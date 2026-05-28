@@ -37,6 +37,10 @@ public abstract class AbstractRender<T, F extends Object> implements IRender<T> 
 
     }
 
+    public BlockPos getBlockPos() {
+        return blockPos;
+    }
+
     @Override
     public String getType() {
         return type;

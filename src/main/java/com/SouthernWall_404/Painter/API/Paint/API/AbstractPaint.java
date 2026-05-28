@@ -7,7 +7,6 @@ import com.SouthernWall_404.Painter.API.Wallpaper.BlockWallPaper;
 import com.SouthernWall_404.Painter.API.Wallpaper.IWallpaper;
 import com.SouthernWall_404.Painter.API.Wallpaper.Wallpapers;
 import com.SouthernWall_404.LaplaceAPI.VertinCore.Config.Configs;
-import com.SouthernWall_404.Painter.API.Paint.Util.RenderUtil;
 import com.SouthernWall_404.Painter.Client.Config.ClientConfig;
 import com.SouthernWall_404.Painter.Painter;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -75,9 +74,19 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>, Dire
 
     @OnlyIn(Dist.CLIENT)
     public void cycleTextureUV(Direction direction) {
-        int flag=getFlag( direction);
-        IWallpaper wallpaper=getWallpaper( direction);
-        wallpaper.cycleTextureUV(BlockClientUtil.getQuadsForDirection(getOrigin(),direction).getFirst(),direction ,blockPos );
+
+        IWallpaper wallpaper=getWallpaper( direction);//先获取wallpaper
+
+        if(wallpaper==null){
+            Minecraft mc=Minecraft.getInstance();
+            if(mc.player!=null)
+            {
+                //TODO 添加提示消息
+            }
+            return;
+        }
+        direction=translateFace(direction);//获取实际方向
+        wallpaper.cycleTextureUV(BlockClientUtil.getQuadsForDirection(getOrigin(),direction).getFirst(),this );
     }
 
     protected void registerRenderVec()
@@ -270,7 +279,7 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>, Dire
             int flag = entryTag.getInt("flag");
             CompoundTag wallpaperTag = entryTag.getCompound("wallpaper");
             String type = wallpaperTag.getString("type");
-            
+
             IWallpaper wallpaper = Wallpapers.create(type, provider, wallpaperTag);
             if (wallpaper != null) {
                 wallpapers.put(flag, wallpaper);
