@@ -34,6 +34,8 @@ public class PaintUtil {
 
                 //TODO 需要整理到PaintInfo?又或者不用
                 if(level.isClientSide) paint.cycleTextureUV(direction); // 旋转纹理并发送网络包
+
+                chunk.setUnsaved(true);
             }
         }
         else {//当主手持刷子
@@ -50,6 +52,7 @@ public class PaintUtil {
                     BlockState existingMat = paint.getMaterial(direction);//获取当前面的喷涂
                     if (existingMat != null && existingMat.getBlock() == toPaint.getBlock()) {//如果当面有喷涂，且与手中方块相同
                         toPaint = BlockUtil.cycleInDirection(existingMat);//旋转
+
                     }
                     //如果当面没有喷涂，或与手中方块不同
                     //则正常喷涂
@@ -59,6 +62,8 @@ public class PaintUtil {
             } else {// 副手不是方块物品，则尝试利用已有的 paint 材质进行旋转
                 if (paint != null) {//如果存在paint
                     paint.cycleTextureDir( direction);
+
+                    chunk.setUnsaved(true);
                 }
             }
 
