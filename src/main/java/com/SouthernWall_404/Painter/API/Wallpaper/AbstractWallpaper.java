@@ -141,11 +141,16 @@ public abstract class AbstractWallpaper implements IWallpaper{
                 }
 
                 if(isVisible>0){//正数为可见
-                    quads.forEach(quad -> BakedQuadRender.renderInOfferredAO(quad, paint.getOrigin(),paint.getRenderVec().get(paint.getFlag(direction)), poseStack, buffer, aoFace));
+                    renderQuad(paint,direction, poseStack, buffer);
                 }
             }
         }
 
+    }
+
+    protected void renderQuad(AbstractPaint paint,Direction direction, PoseStack poseStack, VertexConsumer buffer)
+    {
+        quads.forEach(quad -> BakedQuadRender.renderInOfferredAO(quad, paint.getOrigin(),paint.getRenderVec().get(paint.getFlag(direction)), poseStack, buffer, aoFace));
     }
 
     /**

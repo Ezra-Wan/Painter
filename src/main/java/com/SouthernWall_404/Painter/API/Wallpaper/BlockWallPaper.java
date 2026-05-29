@@ -79,33 +79,10 @@ public class BlockWallPaper extends ListOverlayWallpaper{
         return TYPE;
     }
 
-    @OnlyIn(Dist.CLIENT)
-    public void render(AbstractPaint paint,Direction direction, PoseStack poseStack, VertexConsumer buffer)
-    {
-        Minecraft mc=Minecraft.getInstance();
-        if(mc!=null)
-        {
-            Level level=mc.level;
-            if(level!=null)
-            {
-                if(aoFace==null)refreshAO(paint,direction);
-                if(isVisible<0)refreshVisibles(paint,direction);
-                if(quads.isEmpty()){
-                    quads=createQuad(BlockClientUtil.getQuadsForDirection(paint.getOrigin(),paint.translateFace(direction)).getFirst());//TODO 不是很标准的编程
-                }
-
-                if(isVisible>0){//正数为可见
-                    quads.forEach(quad -> BakedQuadRender.renderInOfferredAO(quad, material,paint.getRenderVec().get(paint.getFlag(direction)), poseStack, buffer, aoFace));
-                }
-            }
-        }
-
+    @Override
+    protected void renderQuad(AbstractPaint paint, Direction direction, PoseStack poseStack, VertexConsumer buffer) {
+        quads.forEach(quad -> BakedQuadRender.renderInOfferredAO(quad, material,paint.getRenderVec().get(paint.getFlag(direction)), poseStack, buffer, aoFace));
     }
-
-
-    //TODO 添加对于方块的特殊调整
-    // createQuad需要修改
-    // render需要添加对于颜色的处理
 
 
 
