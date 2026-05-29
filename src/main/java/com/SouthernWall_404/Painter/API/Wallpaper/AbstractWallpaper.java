@@ -49,19 +49,7 @@ public abstract class AbstractWallpaper implements IWallpaper{
         this.altasKey = altasKey;
     }
 
-    /**
-     * 用于以填充方式创建Quad
-     * @param originInfo
-     * @param texture
-     * @return
-     */
-    public VerticesInfo doStuff(VerticesInfo originInfo,VerticesInfo texture) {
-        float xScale=originInfo.getXLength()/texture.getXLength();
-        float yScale=originInfo.getYLength()/texture.getYLength();
 
-        texture.scaleUV(xScale,yScale);
-        return texture;
-    }
 
     /**
      * 用于最终建立Quad
@@ -104,7 +92,6 @@ public abstract class AbstractWallpaper implements IWallpaper{
      */
     public abstract List<VerticesInfo> createTexture(BakedQuad originQuads);
 
-    //TODO 考虑将getType放在这里
     @OnlyIn(Dist.CLIENT)
     public void refreshAO(AbstractPaint paint,Direction direction){
         Minecraft mc=Minecraft.getInstance();
@@ -113,7 +100,7 @@ public abstract class AbstractWallpaper implements IWallpaper{
             if(level!= null)
             {
                 BlockPos blockPos=paint.getBlockPos();
-                if(!paint.hasNullInDirection( direction))blockPos=blockPos.relative(direction);//进行非dir面偏移
+                if(!paint.hasNullInDirection( direction))blockPos=blockPos.relative(direction);
                 if(aoFace==null)aoFace=new ModelRender.AmbientOcclusionFace();
 
                 aoFace.calculate(level,paint.getOrigin(),blockPos, direction, shape, shapeFlags, true);
