@@ -83,7 +83,6 @@ public class SpriteWallpaper extends AbstractWallpaper {
         }
 
         setUVOffset(new Vector2f(currentUoffset,currentVoffset), paint);
-        //TODO 需要添加网络处理，向服务器进行同步
 
     }
 

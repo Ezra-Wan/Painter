@@ -6,8 +6,8 @@ import com.SouthernWall_404.LaplaceAPI.RegulappleEngine.BakedQuadRender;
 import com.SouthernWall_404.LaplaceAPI.RegulappleEngine.ModelRender;
 import com.SouthernWall_404.LaplaceAPI.UlrichToolBox.Blocks.BlockClientUtil;
 import com.SouthernWall_404.Painter.API.Paint.API.AbstractPaint;
-import com.SouthernWall_404.Painter.API.Paint.Util.Paint.PaintSyncHelper;
 import com.SouthernWall_404.Painter.API.Paint.Util.RenderUtil;
+import com.SouthernWall_404.Painter.Client.Event.ClientTick;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.Minecraft;
@@ -204,11 +204,8 @@ public abstract class AbstractWallpaper implements IWallpaper{
         Minecraft mc=Minecraft.getInstance();
         if(mc!=null&&mc.level!=null){
 
-            PaintSyncHelper.syncRenders(List.of(paint));
-            //TODO 添加同步
+            ClientTick.updateRender( paint);
         }
-
-        //TODO UV处理需要再修复以下
         //TODO Block和这里的职能略有不清，需要明确
         //TODO 似乎有循环调用的错误
     }

@@ -36,8 +36,15 @@ public class PaintSyncHelper {
     }
 
 
+    //TODo 添加正确分发方法
+
+    /**
+     * 用于更新renders
+     * 建议使用队列化处理，以提高性能
+     * @param renders
+     */
     @OnlyIn(Dist.CLIENT)
-    public static void syncRenders(List<AbstractRender> renders){
+    public static void syncRenders(Set<AbstractRender> renders){
 
         CompoundTag tag=new CompoundTag();
         ListTag renderList=new ListTag();
@@ -63,25 +70,6 @@ public class PaintSyncHelper {
 
 
         NetworkSync.requireToServer(ServerHandlers.RENDER_UPDATE_PACKET,tag);
-    }
-
-    /**
-     * 同步UV偏移数据到服务端
-     * @param blockPos 方块位置
-     * @param direction 方向
-     * @param uv UV偏移数组，长度为2，[0]为U，[1]为V
-     */
-    public static void syncPaintUV(BlockPos blockPos, Direction direction, float[] uv) {
-        CompoundTag tag = new CompoundTag();
-        tag.putInt("x", blockPos.getX());
-        tag.putInt("y", blockPos.getY());
-        tag.putInt("z", blockPos.getZ());
-        tag.putString("direction", direction.getName());
-        tag.putFloat("u", uv[0]);
-        tag.putFloat("v", uv[1]);
-
-
-        NetworkSync.requireToServer(ServerHandlers.CYCLE_TEXTURE_UV_PACKET,tag);
     }
 
     public static void syncRefresh(Level level, Set<ChunkPos> poses)
