@@ -137,7 +137,7 @@ public abstract class AbstractWallpaper implements IWallpaper{
                 if(aoFace==null)refreshAO(paint,direction);
                 if(isVisible<0)refreshVisibles(paint,direction);
                 if(quads.isEmpty()){
-                    quads=createQuad(BlockClientUtil.getQuadsForDirection(paint.getOrigin(),paint.translateFace(direction)).getFirst());//TODO 不是很标准的编程
+                    quads=createQuad(BlockClientUtil.getQuadsForDirection(paint.getOrigin(),paint.translateFace(direction)).getFirst());
                 }
 
                 if(isVisible>0){//正数为可见

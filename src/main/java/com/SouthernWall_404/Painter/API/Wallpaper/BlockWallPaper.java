@@ -6,6 +6,7 @@ import com.SouthernWall_404.LaplaceAPI.UlrichToolBox.Blocks.BlockUtil;
 import com.SouthernWall_404.Painter.API.Paint.API.AbstractPaint;
 import com.SouthernWall_404.Painter.API.Paint.Util.Paint.PaintOperationHelper;
 import com.SouthernWall_404.Painter.API.Paint.Util.RenderUtil;
+import com.SouthernWall_404.Painter.API.Paint.Util.Wallpaper.WallpaperBlockHelper;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.Minecraft;
@@ -40,10 +41,9 @@ public class BlockWallPaper extends ListOverlayWallpaper{
     
     private BlockState material;
     private Direction face;
-    private float[] uvOffset=new float[2];
 
     public BlockWallPaper(BlockState material,Direction face) {
-        super(getOverlays(material,face));
+        super(WallpaperBlockHelper.getOverlays(material,face));
         this.material = material;
         this.face = face;
     }
@@ -53,26 +53,26 @@ public class BlockWallPaper extends ListOverlayWallpaper{
         deserializeNBT(provider, tag);
     }
 
+    /**
+     * 默认的材质修改方法，带有渲染更新
+     * @param material
+     */
+    public void setMaterial(BlockState material) {
+        this.material = material;
 
+        refresh();
+
+        this.overlays=WallpaperBlockHelper.getOverlays(material,face);
+
+    }
 
     public void cycleTextureDir() {
         if (material != null) {
-            material= BlockUtil.cycleInDirection( material);
-
-            refresh();//TODO 似乎有数据持久化上的问题
-
-            overlays=getOverlays(material,face);
-
+            setMaterial(BlockUtil.cycleInDirection( material));
         }
 
     }
 
-
-    @Override
-    public void refresh() {
-        super.refresh();
-
-    }
 
     @Override
     public String getType() {
@@ -107,17 +107,9 @@ public class BlockWallPaper extends ListOverlayWallpaper{
     // createQuad需要修改
     // render需要添加对于颜色的处理
 
-    @OnlyIn(Dist.CLIENT)
-    public static List<IWallpaper> getOverlays(BlockState material, Direction face)
-    {
-        List<IWallpaper> overlays=new ArrayList<>();
-        Minecraft mc=Minecraft.getInstance();
-        if(mc!=null) {
-            List<BakedQuad> quads = BlockClientUtil.getQuadsForDirection(material, face);
-            quads.forEach(quad -> overlays.add(SpriteWallpaper.builder(quad).build()));
-        }
-        return overlays;
-    }
+
+
+
     @Override
     public @UnknownNullability CompoundTag serializeNBT(HolderLookup.Provider provider) {
         CompoundTag tag = new CompoundTag();

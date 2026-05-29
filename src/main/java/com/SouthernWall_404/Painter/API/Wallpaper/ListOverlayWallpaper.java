@@ -49,6 +49,14 @@ public class ListOverlayWallpaper extends AbstractWallpaper {
 
     }
 
+    /**
+     * 默认不做操作，如需要可以继承并重写
+     */
+    public void refreshOverlays()
+    {
+        overlays.forEach(IWallpaper::refresh);
+    }
+
     @Override
     public String getType() {
         return TYPE;
@@ -73,8 +81,10 @@ public class ListOverlayWallpaper extends AbstractWallpaper {
 
     @Override
     public void refresh() {
+//        refreshOverlays();
         super.refresh();
-        overlays.forEach(IWallpaper::refresh);
+
+        refreshOverlays();
     }
 
 //    @Override
