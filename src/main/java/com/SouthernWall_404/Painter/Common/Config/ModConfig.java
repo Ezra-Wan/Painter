@@ -13,6 +13,17 @@ import net.neoforged.neoforge.common.ModConfigSpec;
  */
 public class ModConfig {
 
+    // 油漆桶默认是否需要选区（严格模式）
+    public static final boolean DEFAULT_BUCKET_REQUIRES_SELECTION = true;
+
+    /**
+     * 获取油漆桶默认选区要求
+     * @return true=需要选区（严格模式），false=不需要选区（自由模式）
+     */
+    public static boolean getBucketRequiresSelectionDefault() {
+        // TODO: 未来可以从 TOML 配置读取
+        return DEFAULT_BUCKET_REQUIRES_SELECTION;
+    }
 
     public static void register(ModContainer container)
     {

@@ -1,6 +1,7 @@
 package com.SouthernWall_404.Painter.Common.World.Item;
 
 import com.SouthernWall_404.Painter.API.Paint.Util.Paint.PaintUtil;
+import com.SouthernWall_404.Painter.API.Tool.BucketSelectionConfig;
 import com.SouthernWall_404.Painter.API.Tool.SelectedZone;
 import com.SouthernWall_404.Painter.API.Tool.Wall.Filters.EmptyFilter;
 import com.SouthernWall_404.Painter.API.Tool.Wall.Filters.SelectFilter;
@@ -41,16 +42,34 @@ public class PaintBucketItem extends BlockInteractItem {
         Level level = event.getLevel();
         BlockPos blockPos = event.getPos();
         Player player = event.getEntity();
-        SelectedZone selectedZone = player.getData(ModAttachments.SELECTED_ZONE_FOR_SWAP);
-
-        if (selectedZone != null) {
-            List<IFilter> filters = new ArrayList<>();
-            filters.add(new EmptyFilter());
-            if (selectedZone.isSelecting()) {
-                filters.add(new SelectFilter());
+        
+        // 获取玩家的油漆桶配置
+        BucketSelectionConfig config = player.getData(ModAttachments.BUCKET_SELECTION_CONFIG);
+        
+        // 如果处于严格模式，检查选区是否存在
+        if (config.isRequiresSelection()) {
+            SelectedZone selectedZone = player.getData(ModAttachments.SELECTED_ZONE_FOR_SWAP);
+            
+            if (selectedZone == null || !selectedZone.isSelecting()) {
+                player.displayClientMessage(
+                    Component.translatable("painter.message.bucket.requires_selection")
+                        .withStyle(ChatFormatting.RED),
+                    true
+                );
+                event.setCanceled(true);
+                return;
             }
-            PaintUtil.dealBucketClick(blockPos, event.getFace(), player, level, filters,isInMainHand);
         }
+        
+        List<IFilter> filters = new ArrayList<>();
+        filters.add(new EmptyFilter());
+        
+        // 根据配置决定是否添加选区过滤器
+        if (config.isRequiresSelection()) {
+            filters.add(new SelectFilter());
+        }
+        
+        PaintUtil.dealBucketClick(blockPos, event.getFace(), player, level, filters,isInMainHand);
 
         event.setCanceled(true);
         player.swing(InteractionHand.MAIN_HAND);

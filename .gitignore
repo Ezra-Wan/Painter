@@ -24,3 +24,7 @@ runs
 run-data
 
 repo
+
+# AI 教程文档（不上传到远程仓库）
+Tutorials/
+Tutorial/

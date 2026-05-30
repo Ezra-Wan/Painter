@@ -23,6 +23,7 @@ import java.util.List;
 
 public class ServerHandlers {
     public static final ResourceLocation RENDER_UPDATE_PACKET = ResourceLocation.fromNamespaceAndPath(Painter.MODID, "render_update");
+    public static final ResourceLocation BUCKET_MODE_SYNC_PACKET = ResourceLocation.fromNamespaceAndPath(Painter.MODID, "bucket_mode_sync");
 
     public static void register() {
         NetworkRegister.registerClientRequestHandler(RENDER_UPDATE_PACKET, ((packet, context) -> renderUpdateHandler(packet, context)));

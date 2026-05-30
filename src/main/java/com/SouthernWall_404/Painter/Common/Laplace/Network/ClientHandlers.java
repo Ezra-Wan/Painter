@@ -5,6 +5,7 @@ import com.SouthernWall_404.LaplaceAPI.xNetwork.Packet.S2C.BlockSetPacket;
 import com.SouthernWall_404.LaplaceAPI.xNetwork.Packet.S2C.ServerNoticePacket;
 import com.SouthernWall_404.Painter.API.Paint.API.AbstractPaint;
 import com.SouthernWall_404.Painter.API.Paint.Util.Paint.PaintAttachmentHelper;
+import com.SouthernWall_404.Painter.API.Tool.BucketSelectionConfig;
 import com.SouthernWall_404.Painter.Common.Init.ModAttachments;
 import com.SouthernWall_404.Painter.Painter;
 import net.minecraft.client.Minecraft;
@@ -31,6 +32,7 @@ public class ClientHandlers {
     {
         if (FMLEnvironment.dist == Dist.CLIENT) {
             NetworkRegister.registerServerNoticeHandler(AO_FRESH_PACKET,((packet, context) -> aoRefreshHandler(packet,context)));
+            NetworkRegister.registerServerNoticeHandler(ServerHandlers.BUCKET_MODE_SYNC_PACKET, ((packet, context) -> bucketModeSyncHandler(packet, context)));
         }
     }
     @OnlyIn(Dist.CLIENT)
@@ -53,6 +55,20 @@ public class ClientHandlers {
                     level.getChunk(chunkPos.x, chunkPos.z).getData(ModAttachments.PAINT_INFO.get()).setChanged();
                 }
             }
+        });
+    }
+
+    @OnlyIn(Dist.CLIENT)
+    public static void bucketModeSyncHandler(ServerNoticePacket packet, IPayloadContext context) {
+        context.enqueueWork(() -> {
+            Minecraft mc = Minecraft.getInstance();
+            if (mc == null || mc.player == null) return;
+
+            CompoundTag tag = packet.data();
+            boolean requiresSelection = tag.getBoolean("requiresSelection");
+
+            BucketSelectionConfig config = mc.player.getData(ModAttachments.BUCKET_SELECTION_CONFIG);
+            config.setRequiresSelection(requiresSelection);
         });
     }
 }
