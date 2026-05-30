@@ -7,6 +7,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.core.Direction;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
@@ -24,7 +25,6 @@ public interface IWallpaper extends INBTSerializable<CompoundTag> {
     public List<BakedQuad> createQuad(BakedQuad originQuad);//建立渲染面的通用方法
 
     @OnlyIn(Dist.CLIENT)
-    public List<VerticesInfo> createTexture(BakedQuad originQuad);
     public void cycleTextureUV(BakedQuad originQuad, AbstractPaint paint);
 
     @OnlyIn(Dist.CLIENT)
@@ -34,5 +34,9 @@ public interface IWallpaper extends INBTSerializable<CompoundTag> {
 
     @OnlyIn(Dist.CLIENT)
     public void refresh();
+    default IWallpaper fromNBT(HolderLookup.Provider provider, CompoundTag compoundTag) {
+        return Wallpapers.create(compoundTag.getString("type"),provider,compoundTag);
+    }
+
 
 }

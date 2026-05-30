@@ -6,6 +6,7 @@ import com.SouthernWall_404.LaplaceAPI.UlrichToolBox.Blocks.BlockUtil;
 import com.SouthernWall_404.Painter.API.Paint.API.AbstractPaint;
 import com.SouthernWall_404.Painter.API.Paint.Util.Paint.PaintOperationHelper;
 import com.SouthernWall_404.Painter.API.Paint.Util.RenderUtil;
+import com.SouthernWall_404.Painter.API.Paint.Util.Wallpaper.WallpaperBlockHelper;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.Minecraft;
@@ -37,13 +38,14 @@ import java.util.List;
  */
 public class BlockWallPaper extends ListOverlayWallpaper{
     public static final String TYPE = "block";
-    
+
+    //========数据========
     private BlockState material;
     private Direction face;
-    private float[] uvOffset=new float[2];
 
+    //========构造方法=========
     public BlockWallPaper(BlockState material,Direction face) {
-        super(getOverlays(material,face));
+        super(WallpaperBlockHelper.getOverlays(material,face));
         this.material = material;
         this.face = face;
     }
@@ -55,83 +57,20 @@ public class BlockWallPaper extends ListOverlayWallpaper{
 
 
 
-    public void cycleTextureDir() {
-        if (material != null) {
-            material= BlockUtil.cycleInDirection( material);
-
-            refresh();//TODO 似乎有数据持久化上的问题
-
-            overlays=getOverlays(material,face);
-
-        }
-
-    }
-
-
-    @Override
-    public void refresh() {
-        super.refresh();
-
-    }
-
-    @Override
-    public String getType() {
-        return TYPE;
-    }
-
-    @OnlyIn(Dist.CLIENT)
-    public void render(AbstractPaint paint,Direction direction, PoseStack poseStack, VertexConsumer buffer)
-    {
-        Minecraft mc=Minecraft.getInstance();
-        if(mc!=null)
-        {
-            Level level=mc.level;
-            if(level!=null)
-            {
-                if(aoFace==null)refreshAO(paint,direction);
-                if(isVisible<0)refreshVisibles(paint,direction);
-                if(quads.isEmpty()){
-                    quads=createQuad(BlockClientUtil.getQuadsForDirection(paint.getOrigin(),paint.translateFace(direction)).getFirst());//TODO 不是很标准的编程
-                }
-
-                if(isVisible>0){//正数为可见
-                    quads.forEach(quad -> BakedQuadRender.renderInOfferredAO(quad, material,paint.getRenderVec().get(paint.getFlag(direction)), poseStack, buffer, aoFace));
-                }
-            }
-        }
-
-    }
-
-
-    //TODO 添加对于方块的特殊调整
-    // createQuad需要修改
-    // render需要添加对于颜色的处理
-
-    @OnlyIn(Dist.CLIENT)
-    public static List<IWallpaper> getOverlays(BlockState material, Direction face)
-    {
-        List<IWallpaper> overlays=new ArrayList<>();
-        Minecraft mc=Minecraft.getInstance();
-        if(mc!=null) {
-            List<BakedQuad> quads = BlockClientUtil.getQuadsForDirection(material, face);
-            quads.forEach(quad -> overlays.add(SpriteWallpaper.builder(quad).build()));
-        }
-        return overlays;
-    }
     @Override
     public @UnknownNullability CompoundTag serializeNBT(HolderLookup.Provider provider) {
         CompoundTag tag = new CompoundTag();
-        
+
         tag.putString("type", TYPE);
-        
+
         if (material != null) {
             Tag stateTag = BlockState.CODEC.encodeStart(
-                provider.createSerializationContext(NbtOps.INSTANCE),
+                    provider.createSerializationContext(NbtOps.INSTANCE),
                     material
             ).getOrThrow();
             tag.put("blockState", stateTag);
         }
-        
+
         if (face != null) {
             tag.putInt("face", face.get3DDataValue());
         }
@@ -146,11 +85,11 @@ public class BlockWallPaper extends ListOverlayWallpaper{
         if (compoundTag.contains("blockState")) {
             Tag stateTag = compoundTag.get("blockState");
             material = BlockState.CODEC.parse(
-                provider.createSerializationContext(NbtOps.INSTANCE),
-                stateTag
+                    provider.createSerializationContext(NbtOps.INSTANCE),
+                    stateTag
             ).getOrThrow();
         }
-        
+
         if (compoundTag.contains("face")) {
             int faceValue = compoundTag.getInt("face");
             face = Direction.from3DDataValue(faceValue);
@@ -159,5 +98,40 @@ public class BlockWallPaper extends ListOverlayWallpaper{
         if(compoundTag.contains("list")){
             super.deserializeNBT(provider, compoundTag.getCompound("list"));
         }
+    }
+
+    //=========基本方法========
+
+    /**
+     * 默认的材质修改方法，带有渲染更新
+     * @param material
+     */
+    public void setMaterial(BlockState material) {
+        this.material = material;
+
+        setOverlays(WallpaperBlockHelper.getOverlays(material,face));
+
+    }
+    @Override
+    public String getType() {
+        return TYPE;
+    }
+    //========业务方法========
+
+    /**
+     * 修改方块内容
+     */
+    public void cycleTextureDir() {
+        if (material != null) {
+            setMaterial(BlockUtil.cycleInDirection( material));
+        }
+    }
+
+    /**
+     * 使用方块进行渲染，以免出现着色问题
+     */
+    @Override
+    protected void renderQuad(AbstractPaint paint, Direction direction, PoseStack poseStack, VertexConsumer buffer) {
+        quads.forEach(quad -> BakedQuadRender.renderInOfferredAO(quad, material,paint.getRenderVec().get(paint.getFlag(direction)), poseStack, buffer, aoFace));
     }
 }
