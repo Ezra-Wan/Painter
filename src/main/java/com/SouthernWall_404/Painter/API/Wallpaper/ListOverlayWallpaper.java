@@ -126,22 +126,6 @@ public class ListOverlayWallpaper extends AbstractWallpaper {
         refresh();
     }
 
-    //========刷新方法========
-    /**
-     * 默认不做操作，如需要可以继承并重写
-     */
-    public void refreshOverlays()
-    {
-        overlays.forEach(IWallpaper::refresh);
-    }
-
-    @Override
-    public void refresh() {
-//        refreshOverlays();
-        super.refresh();
-
-        refreshOverlays();
-    }
     //========渲染方法========
 
     /**
@@ -155,7 +139,6 @@ public class ListOverlayWallpaper extends AbstractWallpaper {
         return List.of();
     }
 
-    //TODO 考虑移除掉，将所有渲染交给下属List处理
     @Override
     public List<BakedQuad> createQuad(BakedQuad originQuad) {
 
@@ -166,4 +149,6 @@ public class ListOverlayWallpaper extends AbstractWallpaper {
         });
         return quads;
     }
+
+
 }

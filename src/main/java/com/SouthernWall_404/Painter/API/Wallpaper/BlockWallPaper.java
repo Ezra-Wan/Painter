@@ -109,9 +109,6 @@ public class BlockWallPaper extends ListOverlayWallpaper{
     public void setMaterial(BlockState material) {
         this.material = material;
 
-//        refresh();
-
-        //TODO 有待测试
         setOverlays(WallpaperBlockHelper.getOverlays(material,face));
 
     }
