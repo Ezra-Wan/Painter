@@ -24,6 +24,7 @@
 
   "painter.message.failed_to_paint.out_of_range": "超出选区范围，左键以移除选区",
   "painter.message.bucket.requires_selection": "油漆桶必须在选区内使用，请先用粉笔创建选区",
+  "painter.message.bucket.outside_selection": "点击位置不在选区内，请在选区内使用油漆桶",
 
   "painter.command.bucket_mode.toggled": "油漆桶模式已切换为：%s",
   "painter.command.bucket_mode.strict": "§a严格模式（需要选区）",

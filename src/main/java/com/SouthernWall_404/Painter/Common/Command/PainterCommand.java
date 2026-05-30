@@ -38,8 +38,6 @@ public class PainterCommand {
                     // 切换模式
                     boolean newState = config.toggle();
                     
-                    System.out.println("[DEBUG PainterCommand] 服务端切换模式: requiresSelection=" + newState);
-                    
                     // 同步到客户端
                     syncConfigToClient(player, newState);
                     
