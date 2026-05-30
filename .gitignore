@@ -24,3 +24,9 @@ runs
 run-data
 
 repo
+
+# 文档文件（统一管理，不随功能提交）
+# Tutorial/*.md - 教程文档统一在版本发布时更新
+# logs/*.md - 更新日志统一管理
+# skill/*.md - AI助手技能文档统一管理
+# 注意：README.md 和 README.en.md 不在此列，可能需要随版本更新
