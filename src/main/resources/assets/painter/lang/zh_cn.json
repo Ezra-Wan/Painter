@@ -17,6 +17,7 @@
 
   "painter.message.clear": "选区已清除！",
   "painter.message.select_a": "第一选取点设置为[%s,%s,%s]，方向为%s",
+  "painter.message.select.success": "选区创建成功！",
   "painter.message.select_b.pass": "第二选取点设置为[%s,%s,%s]",
   "painter.message.select_b.missing_a": "第一选取点未设置",
   "painter.message.select_b.not_in_surface": "不在已选取的墙面上",
