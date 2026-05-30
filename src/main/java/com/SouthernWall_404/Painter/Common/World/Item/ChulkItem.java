@@ -51,9 +51,21 @@ public class ChulkItem extends BlockInteractItem {
                     true);
         } else {
             // 第二次右键：设置B点并形成选区
-            zone.setB(event.getPos());
-
-            //TODO 记得加反馈信息
+            if(zone.setB(event.getPos())) {
+                // 成功建立选区
+                player.displayClientMessage(
+                    Component.translatable("painter.message.select.success")
+                        .withStyle(ChatFormatting.GREEN),
+                    true
+                );
+            } else {
+                // 两点不在同一平面，已自动清除缓存
+                player.displayClientMessage(
+                    Component.translatable("painter.message.select_b.not_in_surface")
+                        .withStyle(ChatFormatting.RED),
+                    true
+                );
+            }
         }
         player.swing(InteractionHand.MAIN_HAND);
     }
