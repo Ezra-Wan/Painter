@@ -24,6 +24,7 @@ import java.util.List;
 public class ServerHandlers {
 
     public static final ResourceLocation CYCLE_TEXTURE_UV_PACKET = ResourceLocation.fromNamespaceAndPath(Painter.MODID, "cycle_texture_uv");
+    public static final ResourceLocation BUCKET_CONFIG_SYNC_PACKET = ResourceLocation.fromNamespaceAndPath(Painter.MODID, "bucket_config_sync");
 
     public static final ResourceLocation RENDER_UPDATE_PACKET = ResourceLocation.fromNamespaceAndPath(Painter.MODID, "render_update");
 

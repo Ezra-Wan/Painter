@@ -3,6 +3,7 @@ package com.SouthernWall_404.Painter.Common.Init;
 import com.SouthernWall_404.LaplaceAPI.VertinCore.World.Attachment.AttachmentRegistryHelper;
 import com.SouthernWall_404.Painter.API.Paint.Attachment.LevelPaintInfo;
 import com.SouthernWall_404.Painter.API.Paint.Attachment.PaintInfo;
+import com.SouthernWall_404.Painter.API.Tool.BucketSelectionConfig;
 import com.SouthernWall_404.Painter.API.Tool.SelectedZone;
 import com.SouthernWall_404.Painter.Painter;
 import net.neoforged.fml.common.Mod;
@@ -32,5 +33,6 @@ public class ModAttachments {
     public static final Supplier<AttachmentType<PaintInfo>> PAINT_INFO = AttachmentRegistryHelper.register(Painter.frame,"paint_info",()->new PaintInfo());
     public static final Supplier<AttachmentType<LevelPaintInfo>> LEVEL_PAINT_INFO = AttachmentRegistryHelper.registerLevelAttachment(Painter.frame,"level_paint_info",()->new LevelPaintInfo());
     public static final Supplier<AttachmentType<SelectedZone>> SELECTED_ZONE_FOR_SWAP = AttachmentRegistryHelper.registerWithOutSerialize(Painter.frame,"selected_zone_for_swap",()->new SelectedZone());
+    public static final Supplier<AttachmentType<BucketSelectionConfig>> BUCKET_SELECTION_CONFIG = AttachmentRegistryHelper.register(Painter.frame,"bucket_selection_config",()->new BucketSelectionConfig());
 
 }
