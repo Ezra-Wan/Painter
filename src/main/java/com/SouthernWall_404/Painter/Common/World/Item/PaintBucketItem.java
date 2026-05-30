@@ -46,6 +46,11 @@ public class PaintBucketItem extends BlockInteractItem {
         // 获取玩家的油漆桶配置
         BucketSelectionConfig config = player.getData(ModAttachments.BUCKET_SELECTION_CONFIG);
         
+        // 调试日志：输出当前模式状态
+        if (!level.isClientSide()) {
+            System.out.println("[DEBUG PaintBucket] requiresSelection=" + config.isRequiresSelection());
+        }
+        
         // 如果处于严格模式，检查选区是否存在
         if (config.isRequiresSelection()) {
             SelectedZone selectedZone = player.getData(ModAttachments.SELECTED_ZONE_FOR_SWAP);

@@ -67,8 +67,12 @@ public class ClientHandlers {
             CompoundTag tag = packet.data();
             boolean requiresSelection = tag.getBoolean("requiresSelection");
 
+            System.out.println("[DEBUG ClientHandlers] 接收到同步包: requiresSelection=" + requiresSelection);
+            
             BucketSelectionConfig config = mc.player.getData(ModAttachments.BUCKET_SELECTION_CONFIG);
             config.setRequiresSelection(requiresSelection);
+            
+            System.out.println("[DEBUG ClientHandlers] 客户端配置已更新: " + config.isRequiresSelection());
         });
     }
 }
