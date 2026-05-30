@@ -28,7 +28,7 @@ public class WallpaperBlockHelper {
         Minecraft mc=Minecraft.getInstance();
         if(mc!=null) {
             List<BakedQuad> quads = BlockClientUtil.getQuadsForDirection(material, face);
-            quads.forEach(quad -> overlays.add(SpriteWallpaper.builder(quad).build()));
+            quads.forEach(quad -> overlays.add(new SpriteWallpaper( quad)));
         }
         return overlays;
     }

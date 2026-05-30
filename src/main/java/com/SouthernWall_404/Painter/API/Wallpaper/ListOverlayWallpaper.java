@@ -6,6 +6,8 @@ import com.SouthernWall_404.Painter.API.Paint.API.AbstractPaint;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 import org.jetbrains.annotations.UnknownNullability;
 
 import java.util.ArrayList;
@@ -43,7 +45,7 @@ public class ListOverlayWallpaper extends AbstractWallpaper {
     public static ListOverlayWallpaper ofQuads(List<BakedQuad> quads){
 
         List<IWallpaper> overlays=new ArrayList<>();
-        quads.forEach(quad->overlays.add(SpriteWallpaper.builder(quad).build()));
+        quads.forEach(quad->overlays.add(new SpriteWallpaper( quad)));
 
         return new ListOverlayWallpaper(overlays);
 
@@ -61,8 +63,10 @@ public class ListOverlayWallpaper extends AbstractWallpaper {
     public String getType() {
         return TYPE;
     }
+
+    @OnlyIn(Dist.CLIENT)
     @Override
-    public List<VerticesInfo> createTexture(BakedQuad originQuad) {
+    protected List<VerticesInfo> createTexture(BakedQuad originQuad) {
         return List.of();
     }
 

@@ -24,28 +24,36 @@ public class SpriteWallpaper extends AbstractWallpaper {
 
     public static final String TYPE="sprite";
 
-    //========属性=========
-
+    //========数据=========
     private VerticesInfo texture;
 
 
-
+    //========构造方法========
     SpriteWallpaper(VerticesInfo texture,ResourceLocation atlasKey, int tintIndex) {
         super(tintIndex, atlasKey);
         this.texture=texture;
 
     }
 
+    /**
+     * 用于从NBT建立
+     * @param provider
+     * @param tag
+     */
     SpriteWallpaper(HolderLookup.Provider provider,CompoundTag tag){
         this(VerticesInfo.fromNBT(provider,tag.getCompound("texture")),null,-1);
         deserializeNBT(provider,tag);
     }
-
-    public static Builder builder(BakedQuad quad)
-    {
-        return new Builder(quad);
+    /**
+     * 用于从BakedQuad建立
+     * @param quad
+     */
+    public SpriteWallpaper(BakedQuad quad) {
+        this(VerticesInfo.of(quad.getVertices()),quad.getSprite().atlasLocation(),quad.getTintIndex());
     }
 
+
+    //========基本方法========
     @Override
     public String getType() {
         return TYPE;
@@ -88,7 +96,7 @@ public class SpriteWallpaper extends AbstractWallpaper {
 
     @OnlyIn(Dist.CLIENT)
     @Override
-    public List<VerticesInfo> createTexture(BakedQuad originQuad) {
+    protected List<VerticesInfo> createTexture(BakedQuad originQuad) {
 
         List<VerticesInfo> textures=new ArrayList<>();
         Minecraft mc=Minecraft.getInstance();
@@ -149,31 +157,5 @@ public class SpriteWallpaper extends AbstractWallpaper {
         
         // 反序列化 SpriteWallpaper 特有字段
         if(compoundTag.contains("texture")) texture = VerticesInfo.fromNBT(provider, compoundTag.getCompound("texture"));
-    }
-
-    public static class Builder{
-        private int tintIndex;
-        private VerticesInfo texture;
-        private ResourceLocation altasKey;
-
-        public Builder(VerticesInfo texture, ResourceLocation altasKey,int tintIndex) {
-
-            this.texture = texture;
-            this.altasKey = altasKey;
-            this.tintIndex = tintIndex;
-        }
-
-        public Builder(BakedQuad quad)
-        {
-
-            this.tintIndex =quad.getTintIndex();
-            texture=VerticesInfo.of(quad);
-            this.altasKey= quad.getSprite().contents().name();
-        }
-
-        public SpriteWallpaper build()
-        {
-            return new SpriteWallpaper(texture,altasKey, tintIndex);
-        }
     }
 }
