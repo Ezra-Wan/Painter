@@ -1,6 +1,7 @@
 package com.SouthernWall_404.Painter.Common.World.Item;
 
 import com.SouthernWall_404.Painter.API.Paint.Util.Paint.PaintUtil;
+import com.SouthernWall_404.Painter.API.Tool.BucketSelectionConfig;
 import com.SouthernWall_404.Painter.API.Tool.SelectedZone;
 import com.SouthernWall_404.Painter.API.Tool.Wall.Filters.EmptyFilter;
 import com.SouthernWall_404.Painter.API.Tool.Wall.Filters.SelectFilter;
@@ -41,22 +42,35 @@ public class PaintBucketItem extends BlockInteractItem {
         Level level = event.getLevel();
         BlockPos blockPos = event.getPos();
         Player player = event.getEntity();
-        SelectedZone selectedZone = player.getData(ModAttachments.SELECTED_ZONE_FOR_SWAP);
+        
+        // 获取玩家的油漆桶选区依赖配置（双端都执行，因为已经通过数据包同步）
+        BucketSelectionConfig config = player.getData(ModAttachments.BUCKET_SELECTION_CONFIG);
+        
+        // 根据配置决定是否检查选区
+        if (config.isRequiresSelection()) {
+            SelectedZone selectedZone = player.getData(ModAttachments.SELECTED_ZONE_FOR_SWAP);
 
-        // 强制要求选区存在
-        if (selectedZone == null || !selectedZone.isSelecting()) {
-            player.displayClientMessage(
-                Component.translatable("painter.message.bucket.requires_selection")
-                    .withStyle(ChatFormatting.RED),
-                true
-            );
-            event.setCanceled(true);
-            return;
+            // 强制要求选区存在
+            if (selectedZone == null || !selectedZone.isSelecting()) {
+                player.displayClientMessage(
+                    Component.translatable("painter.message.bucket.requires_selection")
+                        .withStyle(ChatFormatting.RED),
+                    true
+                );
+                event.setCanceled(true);
+                return;
+            }
         }
+        // 非依赖选区模式下，直接跳过选区检查
 
         List<IFilter> filters = new ArrayList<>();
         filters.add(new EmptyFilter());
-        filters.add(new SelectFilter()); // 始终添加选区过滤器
+        
+        // 只有在需要选区模式下才添加选区过滤器
+        if (config.isRequiresSelection()) {
+            filters.add(new SelectFilter());
+        }
+        
         PaintUtil.dealBucketClick(blockPos, event.getFace(), player, level, filters,isInMainHand);
 
         event.setCanceled(true);

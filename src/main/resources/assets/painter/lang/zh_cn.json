@@ -24,6 +24,9 @@
   "painter.message.failed_to_paint.out_of_range": "超出选区范围，左键以移除选区",
   "painter.message.bucket.requires_selection": "油漆桶必须在选区内使用，请先用粉笔创建选区",
 
+  "painter.command.bucket_selection.enabled": "油漆桶已切换到需要选区模式",
+  "painter.command.bucket_selection.disabled": "油漆桶已切换到无需选区模式",
+
   "painter.tooltip.brush_1": "副手持要粉刷的方块，主手持刷子",
   "painter.tooltip.brush_2": "右键方块即可粉刷",
   "painter.tooltip.brush_3": "-当前版本兼容：完整方块 台阶",
