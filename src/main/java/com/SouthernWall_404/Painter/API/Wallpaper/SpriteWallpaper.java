@@ -52,15 +52,48 @@ public class SpriteWallpaper extends AbstractWallpaper {
         this(VerticesInfo.of(quad.getVertices()),quad.getSprite().atlasLocation(),quad.getTintIndex());
     }
 
+    @Override
+    public @UnknownNullability CompoundTag serializeNBT(HolderLookup.Provider provider) {
+        // 调用父类序列化通用字段（tintIndex, altasKey）
+        CompoundTag tag = super.serializeNBT(provider);
 
+        // 序列化 SpriteWallpaper 特有字段
+        tag.put("texture", texture.serializeNBT(provider));
+
+        return tag;
+    }
+
+    @Override
+    public void deserializeNBT(HolderLookup.Provider provider, CompoundTag compoundTag) {
+        // 调用父类反序列化通用字段（tintIndex, altasKey）
+        super.deserializeNBT(provider, compoundTag);
+
+        // 反序列化 SpriteWallpaper 特有字段
+        if(compoundTag.contains("texture")) texture = VerticesInfo.fromNBT(provider, compoundTag.getCompound("texture"));
+    }
     //========基本方法========
     @Override
     public String getType() {
         return TYPE;
     }
 
+    public void setTexture(VerticesInfo texture) {
+        this.texture = texture;
+    }
+
+    public VerticesInfo getTexture() {
+        return texture;
+    }
 
 
+    //========业务方法========
+
+    /**
+     * 用于自动旋转uv
+     * @param originQuad
+     * @param paint
+     */
+    @OnlyIn(Dist.CLIENT)
     @Override
     public void cycleTextureUV(BakedQuad originQuad, AbstractPaint paint) {
 
@@ -112,50 +145,5 @@ public class SpriteWallpaper extends AbstractWallpaper {
 
         return textures;
     }
-//
-//    @OnlyIn(Dist.CLIENT)
-//    @Override
-//    public List<BakedQuad> createQuad(BakedQuad originQuad) {
-//
-//        List<BakedQuad> quads=new ArrayList<>();
-//            Minecraft mc=Minecraft.getInstance();
-//            if(mc!=null)
-//            {
-//                VerticesInfo originInfo=VerticesInfo.of(originQuad);
-//                //TODO 记得改laplace命名
-//
-//
-//
-//                //uv处理
-//                        VerticesInfo mixedInfo=
-//                        originInfo.copy()
-//                                .stuffedBy( texture)
-//                                .color(texture.getColors());
-//
-//                BakedQuad quad=new BakedQuad(mixedInfo.vertices(), tintIndex,originQuad.getDirection(),sprite,true);
-//                quads.add(quad);
-//        }
-//        return quads;
-//    }
 
-
-    @Override
-    public @UnknownNullability CompoundTag serializeNBT(HolderLookup.Provider provider) {
-        // 调用父类序列化通用字段（tintIndex, altasKey）
-        CompoundTag tag = super.serializeNBT(provider);
-        
-        // 序列化 SpriteWallpaper 特有字段
-        tag.put("texture", texture.serializeNBT(provider));
-        
-        return tag;
-    }
-
-    @Override
-    public void deserializeNBT(HolderLookup.Provider provider, CompoundTag compoundTag) {
-        // 调用父类反序列化通用字段（tintIndex, altasKey）
-        super.deserializeNBT(provider, compoundTag);
-        
-        // 反序列化 SpriteWallpaper 特有字段
-        if(compoundTag.contains("texture")) texture = VerticesInfo.fromNBT(provider, compoundTag.getCompound("texture"));
-    }
 }

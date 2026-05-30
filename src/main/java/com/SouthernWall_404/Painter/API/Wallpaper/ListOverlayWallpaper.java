@@ -16,32 +16,44 @@ import java.util.List;
 /**
  * 应当允许存储多个Wallpaper，包括自身，即自引用
  */
+
+/**
+ * 注意：此处会重写大部分原有的缓存处理方法，ListOverlayWallpaper 只缓存ao 可见性
+ */
 public class ListOverlayWallpaper extends AbstractWallpaper {
 
-    protected List<IWallpaper> overlays;
     public static final String TYPE = "List";
+
+
+    // ========数据========
+    protected List<IWallpaper> overlays;
 
     @Override
     public void cycleTextureUV(BakedQuad originQuad, AbstractPaint paint) {
         overlays.forEach(wallpaper->wallpaper.cycleTextureUV(originQuad,paint));
     }
 
-
-    @Override
-    public void setUVOffset(Vector2f uvOffset, AbstractPaint paint) {
-        overlays.forEach(wallpaper->wallpaper.setUVOffset(uvOffset, paint));
-    }
-
+    //========构造方法========
     public ListOverlayWallpaper(List<IWallpaper> overlays) {
         super(0,null);
         this.overlays=overlays;
     }
 
+    /**
+     * 从NBT建立
+     * @param provider
+     * @param tag
+     */
     public ListOverlayWallpaper(HolderLookup.Provider provider,CompoundTag tag){
         this(List.of());
         deserializeNBT(provider,tag);
     }
 
+    /**
+     * 从Quads建立
+     * @param quads
+     * @return
+     */
     public static ListOverlayWallpaper ofQuads(List<BakedQuad> quads){
 
         List<IWallpaper> overlays=new ArrayList<>();
@@ -50,67 +62,14 @@ public class ListOverlayWallpaper extends AbstractWallpaper {
         return new ListOverlayWallpaper(overlays);
 
     }
-
-    /**
-     * 默认不做操作，如需要可以继承并重写
-     */
-    public void refreshOverlays()
-    {
-        overlays.forEach(IWallpaper::refresh);
-    }
-
-    @Override
-    public String getType() {
-        return TYPE;
-    }
-
-    @OnlyIn(Dist.CLIENT)
-    @Override
-    protected List<VerticesInfo> createTexture(BakedQuad originQuad) {
-        return List.of();
-    }
-
-    @Override
-    public List<BakedQuad> createQuad(BakedQuad originQuad) {
-
-        List<BakedQuad> quads=new ArrayList<>();
-
-        overlays.forEach(wallpaper->{
-            quads.addAll(wallpaper.createQuad(originQuad));
-        });
-
-
-        return quads;
-    }
-
-    @Override
-    public void refresh() {
-//        refreshOverlays();
-        super.refresh();
-
-        refreshOverlays();
-    }
-
-//    @Override
-//    public List<BakedQuad> createQuad(BakedQuad originQuad) {
-//
-//        List<BakedQuad> quads=new ArrayList<>();
-//
-//        overlays.forEach(wallpaper->{
-//            quads.addAll(wallpaper.createQuad(originQuad));
-//        });
-//
-//        return quads;
-//    }
-
     @Override
     public @UnknownNullability CompoundTag serializeNBT(HolderLookup.Provider provider) {
         // 调用父类序列化通用字段（tintIndex, altasKey）
         CompoundTag tag = super.serializeNBT(provider);
-        
+
         // 保存类型标识
         tag.putString("type", TYPE);
-        
+
         // 序列化 overlays 列表
         net.minecraft.nbt.ListTag overlaysList = new net.minecraft.nbt.ListTag();
         for (IWallpaper wallpaper : overlays) {
@@ -122,7 +81,7 @@ public class ListOverlayWallpaper extends AbstractWallpaper {
             overlaysList.add(wallpaperTag);
         }
         tag.put("overlays", overlaysList);
-        
+
         return tag;
     }
 
@@ -130,23 +89,81 @@ public class ListOverlayWallpaper extends AbstractWallpaper {
     public void deserializeNBT(HolderLookup.Provider provider, CompoundTag compoundTag) {
         // 调用父类反序列化通用字段（tintIndex, altasKey）
         super.deserializeNBT(provider, compoundTag);
-        
+
         // 反序列化 overlays 列表
         net.minecraft.nbt.ListTag overlaysList = compoundTag.getList("overlays", net.minecraft.nbt.Tag.TAG_COMPOUND);
-        
+
         List<IWallpaper> deserializedOverlays = new ArrayList<>();
         for (int i = 0; i < overlaysList.size(); i++) {
             CompoundTag wallpaperTag = overlaysList.getCompound(i);
             String type = wallpaperTag.getString("type");
-            
+
             // 使用 Wallpapers 注册表反序列化
             IWallpaper wallpaper = Wallpapers.create(type,provider, wallpaperTag);
             if (wallpaper != null) {
                 deserializedOverlays.add(wallpaper);
             }
         }
-        
+
         this.overlays = deserializedOverlays;
     }
 
+    //========基础方法========
+    @Override
+    public void setUVOffset(Vector2f uvOffset, AbstractPaint paint) {
+        overlays.forEach(wallpaper->wallpaper.setUVOffset(uvOffset, paint));
+    }
+    @Override
+    public String getType() {
+        return TYPE;
+    }
+    public List<IWallpaper> getOverlays() {
+        return overlays;
+    }
+
+    public void setOverlays(List<IWallpaper> overlays) {
+        this.overlays = overlays;
+        refresh();
+    }
+
+    //========刷新方法========
+    /**
+     * 默认不做操作，如需要可以继承并重写
+     */
+    public void refreshOverlays()
+    {
+        overlays.forEach(IWallpaper::refresh);
+    }
+
+    @Override
+    public void refresh() {
+//        refreshOverlays();
+        super.refresh();
+
+        refreshOverlays();
+    }
+    //========渲染方法========
+
+    /**
+     * 抛空，此处不做Texture处理
+     * @param originQuad
+     * @return
+     */
+    @OnlyIn(Dist.CLIENT)
+    @Override
+    protected List<VerticesInfo> createTexture(BakedQuad originQuad) {
+        return List.of();
+    }
+
+    //TODO 考虑移除掉，将所有渲染交给下属List处理
+    @Override
+    public List<BakedQuad> createQuad(BakedQuad originQuad) {
+
+        List<BakedQuad> quads=new ArrayList<>();
+
+        overlays.forEach(wallpaper->{
+            quads.addAll(wallpaper.createQuad(originQuad));
+        });
+        return quads;
+    }
 }

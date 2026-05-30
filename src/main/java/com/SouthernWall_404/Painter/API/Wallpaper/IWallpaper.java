@@ -25,7 +25,6 @@ public interface IWallpaper extends INBTSerializable<CompoundTag> {
     public List<BakedQuad> createQuad(BakedQuad originQuad);//建立渲染面的通用方法
 
     @OnlyIn(Dist.CLIENT)
-    public List<VerticesInfo> createTexture(BakedQuad originQuad);
     public void cycleTextureUV(BakedQuad originQuad, AbstractPaint paint);
 
     @OnlyIn(Dist.CLIENT)

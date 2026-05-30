@@ -38,10 +38,12 @@ import java.util.List;
  */
 public class BlockWallPaper extends ListOverlayWallpaper{
     public static final String TYPE = "block";
-    
+
+    //========数据========
     private BlockState material;
     private Direction face;
 
+    //========构造方法=========
     public BlockWallPaper(BlockState material,Direction face) {
         super(WallpaperBlockHelper.getOverlays(material,face));
         this.material = material;
@@ -53,54 +55,22 @@ public class BlockWallPaper extends ListOverlayWallpaper{
         deserializeNBT(provider, tag);
     }
 
-    /**
-     * 默认的材质修改方法，带有渲染更新
-     * @param material
-     */
-    public void setMaterial(BlockState material) {
-        this.material = material;
-
-        refresh();
-
-        this.overlays=WallpaperBlockHelper.getOverlays(material,face);
-
-    }
-
-    public void cycleTextureDir() {
-        if (material != null) {
-            setMaterial(BlockUtil.cycleInDirection( material));
-        }
-
-    }
-
-
-    @Override
-    public String getType() {
-        return TYPE;
-    }
-
-    @Override
-    protected void renderQuad(AbstractPaint paint, Direction direction, PoseStack poseStack, VertexConsumer buffer) {
-        quads.forEach(quad -> BakedQuadRender.renderInOfferredAO(quad, material,paint.getRenderVec().get(paint.getFlag(direction)), poseStack, buffer, aoFace));
-    }
-
-
 
 
     @Override
     public @UnknownNullability CompoundTag serializeNBT(HolderLookup.Provider provider) {
         CompoundTag tag = new CompoundTag();
-        
+
         tag.putString("type", TYPE);
-        
+
         if (material != null) {
             Tag stateTag = BlockState.CODEC.encodeStart(
-                provider.createSerializationContext(NbtOps.INSTANCE),
+                    provider.createSerializationContext(NbtOps.INSTANCE),
                     material
             ).getOrThrow();
             tag.put("blockState", stateTag);
         }
-        
+
         if (face != null) {
             tag.putInt("face", face.get3DDataValue());
         }
@@ -115,11 +85,11 @@ public class BlockWallPaper extends ListOverlayWallpaper{
         if (compoundTag.contains("blockState")) {
             Tag stateTag = compoundTag.get("blockState");
             material = BlockState.CODEC.parse(
-                provider.createSerializationContext(NbtOps.INSTANCE),
-                stateTag
+                    provider.createSerializationContext(NbtOps.INSTANCE),
+                    stateTag
             ).getOrThrow();
         }
-        
+
         if (compoundTag.contains("face")) {
             int faceValue = compoundTag.getInt("face");
             face = Direction.from3DDataValue(faceValue);
@@ -128,5 +98,43 @@ public class BlockWallPaper extends ListOverlayWallpaper{
         if(compoundTag.contains("list")){
             super.deserializeNBT(provider, compoundTag.getCompound("list"));
         }
+    }
+
+    //=========基本方法========
+
+    /**
+     * 默认的材质修改方法，带有渲染更新
+     * @param material
+     */
+    public void setMaterial(BlockState material) {
+        this.material = material;
+
+//        refresh();
+
+        //TODO 有待测试
+        setOverlays(WallpaperBlockHelper.getOverlays(material,face));
+
+    }
+    @Override
+    public String getType() {
+        return TYPE;
+    }
+    //========业务方法========
+
+    /**
+     * 修改方块内容
+     */
+    public void cycleTextureDir() {
+        if (material != null) {
+            setMaterial(BlockUtil.cycleInDirection( material));
+        }
+    }
+
+    /**
+     * 使用方块进行渲染，以免出现着色问题
+     */
+    @Override
+    protected void renderQuad(AbstractPaint paint, Direction direction, PoseStack poseStack, VertexConsumer buffer) {
+        quads.forEach(quad -> BakedQuadRender.renderInOfferredAO(quad, material,paint.getRenderVec().get(paint.getFlag(direction)), poseStack, buffer, aoFace));
     }
 }
