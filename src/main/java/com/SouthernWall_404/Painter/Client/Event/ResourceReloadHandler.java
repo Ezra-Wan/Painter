@@ -15,20 +15,14 @@ import net.neoforged.neoforge.client.event.RegisterClientReloadListenersEvent;
 @EventBusSubscriber(modid = Painter.MODID, bus = EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
 public class ResourceReloadHandler {
 
-    private static int lastPacksHash = 0;
-
     @SubscribeEvent
     public static void registerReloadListener(RegisterClientReloadListenersEvent event) {
         event.registerReloadListener(new SimplePreparableReloadListener<Void>() {
-
-
-
             @Override
             protected Void prepare(ResourceManager resourceManager, ProfilerFiller profiler) {
                 // 准备阶段，无需操作
                 return null;
             }
-
             @Override
             protected void apply(Void unused, ResourceManager resourceManager, ProfilerFiller profiler) {
                 // 应用阶段，无需额外操作
