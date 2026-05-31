@@ -1,5 +1,6 @@
 package com.SouthernWall_404.Painter.API.Wallpaper;
 
+import com.SouthernWall_404.Laplace.VerticesHelper;
 import com.SouthernWall_404.LaplaceAPI.Math37.Vector2f;
 import com.SouthernWall_404.LaplaceAPI.RegulappleEngine.BakedQuad.VerticesInfo;
 import com.SouthernWall_404.Painter.API.Paint.API.AbstractPaint;
@@ -49,7 +50,7 @@ public class SpriteWallpaper extends AbstractWallpaper {
      * @param quad
      */
     public SpriteWallpaper(BakedQuad quad) {
-        this(VerticesInfo.of(quad.getVertices()),quad.getSprite().atlasLocation(),quad.getTintIndex());
+        this(VerticesInfo.of(quad.getVertices()),quad.getSprite().contents().name(),quad.getTintIndex());
     }
 
     @Override
@@ -134,6 +135,9 @@ public class SpriteWallpaper extends AbstractWallpaper {
         List<VerticesInfo> textures=new ArrayList<>();
         Minecraft mc=Minecraft.getInstance();
         if(mc!=null){
+
+            texture= VerticesHelper.localize(texture,altasKey);
+
             VerticesInfo originInfo=VerticesInfo.of(originQuad);
             textures.add(
                     originInfo.copy()
