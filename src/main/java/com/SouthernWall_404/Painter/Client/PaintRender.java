@@ -93,4 +93,14 @@ public class PaintRender {
     public static synchronized void clear() {
         cachedChunks.clear();
     }
+
+    public static synchronized void refresh() {
+        cachedChunks.forEach(pos -> {
+            LevelChunk chunk = Minecraft.getInstance().level.getChunkSource().getChunkNow(pos.x, pos.z);
+            if (chunk != null) {
+                PaintInfo paintInfo = chunk.getData(ModAttachments.PAINT_INFO);
+                paintInfo.refresh();
+            }
+        });
+    }
 }
