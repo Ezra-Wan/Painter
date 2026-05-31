@@ -49,8 +49,14 @@ public class PaintRender {
         Level level = Minecraft.getInstance().level;
         if (level == null) return;
 
+        // 创建缓存区块的快照副本以避免并发修改异常
+        Set<ChunkPos> chunksSnapshot;
+        synchronized (cachedChunks) {
+            chunksSnapshot = new HashSet<>(cachedChunks);
+        }
+
         // 遍历缓存的区块，调用每个 PaintInfo 的 render 方法
-        cachedChunks.forEach(chunkPos -> {
+        chunksSnapshot.forEach(chunkPos -> {
             LevelChunk chunk = level.getChunkSource().getChunkNow(chunkPos.x, chunkPos.z);
 
             // 2. 区块级别视锥剔除
@@ -76,26 +82,41 @@ public class PaintRender {
     /**
      * 添加需要渲染的区块
      */
-    public static synchronized void addChunk(ChunkPos pos) {
-        cachedChunks.add(pos);
+    public static void addChunk(ChunkPos pos) {
+        synchronized (cachedChunks) {
+            cachedChunks.add(pos);
+        }
     }
 
     /**
      * 移除不需要渲染的区块
      */
-    public static synchronized void removeChunk(ChunkPos pos) {
-        cachedChunks.remove(pos);
+    public static void removeChunk(ChunkPos pos) {
+        synchronized (cachedChunks) {
+            cachedChunks.remove(pos);
+        }
     }
 
     /**
      * 清空所有缓存
      */
-    public static synchronized void clear() {
-        cachedChunks.clear();
+    public static void clear() {
+        synchronized (cachedChunks) {
+            cachedChunks.clear();
+        }
     }
 
-    public static synchronized void refresh() {
-        cachedChunks.forEach(pos -> {
+    /**
+     * 刷新所有缓存区块的渲染数据
+     */
+    public static void refresh() {
+        // 创建缓存区块的快照副本以避免并发修改异常
+        Set<ChunkPos> chunksSnapshot;
+        synchronized (cachedChunks) {
+            chunksSnapshot = new HashSet<>(cachedChunks);
+        }
+        
+        chunksSnapshot.forEach(pos -> {
             LevelChunk chunk = Minecraft.getInstance().level.getChunkSource().getChunkNow(pos.x, pos.z);
             if (chunk != null) {
                 PaintInfo paintInfo = chunk.getData(ModAttachments.PAINT_INFO);
