@@ -4,13 +4,16 @@ import com.SouthernWall_404.LaplaceAPI.UlrichToolBox.Blocks.BlockUtil;
 import com.SouthernWall_404.Painter.API.Paint.API.AbstractPaint;
 import com.SouthernWall_404.Painter.API.Paint.Attachment.PaintInfo;
 import com.SouthernWall_404.Painter.API.Tool.Wall.IFilter;
+import com.SouthernWall_404.Painter.Common.Event.ServerTick;
 import com.SouthernWall_404.Painter.Common.Init.ModAttachments;
+import com.SouthernWall_404.Painter.Common.Laplace.Network.ServerHandlers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
@@ -62,6 +65,8 @@ public class PaintUtil {
             } else {// 副手不是方块物品，则尝试利用已有的 paint 材质进行旋转
                 if (paint != null) {//如果存在paint
                     paint.cycleTextureDir( direction);
+
+                    ServerTick.update(new ChunkPos(blockPos));
 
                     chunk.setUnsaved(true);
                 }
