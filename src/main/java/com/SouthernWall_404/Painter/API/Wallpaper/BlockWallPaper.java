@@ -112,6 +112,11 @@ public class BlockWallPaper extends ListOverlayWallpaper{
         setOverlays(WallpaperBlockHelper.getOverlays(material,face));
 
     }
+
+    public BlockState getMaterial() {
+        return material;
+    }
+
     @Override
     public String getType() {
         return TYPE;

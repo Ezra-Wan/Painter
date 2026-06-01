@@ -56,9 +56,8 @@ public class SlabBlockPaint extends AbstractPaint {
 
     @Override
     public void deserializeNBT(HolderLookup.Provider provider, CompoundTag compoundTag) {
-        // 先调用父类，恢复 origin 和 materials
-        super.deserializeNBT(provider, compoundTag);
-        
+
+
         // 恢复 slabType
         if (compoundTag.contains("slab_type", CompoundTag.TAG_STRING)) {
             String typeName = compoundTag.getString("slab_type");
@@ -71,6 +70,7 @@ public class SlabBlockPaint extends AbstractPaint {
             slabType = SlabType.TOP; // 兼容旧数据
         }
 
-        update();
+        // 先调用父类，恢复 origin 和 materials
+        super.deserializeNBT(provider, compoundTag);
     }
 }

@@ -2,17 +2,13 @@ package com.SouthernWall_404.Painter.API.Paint.Attachment;
 
 
 import com.SouthernWall_404.LaplaceAPI.VertinCore.IAttachment;
-import com.SouthernWall_404.LaplaceAPI.xNetwork.API.NetworkSync;
 import com.SouthernWall_404.Painter.API.Paint.API.AbstractPaint;
 import com.SouthernWall_404.Painter.API.Paint.API.AbstractRender;
 import com.SouthernWall_404.Painter.API.Paint.PaintContent;
-import com.SouthernWall_404.Painter.API.Paint.Util.Paint.PaintSyncHelper;
 import com.SouthernWall_404.Painter.API.Paint.Util.Paint.PaintValidHelper;
-import com.SouthernWall_404.Painter.API.Paint.Util.RenderUtil;
 import com.SouthernWall_404.Painter.Client.PaintRender;
 import com.SouthernWall_404.Painter.Common.Event.ServerTick;
 import com.SouthernWall_404.Painter.Common.Init.ModAttachments;
-import com.SouthernWall_404.Painter.Painter;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.Minecraft;
@@ -23,14 +19,11 @@ import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.phys.AABB;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
-import net.neoforged.fml.common.Mod;
 
 import javax.annotation.Nullable;
 import java.util.HashMap;
@@ -154,12 +147,12 @@ public class PaintInfo implements IAttachment {
         if (level.isClientSide()) {
             AbstractPaint paint = paints.get(pos);
             if (paint != null) {
-                paint.removeMaterial(direction);
+                paint.removeWallpaper(direction);
             }
         } else {
             AbstractPaint paint = paints.get(pos);
             if (paint != null) {
-                paint.removeMaterial(direction);
+                paint.removeWallpaper(direction);
                 level.getChunk( pos).setUnsaved(true);
 
                 ServerTick.update(new ChunkPos(pos));
