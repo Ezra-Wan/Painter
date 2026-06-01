@@ -23,6 +23,7 @@
   "painter.message.select_b.not_in_surface": "不在已选取的墙面上",
 
   "painter.message.failed_to_paint.out_of_range": "超出选区范围，左键以移除选区",
+  "painter.message.rotate.no_wallpaper": "该面没有壁纸，无法修改纹理范围",
 
   "painter.tooltip.brush_1": "副手持要粉刷的方块，主手持刷子",
   "painter.tooltip.brush_2": "右键方块即可粉刷",

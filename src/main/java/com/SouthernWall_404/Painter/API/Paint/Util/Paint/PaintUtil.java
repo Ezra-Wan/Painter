@@ -32,14 +32,8 @@ public class PaintUtil {
         AbstractPaint paint = paints.get(blockPos);
 
         if (!isInMainHand) {//当副手持刷子
-            if (paint != null) {//只要有paint在
-                //TODO 这里有uv处理相关
 
-                //TODO 需要整理到PaintInfo?又或者不用
-                if(level.isClientSide) paint.cycleTextureUV(direction); // 旋转纹理并发送网络包
-
-                chunk.setUnsaved(true);
-            }
+            PaintOperationHelper.cycleTextureUV(level,blockPos, direction);
         }
         else {//当主手持刷子
             BlockState origin = level.getBlockState(blockPos);

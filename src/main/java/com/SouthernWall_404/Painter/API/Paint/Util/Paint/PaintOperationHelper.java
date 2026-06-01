@@ -1,14 +1,19 @@
 package com.SouthernWall_404.Painter.API.Paint.Util.Paint;
 
+import com.SouthernWall_404.LaplaceAPI.UlrichToolBox.Blocks.BlockClientUtil;
 import com.SouthernWall_404.Painter.API.Paint.API.AbstractPaint;
 import com.SouthernWall_404.Painter.API.Paint.Attachment.PaintInfo;
 import com.SouthernWall_404.Painter.API.Paint.Imply.SimpleBlockPaint;
 import com.SouthernWall_404.Painter.API.Paint.Imply.SlabBlockPaint;
 import com.SouthernWall_404.Painter.API.Wallpaper.BlockWallPaper;
+import com.SouthernWall_404.Painter.API.Wallpaper.IWallpaper;
 import com.SouthernWall_404.Painter.Common.Init.ModAttachments;
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BlockItem;
@@ -110,20 +115,45 @@ public final class PaintOperationHelper {
         }
     }
 
+    /**
+     * 旋转贴图uv
+     * @param blockPos
+     * @param direction
+     */
+    public static void cycleTextureUV(Level level,BlockPos blockPos, Direction direction) {
+        //在客户端执行
+        if (level != null && level.isClientSide) {
 
-    @OnlyIn(Dist.CLIENT)
-    public static void cycleTextureUV(BlockPos blockPos, Direction direction) {
+            AbstractPaint paint = PaintAttachmentHelper.getPaint(level, blockPos);//获取paint内容
+            if (paint != null) {
+                // 旋转
+                IWallpaper wallpaper=paint.getWallpaper(direction);//先获取wallpaper
 
-        Minecraft mc=Minecraft.getInstance();
-        if(mc!=null)
-        {
-            Level level = mc.level;
-            if(level!= null)
-            {
-                LevelChunk chunk = level.getChunkAt(blockPos);
-                PaintInfo paintInfo = chunk.getData(ModAttachments.PAINT_INFO);
-//                paintInfo.cycleTextureUV(level,blockPos, direction);
-            }
+                //无壁纸面处理
+                if(wallpaper==null){
+                    Minecraft mc=Minecraft.getInstance();
+                    if(mc.player!=null)
+                    {
+                        mc.player.displayClientMessage(
+                            Component.translatable("painter.message.rotate.no_wallpaper").withStyle(ChatFormatting.RED),
+                            true
+                        );
+                    }
+                    return;
+                }else {
+                    direction=paint.translateFace(direction);//获取实际方向
+                    wallpaper.cycleTextureUV(BlockClientUtil.getQuadsForDirection(paint.getOrigin(),direction).getFirst(),paint );
+                }
+
+            } else
+                throw new NullPointerException("paint in Position [" + blockPos.getX() + "," + blockPos.getY() + "," + blockPos.getZ() + "] is null");
+        } else {
+            level.getChunk(blockPos).setUnsaved(true);//在服务端设置保存
         }
+    }
+
+    public static void cycleTextureDir(BlockPos blockPos, Direction direction)
+    {
+
     }
 }
