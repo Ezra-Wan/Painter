@@ -7,12 +7,11 @@ import com.SouthernWall_404.Painter.API.Paint.Imply.SimpleBlockPaint;
 import com.SouthernWall_404.Painter.API.Paint.Imply.SlabBlockPaint;
 import com.SouthernWall_404.Painter.API.Wallpaper.BlockWallPaper;
 import com.SouthernWall_404.Painter.API.Wallpaper.IWallpaper;
+import com.SouthernWall_404.Painter.Common.Event.ServerTick;
 import com.SouthernWall_404.Painter.Common.Init.ModAttachments;
-import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
@@ -135,7 +134,7 @@ public final class PaintOperationHelper {
                     if(mc.player!=null)
                     {
                         mc.player.displayClientMessage(
-                            Component.translatable("painter.message.rotate.no_wallpaper").withStyle(ChatFormatting.RED),
+                            Component.translatable("painter.message.rotate.no_wallpaper"),
                             true
                         );
                     }
@@ -152,8 +151,27 @@ public final class PaintOperationHelper {
         }
     }
 
-    public static void cycleTextureDir(BlockPos blockPos, Direction direction)
+    /**
+     * 用于旋转某一paint的贴图方向
+     * @param level
+     * @param blockPos
+     * @param direction
+     */
+    public static void cycleTextureDir(Level level,BlockPos blockPos, Direction direction)
     {
-
+        //
+        AbstractPaint paint =PaintAttachmentHelper.getPaint(level, blockPos);
+        LevelChunk chunk=level.getChunkAt(blockPos);
+        
+        if (paint != null) {
+            IWallpaper wallpaper=paint.getWallpaper( direction);
+            if(wallpaper!=null){
+                if(wallpaper instanceof BlockWallPaper blockWallPaper)blockWallPaper.cycleTextureDir();
+            }
+            
+            ServerTick.update(new ChunkPos(blockPos));
+            
+            chunk.setUnsaved(true);
+        }
     }
 }

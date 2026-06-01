@@ -57,13 +57,7 @@ public class PaintUtil {
                 //如果点击处不存在paint
                 //则正常喷涂
             } else {// 副手不是方块物品，则尝试利用已有的 paint 材质进行旋转
-                if (paint != null) {//如果存在paint
-                    paint.cycleTextureDir( direction);
-
-                    ServerTick.update(new ChunkPos(blockPos));
-
-                    chunk.setUnsaved(true);
-                }
+                PaintOperationHelper.cycleTextureDir(level, blockPos, direction);
             }
 
             if (toPaint == null) return;
