@@ -83,7 +83,7 @@ public final class PaintOperationHelper {
 
             AbstractPaint paint=paints.get(blockPos);
 
-            paint.paint(direction,new BlockWallPaper(material,direction));
+            paint.putWallpaper(direction,new BlockWallPaper(material,direction));
 
             paintInfo.putPaints(level,blockPos, paint);
 
@@ -101,13 +101,13 @@ public final class PaintOperationHelper {
             {
                 SlabType slabType=origin.getValue(SlabBlock.TYPE);
                 AbstractPaint paint=new SlabBlockPaint(blockPos,slabType);
-                paint.paint(direction, new BlockWallPaper(material,direction));
+                paint.putWallpaper(direction, new BlockWallPaper(material,direction));
                 paintInfo.putPaints(level,blockPos, paint);
             }
             if(origin.isCollisionShapeFullBlock(level,blockPos))
             {
                 AbstractPaint paint=new SimpleBlockPaint(blockPos);
-                paint.paint(direction, new BlockWallPaper(material,direction));
+                paint.putWallpaper(direction, new BlockWallPaper(material,direction));
                 paintInfo.putPaints(level,blockPos, paint);
             }
             //        AbstractRender render = new SimpleBlockPaint();//默认普通方块
