@@ -208,7 +208,7 @@ public abstract class AbstractPaint extends AbstractRender<List<BakedQuad>, Dire
     public BlockState getMaterial(Direction f) {
         IWallpaper wallpaper = getWallpaper(f);
         if (wallpaper instanceof BlockWallPaper blockWallPaper) {
-            return Blocks.AIR.defaultBlockState();
+            return blockWallPaper.getMaterial();
         }
         return null;
     }
