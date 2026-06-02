@@ -6,6 +6,7 @@
 [![License](https://img.shields.io/badge/License-All%20Rights%20Reserved-red)](LICENSE)
 
 Painter 是一个为 Minecraft 1.21 NeoForge 平台设计的高级装饰性模组，为玩家提供了强大的墙面粉刷、纹理定制和区域选择功能。通过直观的 tools 系统，玩家可以轻松地将任何方块表面粉刷成其他方块的样式，实现无限创意的建筑装饰。
+源仓库https://gitee.com/SouthernWall_404/painter
 
 ## 📋 功能特性
 
